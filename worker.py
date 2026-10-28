@@ -110,6 +110,11 @@ def execute(request):
         diagnostics=[] if request.get('diagnostics') is True else None
         readings=probe(request['group'],diagnostics)
         return {'readings':readings,**({'diagnostics':diagnostics} if diagnostics is not None else {})}
+    if operation=='research-sample':
+        from research import sample
+        identity=request.get('identity','')
+        if not re.fullmatch(r'[a-f0-9]{24}',identity):raise ValueError('设备标识无效')
+        return {'sample':sample(identity)}
     if operation=='test-sleep':
         # Only available to the isolated regression tests, never to normal IPC.
         if os.environ.get('PB_TEST_MODE')!='1':raise ValueError('Test operation disabled')

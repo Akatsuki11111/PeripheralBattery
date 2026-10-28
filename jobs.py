@@ -102,11 +102,11 @@ class ScanController(QObject):
         self.store=store;self.preferences=preferences;self.logger=logger
         self.inventory=[];self.jobs=set();self.queue=[];self.busy=False;self.stopping=False
         self.last_inventory=0;self.paths=None;self.failures={};self.errors=[];self.last_attempt={}
-        self.pending_force=False
+        self.pending_force=False;self.research_active=False
         self.total_timer=QTimer(self);self.total_timer.setSingleShot(True);self.total_timer.timeout.connect(self._total_expired)
 
     def refresh(self,force=False):
-        if self.stopping:return
+        if self.stopping or self.research_active:return
         if self.busy:
             if force:self.pending_force=True
             return

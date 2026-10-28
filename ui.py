@@ -126,7 +126,7 @@ class Flyout(QWidget):
         self.preferences=preferences or Settings();self.cards={};self.anchor=None;self.detail_labels={};self.detail_key=None
         from history import HistoryStore
         self.history=history or HistoryStore(self.preferences.path.with_name('history.json'))
-        self.catalog_dialog=None
+        self.catalog_dialog=None;self.research_dialog=None;self.research_controller=None
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground,True)
         self.root=QVBoxLayout(self);self.root.setContentsMargins(18,14,18,12);self.root.setSpacing(8)
         head=QHBoxLayout();head.setSpacing(10)
@@ -136,6 +136,8 @@ class Flyout(QWidget):
         head.addWidget(tool('info','品牌目录与设备管理',self.open_catalog));head.addWidget(tool('close','收起到系统托盘',self.hide))
         self.root.addLayout(head)
         self.summary=label('正在读取设备状态…',11,True);self.root.addWidget(self.summary)
+        self.research_button=QPushButton('电量适配检查');self.research_button.setToolTip('逐步检查未知电量设备的已验证状态接口')
+        self.research_button.clicked.connect(self.open_research);self.root.addWidget(self.research_button)
         self.stack=QStackedWidget();self.root.addWidget(self.stack,1)
         self.scroll=QScrollArea();self.scroll.setWidgetResizable(True);self.scroll.setFrameShape(QFrame.Shape.NoFrame)
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -347,6 +349,23 @@ class Flyout(QWidget):
         dialog.finished.connect(lambda result:self.catalog_closed(dialog))
         dialog.show();dialog.raise_();dialog.activateWindow()
 
+    def open_research(self):
+        if self.research_controller is None:
+            self.statusline.setText('当前没有可用的设备扫描器');return
+        if self.research_dialog is not None:
+            self.research_dialog.show();self.research_dialog.raise_();return
+        from research_ui import ResearchDrawer
+        self.pinned=True;dialog=ResearchDrawer(self,self.research_controller);self.research_dialog=dialog
+        dialog.setStyleSheet(self.styleSheet())
+        def closed(*args):
+            self.research_dialog=None;self.pinned=False;dialog.deleteLater()
+        dialog.finished.connect(closed)
+        screen=self.screen() or QApplication.primaryScreen();bounds=screen.availableGeometry()
+        x=self.x()-dialog.width()-8 if self.x()-dialog.width()-8>=bounds.left() else self.x()+self.width()+8
+        x=max(bounds.left()+8,min(x,bounds.right()-dialog.width()-8))
+        y=max(bounds.top()+8,min(self.y(),bounds.bottom()-dialog.height()-8))
+        dialog.move(x,y);dialog.show();dialog.raise_();dialog.activateWindow()
+
     def raise_catalog(self):
         dialog=self.catalog_dialog
         if dialog is None:return False
@@ -362,6 +381,7 @@ class Flyout(QWidget):
 
     def close_windows(self):
         if self.catalog_dialog:self.catalog_dialog.close()
+        if self.research_dialog:self.research_dialog.close()
         self.hide()
 
     def go_back(self):
@@ -402,5 +422,5 @@ class Flyout(QWidget):
 
 def adaptive_height(count,available_height,detail=False):
     maximum=max(160,min(760,round(available_height*.78),available_height-20))
-    desired=max(252,180+max(1,count)*70+max(0,count-1)*6)
+    desired=max(286,214+max(1,count)*70+max(0,count-1)*6)
     return min(maximum,max(430,desired) if detail else desired)

@@ -105,6 +105,7 @@ def main():
     export_action=menu.addAction('导出诊断信息…');menu.addAction('任务栏设置',windows.show_tray_settings)
     menu.addSeparator();quit_action=menu.addAction('退出');tray.setContextMenu(menu)
     controller=ScanController(store,preferences,logger,app)
+    flyout.research_controller=controller
     state={'quitting':False,'captured':False,'devices':store.snapshot(),'errors':[],
            'alerts':set(),'tray_ready':False,'theme':None,'clients':set()}
 
