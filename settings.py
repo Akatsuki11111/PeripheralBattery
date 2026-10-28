@@ -13,7 +13,7 @@ import time
 from models import Device
 
 APP_NAME = 'PeripheralBattery'
-VERSION = '2.2.0'
+VERSION = '2.3.0'
 REFRESH_INTERVALS=(5,15,30,60)
 
 
@@ -133,6 +133,13 @@ class DeviceStore:
                 try:
                     device = Device.from_dict(item)
                     if time.time() - device.last_seen < self.RETENTION:
+                        if not device.last_observed_at:
+                            if device.usable:
+                                device=replace(device,last_percent=device.percent,last_observed_at=device.observed_at)
+                            else:
+                                valid=[p for p in self.history.samples(device.key) if p['percent'] is not None]
+                                if valid and valid[-1]['percent']==device.last_percent:
+                                    device=replace(device,last_observed_at=valid[-1]['at'])
                         device = replace(device, present=False, percent=None, connected=False, voltage_mv=None,monotonic_at=0)
                         self.devices[device.key] = device
                 except (ValueError, TypeError):
@@ -172,12 +179,14 @@ class DeviceStore:
                     device = replace(device, key=previous.key)
             if previous:
                 last = device.last_percent if device.last_percent is not None else previous.last_percent
-                device = replace(device, last_percent=device.percent if device.percent is not None else last)
+                device = replace(device, last_percent=device.percent if device.percent is not None else last,
+                                 last_observed_at=previous.last_observed_at)
                 if (device.percent is None and device.connected is None and previous.present and
-                        previous.usable and time.time()-previous.observed_at<90):
+                        (previous.usable or previous.experimental) and time.time()-previous.observed_at<90):
                     device=replace(device,percent=previous.percent,connected=previous.connected,charging=previous.charging,
                                    confidence=previous.confidence,observed_at=previous.observed_at,monotonic_at=previous.monotonic_at,
                                    source=previous.source,voltage_mv=previous.voltage_mv,note='正在刷新，暂显示最近一次有效应答。')
+            if device.usable:device=replace(device,last_percent=device.percent,last_observed_at=device.observed_at)
             result[device.key] = replace(device, last_seen=now)
         for key, previous in old.items():
             if key not in result and key not in migrated and now - previous.last_seen < self.RETENTION:
@@ -196,7 +205,7 @@ class DeviceStore:
         previous={d.key:d for d in existing}
         if len(readings)==1 and not readings[0].get('key') and any(':paired:' in d.key for d in existing):
             for device in existing:
-                self.devices[device.key]=Device.from_dict({**device.to_dict(),**readings[0],'key':device.key})
+                self.devices[device.key]=self._with_last(Device.from_dict({**device.to_dict(),**readings[0],'key':device.key}),device)
                 self.history.record(self.devices[device.key])
             return self.snapshot()
         for device in existing:
@@ -205,9 +214,16 @@ class DeviceStore:
             key = base.key if len(readings) == 1 else base.key.split(':paired:')[0] + ':paired:' + hashlib.sha256(str(reading.get('key', index)).encode()).hexdigest()[:10]
             current = Device.from_dict({**previous.get(key,base).to_dict(), **reading, 'key': key, 'identity': group_identity,
                                        'present': True, 'last_seen': time.time()})
-            self.devices[key] = current
+            self.devices[key] = self._with_last(current,previous.get(key,base))
             self.history.record(current)
         return self.snapshot()
+
+    @staticmethod
+    def _with_last(current,previous):
+        if current.usable:
+            return replace(current,last_percent=current.percent,last_observed_at=current.observed_at)
+        return replace(current,last_percent=previous.last_percent,last_observed_at=previous.last_observed_at,
+                       charging=None if current.connected is not True else current.charging)
 
     def snapshot(self):
         return sorted(self.devices.values(), key=lambda d: (not d.present, d.brand, d.name, d.key))

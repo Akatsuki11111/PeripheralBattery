@@ -121,14 +121,15 @@ def tray_pixmap(device, size, dark=None):
     painter = QPainter(pm)
     painter.setRenderHint(QPainter.RenderHint.Antialiasing)
     foreground = '#ffffff' if dark else '#171717'
-    color = ('#ff8080' if dark else '#bc211b') if device and device.percent <= 10 else (
-        '#ffd16a' if dark else '#945e00') if device and device.percent <= 20 else foreground
+    value=device.display_percent if device else None
+    color = ('#aaaaaa' if dark else '#777777') if device and device.cached else ('#ff8080' if dark else '#bc211b') if value is not None and value <= 10 else (
+        '#ffd16a' if dark else '#945e00') if value is not None and value <= 20 else foreground
     painter.setRenderHint(QPainter.RenderHint.TextAntialiasing, True)
     # Full-width number, normal Segoe UI proportions. Integer font size/baseline
     # lets the font rasterizer hint strokes for 16/20/24px rather than resampling.
     number_height = round(size * .64)
     number_area = QRectF(0, 0, size, number_height)
-    text = str(device.percent) if device else '–'
+    text = str(value) if value is not None else '–'
     number_font, bounds = tray_number_font(text, size, number_area)
     painter.setFont(number_font)
     painter.setPen(QColor(color))
@@ -138,7 +139,7 @@ def tray_pixmap(device, size, dark=None):
     kind = device.kind if device else 'battery'
     gap = max(1, round(size * .04))
     badge = QRectF(0, number_height + gap, size, size - number_height - 2 * gap)
-    draw_tray_device(painter, kind, badge, color, bool(device and device.charging), dark)
+    draw_tray_device(painter, kind, badge, color, bool(device and device.usable and device.charging), dark)
     painter.end()
     return pm
 

@@ -113,5 +113,5 @@ def visible_devices(devices, preferences):
     return [d for d in coalesce_charging_devices(devices,preferences) if d.key not in hidden and
             d.present and
             (d.kind!='auxiliary' or preferences.get('show_auxiliary',False)) and
-            (d.kind=='auxiliary' or d.power_mode in ('wired','battery') or d.battery_support=='supported' or d.receiver or d.usb_keyboard or d.usable or preferences.get('show_unreadable',False)) and
-            (show_offline or d.connected is not False)]
+            (d.kind=='auxiliary' or d.power_mode in ('wired','battery') or d.battery_support=='supported' or d.receiver or d.usb_keyboard or d.usable or d.experimental or preferences.get('show_unreadable',False)) and
+            (show_offline or d.connected is not False or d.kind=='mouse' and d.cached)]

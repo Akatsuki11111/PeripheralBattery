@@ -106,6 +106,12 @@ def main():
     menu.addSeparator();quit_action=menu.addAction('退出');tray.setContextMenu(menu)
     controller=ScanController(store,preferences,logger,app)
     flyout.research_controller=controller
+    from learning_jobs import LearningController
+    learning=LearningController(controller,app);flyout.learning=learning
+    def learning_changed():
+        s=learning.session
+        flyout.learning_button.setText(f'观察 {int(s.get("elapsed_seconds",0)/60)}/{int(s.get("target_seconds",3600)/60)} 分钟' if s.get('state') in ('observing','awaiting_unplug') else '长时间观察')
+    learning.changed.connect(learning_changed);learning_changed()
     state={'quitting':False,'captured':False,'devices':store.snapshot(),'errors':[],
            'alerts':set(),'tray_ready':False,'theme':None,'clients':set()}
 
@@ -119,11 +125,13 @@ def main():
         state['devices']=devices;state['errors']=errors;flyout.rebuild(devices,errors)
         if args.demo:flyout.summary.setText('演示数据 · 不代表真实设备')
         available=visible_devices(devices,preferences)
-        low=lowest(available);pinned=next((d for d in available if d.key==preferences.get('pinned_key') and d.usable),None)
-        chosen=pinned or low;tray.setIcon(tray_icon(chosen))
+        low=lowest(available);pinned=next((d for d in available if d.key==preferences.get('pinned_key') and (d.usable or d.cached)),None)
+        cached=next((d for d in available if d.key==state.get('tray_key') and d.cached),None)
+        chosen=pinned or low or cached or max((d for d in available if d.cached),key=lambda d:d.last_observed_at,default=None)
+        state['tray_key']=chosen.key if chosen else '';tray.setIcon(tray_icon(chosen))
         ordered=sorted(available,key=lambda d:(d.key!=(chosen.key if chosen else ''),not d.usable,d.name))
         tip='设备电量'+(' · 演示数据' if args.demo else '')+'\n'+'\n'.join(
-            d.name+'：'+(d.reading_text if d.power_mode=='wired' or d.usable else '不适用' if d.kind=='auxiliary' else '未知')+' · '+d.status for d in ordered)
+            d.name+'：'+(d.reading_text if d.power_mode=='wired' or d.usable or d.cached else '不适用' if d.kind=='auxiliary' else '未知')+' · '+d.status for d in ordered)
         tray.setToolTip(tip[:127]);state['theme']=(windows.is_dark(),windows.is_taskbar_dark())
         threshold=preferences.get('low_threshold',20)
         newly_low=collect_low_alerts(available,state['alerts'],threshold,
@@ -180,7 +188,9 @@ def main():
 
     def quit_app():
         if state['quitting']:return
-        state['quitting']=True;poll.stop();tray_ready.stop();controller.shutdown()
+        state['quitting']=True;poll.stop();tray_ready.stop()
+        if learning.session.get('state') in ('observing','awaiting_unplug'):learning.pause('程序已退出，观察暂停。')
+        controller.shutdown()
         try:store.save()
         except OSError as error:logger.warning('cache write failed: %s',redact(error))
         try:store.history.save(True)

@@ -22,6 +22,7 @@ class Device:
     pid: int = 0
     firmware: str = ''
     last_percent: int | None = None
+    last_observed_at: float = 0
     present: bool = True
     confidence: str = 'confirmed'
     battery_support: str = 'identify-only'
@@ -42,7 +43,22 @@ class Device:
 
     @property
     def reading_text(self):
-        return '有线' if self.power_mode=='wired' else '辅助设备' if self.kind=='auxiliary' else f'{self.percent}%' if self.percent is not None else '—'
+        return '有线' if self.power_mode=='wired' else '辅助设备' if self.kind=='auxiliary' else f'{self.percent}%' if self.usable else f'{self.percent}%?' if self.experimental else f'{self.last_percent}%' if self.cached else '—'
+
+    @property
+    def experimental(self):
+        return (self.present and self.connected is not False and self.power_mode!='wired' and self.confidence=='experimental'
+                and not self.stale and valid_percent(self.percent) is not None)
+
+    @property
+    def cached(self):
+        return (self.present and not self.usable and self.power_mode!='wired' and self.kind!='auxiliary'
+                and valid_percent(self.last_percent) is not None and self.last_observed_at>0
+                and 0<=time.time()-self.last_observed_at<86400)
+
+    @property
+    def display_percent(self):
+        return self.percent if self.usable or self.experimental else self.last_percent if self.cached else None
 
     @property
     def stale(self):
@@ -60,11 +76,13 @@ class Device:
             return '未接入'
         if self.kind=='auxiliary':return '辅助设备已接入'
         if self.power_mode=='wired':return '有线连接' if self.connected is True else '有线 · 连接待确认' if self.connected is None else '已断开'
+        if self.experimental:return '实验推测 · 待核实' if self.connected is True else '实验推测 · 远端未确认'
         if self.connected is False:
-            return '休眠或已关闭' if self.receiver else '已断开'
+            return ('休眠 / 关闭 · 上次电量' if self.cached else '休眠或已关闭') if self.receiver else '已断开 · 上次电量' if self.cached else '已断开'
         if self.percent is not None and self.stale:
             return '读数已过期'
         if self.connected is None:
+            if self.cached:return '连接待确认 · 上次电量'
             if self.usb_keyboard and self.power_mode=='unknown' and not self.receiver:
                 return 'USB 已接入 · 供电待确认'
             return '已识别 · 电量未知' if self.battery_support == 'identify-only' else '连接待确认'
@@ -99,10 +117,11 @@ class Device:
         for key in ('note', 'source', 'evidence', 'firmware', 'approximate'):
             if key in data:
                 data[key] = str(data[key])[:1000]
-        for key in ('observed_at', 'monotonic_at', 'last_seen'):
+        for key in ('observed_at', 'last_observed_at', 'monotonic_at', 'last_seen'):
             if key in data and (not isinstance(data[key], (int, float)) or not math.isfinite(data[key]) or data[key]<0):
                 data[key] = 0
         if data.get('observed_at',0)>time.time()+86400:data['observed_at']=0
+        if data.get('last_observed_at',0)>time.time()+60:data['last_observed_at']=0
         for key in ('vid','pid'):
             if key in data and (not isinstance(data[key],int) or not 0<=data[key]<=65535):data[key]=0
         return cls(**data)

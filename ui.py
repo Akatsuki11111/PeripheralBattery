@@ -82,10 +82,11 @@ class DeviceCard(QFrame):
         type_name=d.type_name
         self.kind_label=kind;self.status_label=label(type_name+' · '+d.status,11,True)
         status.addWidget(self.status_label);status.addStretch();center.addLayout(status)
-        bar=BatteryBar();bar.value=d.percent;bar.stale=d.stale or d.connected is not True;bar.charging=d.charging
+        bar=BatteryBar();bar.value=d.display_percent;bar.stale=not d.usable;bar.charging=d.charging if d.usable else False
         self.bar=bar;bar.setVisible(d.power_mode!='wired' and d.kind!='auxiliary');center.addWidget(bar);row.addLayout(center,1)
         pct=QVBoxLayout();pct.setSpacing(0)
         value=label(d.reading_text,20 if d.kind!='auxiliary' else 13,bold=True)
+        value.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else '实时电量')
         if not d.usable:value.setObjectName('muted')
         value.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter);pct.addWidget(value)
         self.value_label=value;self.brand_label=label(d.brand if d.brand!='Unknown' else '品牌待指定',10,True);pct.addWidget(self.brand_label);row.addLayout(pct)
@@ -98,11 +99,12 @@ class DeviceCard(QFrame):
         self.kind_label.setText(GLYPHS.get(d.kind,GLYPHS['mouse']))
         self.status_label.setText(d.type_name+' · '+d.status)
         self.status_label.setToolTip(d.note);self.value_label.setText(d.reading_text)
+        self.value_label.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else '实时电量')
         tone='' if d.usable else 'muted'
         if self.value_label.objectName()!=tone:
             self.value_label.setObjectName(tone);self.value_label.style().unpolish(self.value_label);self.value_label.style().polish(self.value_label)
         self.brand_label.setText(d.brand if d.brand!='Unknown' else '品牌待指定')
-        self.bar.value=d.percent;self.bar.stale=not d.usable;self.bar.charging=d.charging;self.bar.update()
+        self.bar.value=d.display_percent;self.bar.stale=not d.usable;self.bar.charging=d.charging if d.usable else False;self.bar.update()
         self.bar.setVisible(d.power_mode!='wired' and d.kind!='auxiliary')
         self.setAccessibleName(d.name+'，'+d.status+'，'+self.value_label.text())
 
@@ -126,7 +128,7 @@ class Flyout(QWidget):
         self.preferences=preferences or Settings();self.cards={};self.anchor=None;self.detail_labels={};self.detail_key=None
         from history import HistoryStore
         self.history=history or HistoryStore(self.preferences.path.with_name('history.json'))
-        self.catalog_dialog=None;self.research_dialog=None;self.research_controller=None
+        self.catalog_dialog=None;self.research_dialog=None;self.research_controller=None;self.learning=None;self.learning_dialog=None
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground,True)
         self.root=QVBoxLayout(self);self.root.setContentsMargins(18,14,18,12);self.root.setSpacing(8)
         head=QHBoxLayout();head.setSpacing(10)
@@ -136,8 +138,10 @@ class Flyout(QWidget):
         head.addWidget(tool('info','品牌目录与设备管理',self.open_catalog));head.addWidget(tool('close','收起到系统托盘',self.hide))
         self.root.addLayout(head)
         self.summary=label('正在读取设备状态…',11,True);self.root.addWidget(self.summary)
-        self.research_button=QPushButton('电量适配检查');self.research_button.setToolTip('逐步检查未知电量设备的已验证状态接口')
-        self.research_button.clicked.connect(self.open_research);self.root.addWidget(self.research_button)
+        experiment_row=QHBoxLayout();self.root.addLayout(experiment_row)
+        self.research_button=QPushButton('电量适配（实验）');self.research_button.setToolTip('仅列出待适配设备；已适配设备休眠或关机不会进入清单')
+        self.research_button.clicked.connect(self.open_research);experiment_row.addWidget(self.research_button)
+        self.learning_button=QPushButton('长时间观察');self.learning_button.clicked.connect(self.open_learning);experiment_row.addWidget(self.learning_button)
         self.stack=QStackedWidget();self.root.addWidget(self.stack,1)
         self.scroll=QScrollArea();self.scroll.setWidgetResizable(True);self.scroll.setFrameShape(QFrame.Shape.NoFrame)
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -202,6 +206,7 @@ class Flyout(QWidget):
 
     def rebuild(self,devices,errors):
         self.devices=devices;self.errors=errors
+        if self.research_dialog is not None and self.research_dialog.stage==0:self.research_dialog.fill_devices()
         if self.theme!=windows.is_dark():self.apply_theme()
         displayed=visible_devices(devices,self.preferences);keys={d.key for d in displayed}
         for key in list(self.cards):
@@ -301,7 +306,7 @@ class Flyout(QWidget):
                 ('电量精度',d.approximate or ('设备报告值' if d.percent is not None else '未知')),
                 ('当前电压',f'{d.voltage_mv} mV' if d.usable and d.voltage_mv is not None else '设备未提供' if d.usable else '暂无有效读数'),
                 ('放电速率',estimate.rate_text),('预计剩余',estimate.remaining_text),('估算依据',estimate.reason),
-                ('上次有效值',f'{d.last_percent}% · 非实时' if d.last_percent is not None else '暂无')]
+                ('上次有效值',f'{d.last_percent}% · '+(dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S') if d.last_observed_at else '时间未知')+' · 非实时' if d.last_percent is not None else '暂无')]
 
     def clear_history(self,key):
         try:self.history.forget(key);self.show_detail(key)
@@ -366,6 +371,23 @@ class Flyout(QWidget):
         y=max(bounds.top()+8,min(self.y(),bounds.bottom()-dialog.height()-8))
         dialog.move(x,y);dialog.show();dialog.raise_();dialog.activateWindow()
 
+    def open_learning(self):
+        if self.learning is None:return
+        if self.learning_dialog is not None:self.learning_dialog.show();self.learning_dialog.raise_();return
+        from learning_ui import LearningPanel
+        self.pinned=True;dialog=LearningPanel(self.learning,self.refreshRequested.emit,self);self.learning_dialog=dialog
+        dialog.setStyleSheet(self.styleSheet())
+        def closed(*args):
+            self.learning_dialog=None;self.pinned=False
+            try:self.learning.changed.disconnect(dialog.update_state)
+            except RuntimeError:pass
+            dialog.deleteLater()
+        dialog.finished.connect(closed)
+        bounds=(self.screen() or QApplication.primaryScreen()).availableGeometry()
+        x=self.x()-dialog.width()-8
+        dialog.move(max(bounds.left()+8,min(x,bounds.right()-dialog.width()-8)),max(bounds.top()+8,min(self.y(),bounds.bottom()-dialog.height()-8)))
+        dialog.show();dialog.raise_();dialog.activateWindow()
+
     def raise_catalog(self):
         dialog=self.catalog_dialog
         if dialog is None:return False
@@ -382,6 +404,7 @@ class Flyout(QWidget):
     def close_windows(self):
         if self.catalog_dialog:self.catalog_dialog.close()
         if self.research_dialog:self.research_dialog.close()
+        if self.learning_dialog:self.learning_dialog.close()
         self.hide()
 
     def go_back(self):

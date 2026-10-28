@@ -151,6 +151,15 @@ class ScanController(QObject):
         self._start_queries()
 
     def _start_queries(self):
+        from long_learning import mappings
+        from catalog import device_profile
+        saved=mappings()
+        for group in self.inventory:
+            profile=device_profile(group['device'].get('vid',0),group['device'].get('pid',0))
+            if group['device']['identity'] in saved and not (profile or {}).get('backend') and group['device'].get('power_mode')!='wired':
+                group['original_backend']=group.get('original_backend',group.get('backend',''));group['backend']='learned'
+            elif group.get('backend')=='learned' and group['device']['identity'] not in saved:
+                group['backend']=group.get('original_backend','')
         now=time.monotonic()
         available=[g for g in self.inventory if g.get('backend') and
                    self.failures.get(g['device']['identity'],(0,0))[1]<=now]
@@ -176,7 +185,7 @@ class ScanController(QObject):
         if result.get('ok') and isinstance(readings,list) and readings:
             try:
                 self.store.apply_readings(identity,readings)
-                if any(item.get('connected') is True for item in readings):self.failures.pop(identity,None)
+                if any(item.get('connected') is True or item.get('confidence')=='experimental' for item in readings):self.failures.pop(identity,None)
                 elif all(item.get('connected') is None for item in readings):self._backoff(identity)
             except (ValueError,TypeError,KeyError) as error:
                 self.errors.append('设备读数无效：'+str(error))

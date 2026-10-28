@@ -51,6 +51,17 @@ def probe(group,diagnostics=None):
     infos=[decode_info(item) for item in group['infos']]
     base=group['device'];backend=group['backend']
     records=[]
+    if backend=='learned':
+        from research import sample
+        from long_learning import mappings,decode_mapping
+        mapping=mappings().get(base['identity'])
+        if not isinstance(mapping,dict):raise ValueError('实验映射已被移除')
+        response=sample(base['identity'],mapping.get('channel'));level=decode_mapping(response,mapping)
+        return [{'name':base['name'],'percent':level,'connected':True if response.get('remote_confirmed') else None,
+                 'charging':response.get('charging'),'confidence':'experimental','source':'本地实验映射 · 未经独立验证',
+                 'evidence':'用户确认的长期相关性候选；不证明远端在线','observed_at':time.time(),
+                 'monotonic_at':time.monotonic(),'battery_support':'experimental',
+                 'note':'实验推测，可能是慢速计数器等字段；不参与最低电量和提醒，可在观察面板停用。'}]
     if backend=='rog_omni_mini':
         from rog_omni import query
         records=query(infos)
@@ -114,7 +125,7 @@ def execute(request):
         from research import sample
         identity=request.get('identity','')
         if not re.fullmatch(r'[a-f0-9]{24}',identity):raise ValueError('设备标识无效')
-        return {'sample':sample(identity)}
+        return {'sample':sample(identity,request.get('channel'))}
     if operation=='test-sleep':
         # Only available to the isolated regression tests, never to normal IPC.
         if os.environ.get('PB_TEST_MODE')!='1':raise ValueError('Test operation disabled')

@@ -1,18 +1,32 @@
 """Conservative status-report research; never interrogate unknown HID protocols."""
-from collections import Counter
 from catalog import device_profile
 from inventory import enumerate_groups,decode_info
 from protocols import query,parse_nova5,parse_nova5_usb,parse_scyrox,scyrox_packet
 import time
 
 
-def sample(identity):
+def research_devices(devices,include_supported=False):
+    result=[]
+    for d in devices:
+        if not d.present or d.brand=='Unknown' or d.kind=='auxiliary' or d.power_mode=='wired' or d.connected is False:continue
+        profile=device_profile(d.vid,d.pid)
+        known=bool((profile or {}).get('backend')) or d.usable or d.last_observed_at>0
+        if not known or include_supported and d.connected is True:result.append(d)
+    return result
+
+
+def sample(identity,channel=None):
     groups=[g for g in enumerate_groups() if g['device'].get('identity')==identity]
     if len(groups)!=1:raise ValueError('设备已经断开、重新枚举或身份不唯一，请重新选择。')
     group=groups[0];d=group['device'];backend=group['backend'];profile=device_profile(d['vid'],d['pid'])
-    if not profile or profile.get('backend')!=backend or backend not in ('nova5','nova5_usb','scyrox'):
-        raise ValueError('此型号没有经过验证的状态查询，不能安全采样；需要先适配协议。')
     infos=[decode_info(x) for x in group['infos']]
+    if not profile or profile.get('backend')!=backend or backend not in ('nova5','nova5_usb','scyrox'):
+        from feature_reports import get_feature
+        data,chosen=get_feature(infos,channel)
+        return {'timestamp':time.time(),'hex':data.hex(' '),'length':len(data),'charging':None,'percent':None,
+                'interface':chosen['interface'],'usage_page':chosen['usage_page'],'usage':chosen['usage'],
+                'backend':'feature-get','vid':d['vid'],'pid':d['pid'],'name':d['name'],'channel':chosen,
+                'remote_confirmed':False}
     if backend in ('nova5','nova5_usb'):
         iface=3 if backend=='nova5' else 0
         matching=[i for i in infos if i.get('interface_number')==iface and i.get('usage_page')==0xffc0 and i.get('usage')==1]
@@ -29,7 +43,7 @@ def sample(identity):
     return {'timestamp':time.time(),'hex':bytes(data).hex(' '),'length':len(data),'charging':charging,
             'percent':level,'interface':matching[0].get('interface_number'),
             'usage_page':matching[0].get('usage_page'),'usage':matching[0].get('usage'),
-            'backend':backend,'vid':d['vid'],'pid':d['pid'],'name':d['name']}
+            'backend':backend,'vid':d['vid'],'pid':d['pid'],'name':d['name'],'remote_confirmed':True}
 
 
 def compare(before,after):
