@@ -4,6 +4,11 @@ from contextlib import contextmanager
 from identity import digest
 
 
+class FeatureReadError(ValueError):
+    def __init__(self,code,message,details):
+        super().__init__(message);self.code=code;self.details=details
+
+
 class Caps(C.Structure):
     _fields_=[(n,C.c_uint16) for n in ('Usage','UsagePage','InputLength','OutputLength','FeatureLength')]+[('Reserved',C.c_uint16*17)]+[(n,C.c_uint16) for n in
         ('LinkNodes','InputButtons','InputValues','InputIndices','OutputButtons','OutputValues','OutputIndices','FeatureButtons','FeatureValues','FeatureIndices')]
@@ -19,10 +24,10 @@ def opened(path):
     hid.HidP_GetCaps.argtypes=[C.c_void_p,C.POINTER(Caps)];hid.HidP_GetCaps.restype=C.c_int32
     hid.HidD_GetFeature.argtypes=[C.c_void_p,C.c_void_p,C.c_uint32];hid.HidD_GetFeature.restype=C.c_ubyte
     handle=kernel.CreateFileW(path.decode() if isinstance(path,bytes) else path,0,3,None,3,0,None)
-    if handle in (None,C.c_void_p(-1).value):raise OSError('无法打开所选 Feature 接口')
+    if handle in (None,C.c_void_p(-1).value):raise OSError(f'无法打开所选接口，Windows 错误 {C.get_last_error()}')
     preparsed=C.c_void_p()
     try:
-        if not hid.HidD_GetPreparsedData(handle,C.byref(preparsed)):raise OSError('无法取得报告描述信息')
+        if not hid.HidD_GetPreparsedData(handle,C.byref(preparsed)):raise OSError(f'无法取得报告描述信息，Windows 错误 {C.get_last_error()}')
         caps=Caps()
         if hid.HidP_GetCaps(preparsed,C.byref(caps))!=0x110000:raise OSError('报告描述信息无效')
         yield handle,hid,preparsed,caps
@@ -43,26 +48,60 @@ def channels_for(info,hid,preparsed,caps):
         fn.argtypes=[C.c_int,C.c_void_p,C.POINTER(C.c_uint16),C.c_void_p];fn.restype=C.c_int32
         if fn(2,entries,C.byref(size),preparsed)!=0x110000 or size.value>count:raise OSError('读取 Feature 描述失败')
         for i in range(size.value):
-            data=bytes(entries[i]);raw.append(data.hex());page=int.from_bytes(data[:2],'little')
-            if page>=0xff00 or page==0x85:ids.add(data[2])
+            data=bytes(entries[i]);raw.append(data.hex());ids.add(data[2])
     signature=digest((caps.Usage,caps.UsagePage,caps.FeatureLength,raw))
     return [dict(interface=info.get('interface_number',-1),usage_page=caps.UsagePage,usage=caps.Usage,
                  report_id=rid,length=caps.FeatureLength,descriptor=signature,
                  collection=digest(info['path'])) for rid in sorted(ids)[:8]]
 
 
+def summary(info,caps,channels):
+    reason='declared' if channels else 'no_feature_report' if not caps.FeatureLength else 'feature_length_limit' if not 2<=caps.FeatureLength<=256 else 'no_declared_fields'
+    return {'interface':info.get('interface_number',-1),'usage_page':int(caps.UsagePage),'usage':int(caps.Usage),
+            'input_length':int(caps.InputLength),'output_length':int(caps.OutputLength),'feature_length':int(caps.FeatureLength),
+            'feature_value_caps':int(caps.FeatureValues),'feature_button_caps':int(caps.FeatureButtons),
+            'report_ids':[c['report_id'] for c in channels],'status':reason}
+
+
+def inspect_features(infos):
+    """Only inspect the descriptor; no Feature GET, input reads or writes."""
+    results=[]
+    for info in infos[:32]:
+        base={k:info.get(k) for k in ('interface_number','usage_page','usage')}
+        if not (info.get('usage_page',0)>=0xff00 or info.get('usage_page')==0x85):
+            results.append({**base,'status':'not_vendor_or_battery_collection'});continue
+        try:
+            with opened(info['path']) as (_,hid,preparsed,caps):
+                results.append(summary(info,caps,channels_for(info,hid,preparsed,caps)))
+        except (OSError,ValueError) as error:results.append({**base,'status':'descriptor_unavailable','error':str(error)})
+    return results
+
+
 def get_feature(infos,expected=None):
-    errors=[]
+    details=[]
     candidates=[i for i in infos if i.get('usage_page',0)>=0xff00 or i.get('usage_page')==0x85]
     for info in candidates[:8]:
         try:
             with opened(info['path']) as (handle,hid,preparsed,caps):
                 channels=channels_for(info,hid,preparsed,caps)
-                if expected is not None:channels=[c for c in channels if c==expected]
+                item=summary(info,caps,channels);details.append(item)
+                if expected is not None:
+                    channels=[c for c in channels if c==expected]
+                    if not channels:item['status']='channel_changed'
                 for channel in channels:
                     buf=(C.c_ubyte*channel['length'])();buf[0]=channel['report_id']
-                    if not hid.HidD_GetFeature(handle,buf,len(buf)):continue
-                    if buf[0]!=channel['report_id']:continue
+                    if not hid.HidD_GetFeature(handle,buf,len(buf)):
+                        item.setdefault('attempts',[]).append({'report_id':channel['report_id'],'status':'feature_read_failed','windows_error':C.get_last_error()});continue
+                    if buf[0]!=channel['report_id']:
+                        item.setdefault('attempts',[]).append({'report_id':channel['report_id'],'status':'unexpected_report_id'});continue
                     return bytes(buf),channel
-        except (OSError,ValueError) as error:errors.append(str(error))
-    raise ValueError('所选设备没有可读取的描述符 Feature 报告，或驱动占用；没有发送厂商配置命令。'+(' '+errors[-1] if errors else ''))
+        except (OSError,ValueError) as error:details.append({'interface':info.get('interface_number',-1),'status':'descriptor_unavailable','error':str(error)})
+    statuses={d['status'] for d in details}
+    attempts=[a for d in details for a in d.get('attempts',[])]
+    if not candidates:code='no_vendor_collection';message='没有找到可供此实验使用的厂商或电池集合；普通鼠标输入接口不提供这种采样。'
+    elif attempts:code='feature_read_failed';message='系统没有返回可用的 Feature 报告。该设备可能需要专用电量查询，也可能存在接口访问问题，请导出诊断。'
+    elif expected is not None and 'channel_changed' in statuses:code='channel_changed';message='原采样通道已改变或报告描述不符，请重新选择设备。'
+    elif 'feature_length_limit' in statuses:code='feature_length_limit';message='设备的 Feature 报告长度超过当前实验支持范围，已停止采样。'
+    elif 'descriptor_unavailable' in statuses:code='descriptor_unavailable';message='无法读取一个或多个接口的报告描述；请导出诊断检查系统错误码。'
+    else:code='no_feature_report';message='已检查接口描述，没有找到可用于此实验的 Feature 报告。延长等待不能补足缺失的报告，需适配专用查询。'
+    raise FeatureReadError(code,message,details)

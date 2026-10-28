@@ -66,6 +66,23 @@ def diagnose_mchose():
     return {'devices':devices,'errors':errors}
 
 
+def diagnose_hid():
+    result=bounded_operation({'operation':'inventory','overrides':{}},10)
+    if not result.get('ok'):return {'devices':[],'errors':[result.get('error','枚举失败')]}
+    groups=result.get('groups',[])[:120]
+    groups.sort(key=lambda g:(g['device'].get('brand')!='Unknown',not g['device'].get('receiver'),g['device'].get('name','')))
+    devices=[];errors=[];deadline=time.monotonic()+40
+    for group in groups[:16]:
+        remaining=deadline-time.monotonic()
+        if remaining<1:errors.append('达到诊断总时限，部分设备尚未检查');break
+        response=bounded_operation({'operation':'research-inspect','identity':group['device']['identity']},min(7,remaining))
+        if response.get('ok'):
+            devices.append({k:response[k] for k in ('device','backend','interfaces','feature_diagnostics','valkyrie_candidates','scope')})
+        else:devices.append({'device':{k:group['device'].get(k) for k in ('name','brand','vid','pid')},'error':response.get('user_message',response.get('error'))})
+    if len(groups)>16:errors.append('最多检查16个设备；可在程序内导出单台设备诊断')
+    return {'devices':devices,'errors':errors,'scope':'仅身份与描述信息；不含设备路径、序列号或输入报告，不修改设备'}
+
+
 class Scanner:
     def scan(self):
         store=DeviceStore();preferences=Settings();errors=[]

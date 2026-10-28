@@ -123,8 +123,9 @@ class FeatureTests(unittest.TestCase):
         calls=[]
         class Hid:
             def HidD_GetFeature(self,*args):calls.append(args);return True
+        caps=Caps();caps.UsagePage=0xff01;caps.Usage=1;caps.FeatureLength=4
         @contextmanager
-        def opened(path):yield 1,Hid(),None,None
+        def opened(path):yield 1,Hid(),None,caps
         info={'path':b'path','usage_page':0xff01}
         with patch('feature_reports.opened',opened),patch('feature_reports.channels_for',return_value=[{'report_id':7,'length':4}]):
             with self.assertRaises(ValueError):get_feature([info],{'report_id':8,'length':4})

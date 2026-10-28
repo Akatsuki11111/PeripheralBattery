@@ -1,0 +1,499 @@
+{
+  "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js",
+  "rows": [
+    {
+      "vid": "3151",
+      "pid": "4026",
+      "valkyrie_names": [
+        "Valkyrie M1"
+      ],
+      "types": [
+        "mouse"
+      ],
+      "other_companies": [
+        "AJAZZMOUSE",
+        "AMAZONBASICS",
+        "AttackShark",
+        "DAXAPROWIRELESSII",
+        "Fantech",
+        "GGVULTURESuite",
+        "IO1.1PRO",
+        "KEYCEO",
+        "KUSkillKorp",
+        "KYSONASpaceSeries",
+        "MEETION",
+        "NIX",
+        "Onten",
+        "SPIRITProSoftware",
+        "SecretGearZX",
+        "StarBlaze",
+        "rongyuan",
+        "腹灵"
+      ]
+    },
+    {
+      "vid": "3151",
+      "pid": "5030",
+      "valkyrie_names": [
+        "MAG75 Max",
+        "VK99"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": [
+        "ABKO",
+        "AJAZZMOUSE",
+        "ASTROMEDA",
+        "ATWO",
+        "Acrox",
+        "AttackShark",
+        "Blackstorm",
+        "COLORFUL",
+        "DARKFORCE",
+        "DSPIXEL",
+        "DeadlyInputorDI",
+        "EDRA",
+        "EPOMAKER",
+        "EWEADNV",
+        "FREEWOLF",
+        "GAMEPOWER",
+        "GKX68MAGNUM",
+        "HawkGamingHK610S",
+        "JINGSU",
+        "KB",
+        "Keydous",
+        "Legion",
+        "MageGee",
+        "MiningBaseCoLtd",
+        "MonsGeek",
+        "Ninjadog",
+        "OUSAID",
+        "PIIFOXDRIVER",
+        "PLUXKB",
+        "RKHEKeyboard",
+        "SARU",
+        "SUNROSE",
+        "Skyloong",
+        "VGNNEON",
+        "Veekos",
+        "WINSTAR",
+        "WOMIER",
+        "XinMengK65Keyboard",
+        "YUNZII",
+        "akko",
+        "gamakay2",
+        "ikbc",
+        "rongyuan",
+        "skillMK231",
+        "凯酷",
+        "咪星人",
+        "腹灵",
+        "蚂蚁电竞",
+        "蝴蝶"
+      ]
+    },
+    {
+      "vid": "374A",
+      "pid": "0331",
+      "valkyrie_names": [
+        "VK M3 Basic"
+      ],
+      "types": [
+        "mouse"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A213",
+      "valkyrie_names": [
+        "VK MAG75 Lite"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A216",
+      "valkyrie_names": [
+        "VK MAG 75",
+        "VK MAG75 Pro"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A219",
+      "valkyrie_names": [
+        "VK99 Gaming"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A225",
+      "valkyrie_names": [
+        "VK MAG68"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A228",
+      "valkyrie_names": [
+        "NB68"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A232",
+      "valkyrie_names": [
+        "VK MAG 68"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A233",
+      "valkyrie_names": [
+        "VK MAG 68 Max"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A236",
+      "valkyrie_names": [
+        "NB68 Max",
+        "VK NB 68 Max"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": [
+        "VGNNEON"
+      ]
+    },
+    {
+      "vid": "374A",
+      "pid": "A242",
+      "valkyrie_names": [
+        "Mecha 75"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A250",
+      "valkyrie_names": [
+        "VK 75 Max",
+        "VK 75 PRO"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A260",
+      "valkyrie_names": [
+        "VK 99 MAX"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A262",
+      "valkyrie_names": [
+        "VK99 Ultra"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A264",
+      "valkyrie_names": [
+        "VK Cyber 68",
+        "VK Cyber 68PRO"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A267",
+      "valkyrie_names": [
+        "VK 87 V2"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A270",
+      "valkyrie_names": [
+        "VK 87 Max V2"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A274",
+      "valkyrie_names": [
+        "VK MAG87 Max"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A277",
+      "valkyrie_names": [
+        "VK 99 V2"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A280",
+      "valkyrie_names": [
+        "VK 99 Max V2"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A283",
+      "valkyrie_names": [
+        "VK 75"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A286",
+      "valkyrie_names": [
+        "VK NB 80 Pro"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A293",
+      "valkyrie_names": [
+        "VK 108"
+      ],
+      "types": [
+        "keyboard"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A318",
+      "valkyrie_names": [
+        "VK M5 Lite"
+      ],
+      "types": [
+        "mouse"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A321",
+      "valkyrie_names": [
+        "VK M5"
+      ],
+      "types": [
+        "mouse"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A328",
+      "valkyrie_names": [
+        "VK M5 PRO"
+      ],
+      "types": [
+        "mouse"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A329",
+      "valkyrie_names": [
+        "VK M5 PRO"
+      ],
+      "types": [
+        "dongle"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A333",
+      "valkyrie_names": [
+        "VK M5 EVO"
+      ],
+      "types": [
+        "mouse"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A336",
+      "valkyrie_names": [
+        "VK M5 Super"
+      ],
+      "types": [
+        "mouse"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A339",
+      "valkyrie_names": [
+        "VK M5 MAX"
+      ],
+      "types": [
+        "mouse"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A340",
+      "valkyrie_names": [
+        "VK M5 MAX"
+      ],
+      "types": [
+        "dongle"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A342",
+      "valkyrie_names": [
+        "VK M4 Lite"
+      ],
+      "types": [
+        "mouse"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A345",
+      "valkyrie_names": [
+        "VK M4"
+      ],
+      "types": [
+        "mouse"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A351",
+      "valkyrie_names": [
+        "VK M5 Ultra"
+      ],
+      "types": [
+        "mouse"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A352",
+      "valkyrie_names": [
+        "VK M5 Ultra"
+      ],
+      "types": [
+        "dongle"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A354",
+      "valkyrie_names": [
+        "VK M7 PRO"
+      ],
+      "types": [
+        "mouse"
+      ],
+      "other_companies": []
+    },
+    {
+      "vid": "374A",
+      "pid": "A355",
+      "valkyrie_names": [
+        "VK M7 PRO"
+      ],
+      "types": [
+        "dongle"
+      ],
+      "other_companies": []
+    }
+  ]
+}

@@ -149,7 +149,9 @@
       "id": "iqunix",
       "name": "IQUNIX",
       "zh": "IQUNIX",
-      "aliases": ["iqunix"],
+      "aliases": [
+        "iqunix"
+      ],
       "vids": [],
       "website": "https://iqunix.com",
       "simple_icon": "",
@@ -545,7 +547,9 @@
         "hewlett",
         "惠普"
       ],
-      "vids": ["03F0"],
+      "vids": [
+        "03F0"
+      ],
       "website": "https://www.hp.com",
       "simple_icon": "hp",
       "logo": "assets/brands/hp.svg",
@@ -817,7 +821,8 @@
         "vk 99",
         "vk87",
         "vk 87",
-        "vk mag75"
+        "vk mag75",
+        "vkms"
       ],
       "vids": [],
       "website": "https://valkyrie.com.cn",
@@ -2901,6 +2906,325 @@
       "name": "Zaopin Z2 Mini",
       "backend": "nordic52",
       "brand": "zaopin"
+    },
+    {
+      "vid": "374A",
+      "pid": "0331",
+      "name": "VK M3 Basic",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A213",
+      "name": "VK MAG75 Lite",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A216",
+      "name": "VK MAG 75 / VK MAG75 Pro（具体版本待确认）",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A219",
+      "name": "VK99 Gaming",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A225",
+      "name": "VK MAG68",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A228",
+      "name": "NB68",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A232",
+      "name": "VK MAG 68",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A233",
+      "name": "VK MAG 68 Max",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A242",
+      "name": "Mecha 75",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A250",
+      "name": "VK 75 Max / VK 75 PRO（具体版本待确认）",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A260",
+      "name": "VK 99 MAX",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A262",
+      "name": "VK99 Ultra",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A264",
+      "name": "VK Cyber 68 / VK Cyber 68PRO（具体版本待确认）",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A267",
+      "name": "VK 87 V2",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A270",
+      "name": "VK 87 Max V2",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A274",
+      "name": "VK MAG87 Max",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A277",
+      "name": "VK 99 V2",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A280",
+      "name": "VK 99 Max V2",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A283",
+      "name": "VK 75",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A286",
+      "name": "VK NB 80 Pro",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A293",
+      "name": "VK 108",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "keyboard",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A318",
+      "name": "VK M5 Lite",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A321",
+      "name": "VK M5",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A328",
+      "name": "VK M5 PRO",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A329",
+      "name": "VK M5 PRO",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js",
+      "receiver": true
+    },
+    {
+      "vid": "374A",
+      "pid": "A333",
+      "name": "VK M5 EVO",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A336",
+      "name": "VK M5 Super",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A339",
+      "name": "VK M5 MAX",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A340",
+      "name": "VK M5 MAX",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js",
+      "receiver": true
+    },
+    {
+      "vid": "374A",
+      "pid": "A342",
+      "name": "VK M4 Lite",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A345",
+      "name": "VK M4",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A351",
+      "name": "VK M5 Ultra",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A352",
+      "name": "VK M5 Ultra",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js",
+      "receiver": true
+    },
+    {
+      "vid": "374A",
+      "pid": "A354",
+      "name": "VK M7 PRO",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+    },
+    {
+      "vid": "374A",
+      "pid": "A355",
+      "name": "VK M7 PRO",
+      "backend": "",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js",
+      "receiver": true
     }
   ],
   "notes": [

@@ -15,6 +15,14 @@ def classify_auxiliary(vid,pid,name,companions):
             any('cxair_r' in value.casefold() for value in companions))
 
 
+def model_name(profile,product):
+    generic=str(product).strip().casefold().replace('_','-').replace(' ','-')
+    if profile and generic in ('wireless-receiver','wirelessreceiver','usb-keyboard','usb-mouse','wireless-mouse',
+                               '2.4g-wireless-device','2.4g-wireless-mouse','gaming-mouse','wireless-gaming-mouse'):
+        return profile['name']
+    return product or (profile or {}).get('name','')
+
+
 def encode_info(info):
     return {key: value.hex() if isinstance(value, bytes) else value for key, value in info.items()}
 
@@ -58,6 +66,8 @@ def enumerate_groups(overrides=None):
         name = next((i.get('product_string') for i in infos if i.get('product_string')), '')
         manufacturer = next((i.get('manufacturer_string') for i in infos if i.get('manufacturer_string')), '')
         profile = device_profile(vid,pid)
+        raw_name=str(name)
+        name=model_name(profile,name)
         if not name:
             name = profile['name'] if profile else next((m.get('friendly') for m in metas if m.get('friendly')), '')
         brand, evidence = recognize(vid,pid,manufacturer,name,(overrides or {}).get(f'{vid:04X}:{pid:04X}',''))
@@ -80,7 +90,7 @@ def enumerate_groups(overrides=None):
             parent_instance=next((m['physical'] for m in metas if m.get('physical')),'')
             companions=companion_names(parent_instance)
         auxiliary=classify_auxiliary(vid,pid,str(name),companions)
-        text = str(name).lower()
+        text = (str(name)+' '+raw_name).lower()
         receiver = (profile or {}).get('receiver',False) or any(word in text for word in ('receiver','dongle','2.4','接收器','hyperspeed'))
         mouse_input=any(i.get('usage_page')==1 and i.get('usage')==2 for i in infos)
         if (backend=='mchose' and is_usb_keyboard and kind=='keyboard' and not receiver

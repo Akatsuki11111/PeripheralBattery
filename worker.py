@@ -126,6 +126,9 @@ def execute(request):
         identity=request.get('identity','')
         if not re.fullmatch(r'[a-f0-9]{24}',identity):raise ValueError('设备标识无效')
         return {'sample':sample(identity,request.get('channel'))}
+    if operation=='research-inspect':
+        from research import inspect_device
+        return inspect_device(request.get('identity',''))
     if operation=='test-sleep':
         # Only available to the isolated regression tests, never to normal IPC.
         if os.environ.get('PB_TEST_MODE')!='1':raise ValueError('Test operation disabled')
@@ -145,6 +148,9 @@ def run(request_file):
     try:
         result={'nonce':request['nonce'],'ok':True,**execute(request)}
     except Exception as error:
-        result={'nonce':request['nonce'],'ok':False,'error':redact(f'{type(error).__name__}: {error}')}
+        result={'nonce':request['nonce'],'ok':False,'error':redact(f'{type(error).__name__}: {error}'),
+                'user_message':redact(str(error))}
+        if getattr(error,'code',None):result['error_code']=error.code
+        if getattr(error,'details',None):result['feature_diagnostics']=error.details
     atomic_json(output,result)
     return 0

@@ -15,6 +15,7 @@ def main():
     parser.add_argument('--worker',metavar='REQUEST')
     parser.add_argument('--diagnose',action='store_true')
     parser.add_argument('--diagnose-mchose',action='store_true',help='仅诊断迈从状态接口，结果不含设备路径或序列号')
+    parser.add_argument('--diagnose-hid',action='store_true',help='导出外设身份和 Feature 描述诊断，不读取键鼠输入')
     parser.add_argument('--diagnostic-output',metavar='JSON')
     parser.add_argument('--startup-check',action='store_true')
     parser.add_argument('--install-startup',action='store_true')
@@ -43,6 +44,12 @@ def main():
         logger.info('startup registration enabled target=%s',redact(current.target));return 0
     if args.startup_check:
         value=asdict(startup.state())
+        if args.diagnostic_output:atomic_json(args.diagnostic_output,value)
+        elif sys.stdout:print(json.dumps(value,ensure_ascii=False,indent=2))
+        return 0
+    if args.diagnose_hid:
+        from providers import diagnose_hid
+        value={'version':VERSION,'generated_at':time.time(),**diagnose_hid()}
         if args.diagnostic_output:atomic_json(args.diagnostic_output,value)
         elif sys.stdout:print(json.dumps(value,ensure_ascii=False,indent=2))
         return 0
