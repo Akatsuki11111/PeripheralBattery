@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+build/
+dist/
+*.exe
+*.zip
+*.log
+settings.json
+devices.json
+history.json
+learning-session.json
+research-evidence.json
+experimental-mappings.json
+observations/
+*-diagnostic.json
