@@ -150,26 +150,31 @@ class Flyout(QWidget):
         self.scroll.setWidget(self.list_body);self.stack.addWidget(self.scroll)
         self.detail=QScrollArea();self.detail.setWidgetResizable(True);self.detail.setFrameShape(QFrame.Shape.NoFrame);self.stack.addWidget(self.detail)
         line=QFrame();line.setObjectName('separator');line.setFixedHeight(1);self.root.addWidget(line)
-        foot=QHBoxLayout();foot.setSpacing(8)
-        auto=label('开机自启',12);auto.setBuddy(None);foot.addWidget(auto);foot.addStretch()
-        self.auto_state=label('已开启' if windows.startup_enabled() else '已关闭',11,True);foot.addWidget(self.auto_state)
-        self.toggle=Toggle(False);self.toggle.toggled.connect(self.change_startup);foot.addWidget(self.toggle);self.root.addLayout(foot)
-        status_row=QHBoxLayout();status_row.setSpacing(8)
-        self.statusline=label('托盘显示最低电量',10,True);self.statusline.setSizePolicy(QSizePolicy.Policy.Ignored,QSizePolicy.Policy.Preferred)
-        status_row.addWidget(self.statusline,1)
-        self.refresh_choice=QComboBox();self.refresh_choice.setObjectName('refreshInterval');self.refresh_choice.setFixedSize(108,26)
+        controls=QGridLayout();controls.setContentsMargins(0,0,0,0);controls.setHorizontalSpacing(12);controls.setVerticalSpacing(6)
+        controls.setColumnStretch(0,1);controls.setColumnStretch(1,1);self.root.addLayout(controls)
+        startup_box=QWidget();startup_row=QHBoxLayout(startup_box);startup_row.setContentsMargins(0,0,0,0);startup_row.setSpacing(6)
+        startup_row.addWidget(label('开机自启',11));startup_row.addStretch()
+        self.auto_state=label('',10,True);self.auto_state.setParent(self);self.auto_state.hide()
+        self.toggle=Toggle(False);self.toggle.toggled.connect(self.change_startup);startup_row.addWidget(self.toggle);controls.addWidget(startup_box,0,0)
+        refresh_box=QWidget();refresh_row=QHBoxLayout(refresh_box);refresh_row.setContentsMargins(0,0,0,0);refresh_row.setSpacing(6)
+        refresh_row.addWidget(label('刷新间隔',11));refresh_row.addStretch()
+        self.refresh_choice=QComboBox();self.refresh_choice.setObjectName('refreshInterval');self.refresh_choice.setFixedSize(94,28)
         self.refresh_choice.setFont(font(11));self.refresh_choice.setAccessibleName('自动刷新间隔')
-        for seconds in REFRESH_INTERVALS:self.refresh_choice.addItem(f'{seconds} 秒刷新',seconds)
+        for seconds in REFRESH_INTERVALS:self.refresh_choice.addItem(f'{seconds} 秒',seconds)
         self.refresh_choice.setCurrentIndex(REFRESH_INTERVALS.index(self.preferences.get('refresh_seconds',15)))
         self.refresh_choice.setToolTip('切换后立即保存并生效。查询未结束时不会重复启动。')
         self.refresh_choice.currentIndexChanged.connect(lambda:self.change_interval(self.refresh_choice.currentData()))
-        status_row.addWidget(self.refresh_choice);self.root.addLayout(status_row)
-        version_row=QHBoxLayout();self.root.addLayout(version_row)
-        self.version_label=label('v'+VERSION+(' · 实验版' if RELEASE_CHANNEL=='experimental' else ' · 正式版'),10,True);version_row.addWidget(self.version_label,1)
-        self.update_channel=QComboBox();self.update_channel.setFont(font(10));self.update_channel.addItem('正式＋实验',True);self.update_channel.addItem('仅正式版',False)
+        refresh_row.addWidget(self.refresh_choice);controls.addWidget(refresh_box,0,1)
+        channel_box=QWidget();channel_row=QHBoxLayout(channel_box);channel_row.setContentsMargins(0,0,0,0);channel_row.setSpacing(6)
+        channel_row.addWidget(label('更新通道',11));channel_row.addStretch()
+        self.update_channel=QComboBox();self.update_channel.setFont(font(10));self.update_channel.setFixedSize(118,28)
+        self.update_channel.addItem('正式＋实验',True);self.update_channel.addItem('仅正式版',False)
         self.update_channel.setCurrentIndex(0 if self.preferences.get('update_prereleases',True) else 1)
-        self.update_channel.setToolTip('选择要检查的 GitHub 发布通道');version_row.addWidget(self.update_channel)
-        self.update_button=QPushButton('检查更新');self.update_button.setFont(font(10));version_row.addWidget(self.update_button)
+        self.update_channel.setToolTip('选择要检查的 GitHub 发布通道');channel_row.addWidget(self.update_channel);controls.addWidget(channel_box,1,0)
+        version_box=QWidget();version_row=QHBoxLayout(version_box);version_row.setContentsMargins(0,0,0,0);version_row.setSpacing(6)
+        self.version_label=label('v'+VERSION,10,True);self.version_label.setToolTip('当前版本：'+VERSION+(' · 实验版' if RELEASE_CHANNEL=='experimental' else ' · 正式版'));version_row.addWidget(self.version_label,1)
+        self.update_button=QPushButton('检查更新');self.update_button.setFont(font(10));self.update_button.setMinimumSize(106,28);version_row.addWidget(self.update_button);controls.addWidget(version_box,1,1)
+        self.statusline=label('托盘显示最低电量',10,True);self.statusline.setSizePolicy(QSizePolicy.Policy.Ignored,QSizePolicy.Policy.Preferred);self.statusline.hide();self.root.addWidget(self.statusline)
         self.update_job=None;self.update_url=None;self.update_button.clicked.connect(self.check_update)
         self.update_candidate=None;self.download_ready=None
         download_row=QHBoxLayout();self.root.addLayout(download_row)
@@ -294,7 +299,7 @@ class Flyout(QWidget):
 
     def refresh_startup(self):
         current=startup.state();self.toggle.set_checked_silent(current.enabled)
-        self.auto_state.setText(current.message);self.auto_state.setToolTip(current.command or '登录 Windows 后自动运行')
+        self.auto_state.setText(current.message);self.auto_state.setToolTip(current.command or '登录 Windows 后自动运行');self.toggle.setToolTip(current.message+'；登录 Windows 后自动运行')
 
     def rebuild(self,devices,errors):
         self.devices=devices;self.errors=errors
@@ -323,7 +328,7 @@ class Flyout(QWidget):
         wired=sum(d.present and d.power_mode=='wired' and d.kind!='auxiliary' for d in displayed)
         pending=sum(d.usb_keyboard and d.power_mode=='unknown' and d.connected is None for d in displayed)
         self.summary.setText(f'{count} 台电池设备在线 · {wired} 台有线'+(f' · {pending} 台 USB 待确认' if pending else '')+' · '+(f'最低 {low.percent}%' if low else '暂无有效电量'))
-        self.statusline.setText(errors[0] if errors else '托盘显示最低电量')
+        self.statusline.setText(errors[0] if errors else '托盘显示最低电量');self.statusline.setVisible(bool(errors))
         self.refresh_choice.blockSignals(True);self.refresh_choice.setCurrentIndex(REFRESH_INTERVALS.index(self.preferences.get('refresh_seconds',15)));self.refresh_choice.blockSignals(False)
         self.statusline.setToolTip('\n'.join(errors) if errors else '仅计算已连接且未过期的有效电量。可把托盘图标拖入或拖出 ^ 溢出区。')
         if self.selected:self.show_detail(self.selected)
@@ -514,7 +519,7 @@ class Flyout(QWidget):
         screen=screen or QApplication.primaryScreen();bounds=screen.availableGeometry()
         count=len(visible_devices(self.devices,self.preferences))
         self.setFixedSize(min(440,bounds.width()-24),adaptive_height(count,bounds.height(),bool(self.selected)))
-        if self.download_progress.isVisible():self.setFixedHeight(min(bounds.height()-20,self.height()+30))
+        if not self.download_progress.isHidden():self.setFixedHeight(min(bounds.height()-20,self.height()+30))
         x=rect.center().x()-self.width()//2 if rect and not rect.isNull() else bounds.right()-self.width()-12
         y=bounds.bottom()-self.height()-10
         if rect and not rect.isNull() and rect.center().y()<bounds.top()+50:y=bounds.top()+10
@@ -539,5 +544,5 @@ class Flyout(QWidget):
 
 def adaptive_height(count,available_height,detail=False):
     maximum=max(160,min(760,round(available_height*.78),available_height-20))
-    desired=max(316,244+max(1,count)*70+max(0,count-1)*6)
+    desired=max(286,214+max(1,count)*70+max(0,count-1)*6)
     return min(maximum,max(430,desired) if detail else desired)

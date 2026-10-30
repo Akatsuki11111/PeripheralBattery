@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.4.1 (experimental)
+- Arrange startup, refresh interval, release channel and version/update controls into two compact rows.
+- Keep full startup status in tooltips; show query errors only when present.
+- Keep download progress visible when reopening the flyout.
+- 154 regression tests pass; real installed v2.4.0 to v2.4.1 update verification is being performed locally.
+
+
 ## v2.4.0 (experimental)
 - Add current version and stable/experimental GitHub Release checks.
 - Add in-app download progress and cancellation, SHA256 verification, restart installation and rollback backups.

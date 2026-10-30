@@ -13,7 +13,7 @@ import time
 from models import Device
 
 APP_NAME = 'PeripheralBattery'
-VERSION = '2.4.0'
+VERSION = '2.4.1'
 RELEASE_CHANNEL = 'experimental'
 REFRESH_INTERVALS=(5,15,30,60)
 
