@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.5.1-experimental.1 (experimental)
+- Retain guided battery adaptation, long observations and locally confirmed experimental mappings.
+- Share v2.5.0 controller support, sleep timestamps and trimmed runtime.
+- This pre-release has its own SemVer tag and executable; stable v2.5.0 omits experiment modules.
+
+
 ## v2.5.0 (stable)
 - Show the timestamp of the last valid battery reading directly on sleeping/unconfirmed device cards.
 - Add 22 controller brands, 539 controller IDs, gamepad glyphs and safe composite-node consolidation.
