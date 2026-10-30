@@ -45,6 +45,8 @@ def recognize(vid, pid, manufacturer='', name='', override=''):
 
 def kind_for(name, interfaces):
     text = str(name).casefold()
+    if any(i.get('usage_page')==1 and i.get('usage') in (4,5,8) for i in interfaces):return 'gamepad'
+    if any(word in text for word in ('gamepad','game controller','xinput','dualshock','dualsense','joy-con','手柄')):return 'gamepad'
     if any(word in text for word in ('headset','headphone','arctis','blackshark','耳机','gamebuds','maxwell')):
         return 'headset'
     if any(word in text for word in ('keyboard','blackwidow','deathstalker','键盘','made68','nuphy air','nuphy halo',
@@ -113,5 +115,5 @@ def visible_devices(devices, preferences):
     return [d for d in coalesce_charging_devices(devices,preferences) if d.key not in hidden and
             d.present and
             (d.kind!='auxiliary' or preferences.get('show_auxiliary',False)) and
-            (d.kind=='auxiliary' or d.power_mode in ('wired','battery') or d.battery_support=='supported' or d.receiver or d.usb_keyboard or d.usable or d.experimental or preferences.get('show_unreadable',False)) and
-            (show_offline or d.connected is not False or d.kind=='mouse' and d.cached)]
+            (d.kind in ('auxiliary','gamepad') or d.power_mode in ('wired','battery') or d.battery_support=='supported' or d.receiver or d.usb_keyboard or d.usable or d.experimental or preferences.get('show_unreadable',False)) and
+            (show_offline or d.connected is not False or d.kind in ('mouse','gamepad') and d.cached)]

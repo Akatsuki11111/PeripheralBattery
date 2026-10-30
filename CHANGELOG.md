@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.5.0 (stable)
+- Show the timestamp of the last valid battery reading directly on sleeping/unconfirmed device cards.
+- Add 22 controller brands, 539 controller IDs, gamepad glyphs and safe composite-node consolidation.
+- Add XInput grades, Windows BatteryReport and passive battery parsing for selected Sony/Nintendo/8BitDo models. Reject ambiguous matching and synthetic wired/full reports.
+- Exclude all guided battery experiments, long observations and learned mapping runtime modules from the stable EXE. Preserve identity/descriptor diagnostics.
+- Trim unused Qt components: approximately 28.6 MB instead of 48.75 MB.
+- 173 regression tests pass; both frozen variants have independent startup, module, worker, native UI and HTTPS checks.
+- KP50B/Rainbow2 identification is verified; their exact private battery queries remain unsupported.
+
+
 ## v2.4.1 (experimental)
 - Arrange startup, refresh interval, release channel and version/update controls into two compact rows.
 - Keep full startup status in tooltips; show query errors only when present.

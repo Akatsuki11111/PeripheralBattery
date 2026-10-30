@@ -8,7 +8,7 @@ from PySide6.QtCore import QObject,QProcess,QProcessEnvironment,QTimer,Signal
 from process_tree import ProcessTree
 from classification import bind_groups,apply_saved_modes
 from identity import usb_audio_device_ids
-from settings import atomic_json,data_dir,read_json,redact,probe_timeout_ms
+from settings import atomic_json,data_dir,read_json,redact,probe_timeout_ms,EXPERIMENTAL_ENABLED
 
 
 def worker_command(request_path):
@@ -151,9 +151,11 @@ class ScanController(QObject):
         self._start_queries()
 
     def _start_queries(self):
-        from long_learning import mappings
         from catalog import device_profile
-        saved=mappings()
+        saved={}
+        if EXPERIMENTAL_ENABLED:
+            from long_learning import mappings
+            saved=mappings()
         for group in self.inventory:
             profile=device_profile(group['device'].get('vid',0),group['device'].get('pid',0))
             if group['device']['identity'] in saved and not (profile or {}).get('backend') and group['device'].get('power_mode')!='wired':

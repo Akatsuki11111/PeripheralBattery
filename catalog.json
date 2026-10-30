@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-10-26",
+  "updated": "2026-10-30",
   "brands": [
     {
       "id": "logitech",
@@ -850,6 +850,346 @@
       "simple_icon": "",
       "logo": "assets/brands/nuphy.png",
       "logo_source": "https://github.com/NuPhyLab.png?size=256"
+    },
+    {
+      "id": "betop",
+      "name": "BETOP",
+      "zh": "北通",
+      "aliases": [
+        "betop",
+        "beitong",
+        "btp-kp",
+        "北通"
+      ],
+      "vids": [],
+      "website": "https://www.betop-cn.com",
+      "simple_icon": "",
+      "logo": "assets\\brands\\betop.ico",
+      "logo_source": "https://www.betop-cn.com/favicon.ico",
+      "controller": true
+    },
+    {
+      "id": "bigbigwon",
+      "name": "BIGBIG WON",
+      "zh": "墨将",
+      "aliases": [
+        "bigbig won",
+        "bigbigwon",
+        "mojhon",
+        "墨将"
+      ],
+      "vids": [],
+      "website": "https://www.bigbigwon.com",
+      "simple_icon": "",
+      "logo": "assets/brands/bigbigwon.png",
+      "logo_source": "https://shop.bigbigwon.com/cdn/shop/files/65c42b3980c9428123fc85fc6da0470a_32x32.png?v=1641288315",
+      "controller": true
+    },
+    {
+      "id": "xbox",
+      "name": "Xbox",
+      "zh": "微软 Xbox",
+      "aliases": [
+        "xbox",
+        "x-box"
+      ],
+      "vids": [],
+      "website": "https://www.xbox.com",
+      "simple_icon": "",
+      "logo": "assets\\brands\\xbox.ico",
+      "logo_source": "https://www.xbox.com/favicon.ico",
+      "controller": true
+    },
+    {
+      "id": "sony",
+      "name": "Sony",
+      "zh": "索尼 PlayStation",
+      "aliases": [
+        "sony",
+        "playstation",
+        "dualshock",
+        "dualsense"
+      ],
+      "vids": [],
+      "website": "https://www.playstation.com",
+      "simple_icon": "",
+      "logo": "assets\\brands\\sony.svg",
+      "logo_source": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/playstation.svg",
+      "controller": true
+    },
+    {
+      "id": "nintendo",
+      "name": "Nintendo",
+      "zh": "任天堂",
+      "aliases": [
+        "nintendo",
+        "joy-con",
+        "任天堂"
+      ],
+      "vids": [
+        "057E"
+      ],
+      "website": "https://www.nintendo.com",
+      "simple_icon": "",
+      "logo": "assets\\brands\\nintendo.ico",
+      "logo_source": "https://www.nintendo.com/favicon.ico",
+      "controller": true
+    },
+    {
+      "id": "8bitdo",
+      "name": "8BitDo",
+      "zh": "八位堂",
+      "aliases": [
+        "8bitdo",
+        "8bit do",
+        "八位堂"
+      ],
+      "vids": [
+        "2DC8"
+      ],
+      "website": "https://www.8bitdo.com",
+      "simple_icon": "",
+      "logo": "assets\\brands\\8bitdo.ico",
+      "logo_source": "https://www.8bitdo.com/favicon.ico",
+      "controller": true
+    },
+    {
+      "id": "gamesir",
+      "name": "GameSir",
+      "zh": "盖世小鸡",
+      "aliases": [
+        "gamesir",
+        "盖世小鸡"
+      ],
+      "vids": [
+        "3537"
+      ],
+      "website": "https://www.gamesir.com",
+      "simple_icon": "",
+      "logo": "assets\\brands\\gamesir.ico",
+      "logo_source": "https://www.gamesir.com/favicon.ico",
+      "controller": true
+    },
+    {
+      "id": "flydigi",
+      "name": "Flydigi",
+      "zh": "飞智",
+      "aliases": [
+        "flydigi",
+        "飞智"
+      ],
+      "vids": [],
+      "website": "https://www.flydigi.com",
+      "simple_icon": "",
+      "logo": "assets\\brands\\flydigi.ico",
+      "logo_source": "https://www.flydigi.com/favicon.ico",
+      "controller": true
+    },
+    {
+      "id": "gulikit",
+      "name": "GuliKit",
+      "zh": "谷粒",
+      "aliases": [
+        "gulikit",
+        "谷粒"
+      ],
+      "vids": [],
+      "website": "https://www.gulikit.com",
+      "simple_icon": "",
+      "logo": "assets\\brands\\gulikit.ico",
+      "logo_source": "https://www.gulikit.com/favicon.ico",
+      "controller": true
+    },
+    {
+      "id": "hori",
+      "name": "HORI",
+      "zh": "堀井",
+      "aliases": [
+        "hori"
+      ],
+      "vids": [],
+      "website": "https://hori.jp",
+      "simple_icon": "",
+      "logo": "assets\\brands\\hori.ico",
+      "logo_source": "https://hori.jp/favicon.ico",
+      "controller": true
+    },
+    {
+      "id": "nacon",
+      "name": "NACON",
+      "zh": "纳康",
+      "aliases": [
+        "nacon"
+      ],
+      "vids": [],
+      "website": "https://www.nacongaming.com",
+      "simple_icon": "",
+      "logo": "",
+      "logo_source": "brand wordmark fallback",
+      "controller": true
+    },
+    {
+      "id": "powera",
+      "name": "PowerA",
+      "zh": "PowerA",
+      "aliases": [
+        "powera",
+        "power a"
+      ],
+      "vids": [],
+      "website": "https://www.powera.com",
+      "simple_icon": "",
+      "logo": "",
+      "logo_source": "brand wordmark fallback",
+      "controller": true
+    },
+    {
+      "id": "pdp",
+      "name": "PDP",
+      "zh": "PDP",
+      "aliases": [
+        "pdp",
+        "performance designed"
+      ],
+      "vids": [],
+      "website": "https://pdp.com",
+      "simple_icon": "",
+      "logo": "",
+      "logo_source": "brand wordmark fallback",
+      "controller": true
+    },
+    {
+      "id": "turtlebeach",
+      "name": "Turtle Beach",
+      "zh": "乌龟海岸",
+      "aliases": [
+        "turtle beach",
+        "turtlebeach"
+      ],
+      "vids": [],
+      "website": "https://www.turtlebeach.com",
+      "simple_icon": "",
+      "logo": "",
+      "logo_source": "brand wordmark fallback",
+      "controller": true
+    },
+    {
+      "id": "hyperkin",
+      "name": "Hyperkin",
+      "zh": "Hyperkin",
+      "aliases": [
+        "hyperkin"
+      ],
+      "vids": [],
+      "website": "https://hyperkin.com",
+      "simple_icon": "",
+      "logo": "",
+      "logo_source": "brand wordmark fallback",
+      "controller": true
+    },
+    {
+      "id": "thrustmaster",
+      "name": "Thrustmaster",
+      "zh": "图马思特",
+      "aliases": [
+        "thrustmaster",
+        "图马思特"
+      ],
+      "vids": [],
+      "website": "https://www.thrustmaster.com",
+      "simple_icon": "",
+      "logo": "assets\\brands\\thrustmaster.ico",
+      "logo_source": "https://www.thrustmaster.com/favicon.ico",
+      "controller": true
+    },
+    {
+      "id": "scuf",
+      "name": "SCUF",
+      "zh": "SCUF",
+      "aliases": [
+        "scuf"
+      ],
+      "vids": [],
+      "website": "https://www.scufgaming.com",
+      "simple_icon": "",
+      "logo": "assets\\brands\\scuf.ico",
+      "logo_source": "https://www.scufgaming.com/favicon.ico",
+      "controller": true
+    },
+    {
+      "id": "easysmx",
+      "name": "EasySMX",
+      "zh": "EasySMX",
+      "aliases": [
+        "easysmx",
+        "easy smx"
+      ],
+      "vids": [],
+      "website": "https://www.easysmx.com",
+      "simple_icon": "",
+      "logo": "",
+      "logo_source": "brand wordmark fallback",
+      "controller": true
+    },
+    {
+      "id": "pxn",
+      "name": "PXN",
+      "zh": "莱仕达",
+      "aliases": [
+        "pxn",
+        "莱仕达"
+      ],
+      "vids": [],
+      "website": "https://www.e-pxn.com",
+      "simple_icon": "",
+      "logo": "",
+      "logo_source": "brand wordmark fallback",
+      "controller": true
+    },
+    {
+      "id": "ipega",
+      "name": "ipega",
+      "zh": "派鲨鱼",
+      "aliases": [
+        "ipega",
+        "派鲨鱼"
+      ],
+      "vids": [],
+      "website": "https://www.ipega.hk",
+      "simple_icon": "",
+      "logo": "",
+      "logo_source": "brand wordmark fallback",
+      "controller": true
+    },
+    {
+      "id": "machenike",
+      "name": "Machenike",
+      "zh": "机械师",
+      "aliases": [
+        "machenike",
+        "机械师"
+      ],
+      "vids": [],
+      "website": "https://www.machenike.com",
+      "simple_icon": "",
+      "logo": "",
+      "logo_source": "brand wordmark fallback",
+      "controller": true
+    },
+    {
+      "id": "thunderobot",
+      "name": "Thunderobot",
+      "zh": "雷神",
+      "aliases": [
+        "thunderobot",
+        "雷神"
+      ],
+      "vids": [],
+      "website": "https://www.thunderobot.com",
+      "simple_icon": "",
+      "logo": "",
+      "logo_source": "brand wordmark fallback",
+      "controller": true
     }
   ],
   "devices": [
@@ -3225,6 +3565,4861 @@
       "kind": "mouse",
       "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js",
       "receiver": true
+    },
+    {
+      "vid": "0001",
+      "pid": "0001",
+      "brand": "nintendo",
+      "name": "Nintendo Wii Remote",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0079",
+      "pid": "0007",
+      "brand": "betop",
+      "name": "Betop Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0079",
+      "pid": "0122",
+      "brand": "gulikit",
+      "name": "ZhiXu GuliKit D",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0079",
+      "pid": "1846",
+      "brand": "nintendo",
+      "name": "Nintendo GameCube Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0079",
+      "pid": "954E",
+      "brand": "hyperkin",
+      "name": "Hyperkin N64 Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "00FF",
+      "pid": "01CB",
+      "brand": "sony",
+      "name": "Sony PlayStation Portable",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "044F",
+      "pid": "B300",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster Firestorm Dual Power",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "044F",
+      "pid": "B303",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster Firestorm Dual Analog 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "044F",
+      "pid": "B304",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster Firestorm Dual Power",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "044F",
+      "pid": "B312",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster Vibrating Gamepad",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "044F",
+      "pid": "B315",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster Dual Analog 4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "044F",
+      "pid": "B320",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster Dual Trigger",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "044F",
+      "pid": "B323",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster Dual Trigger PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "044F",
+      "pid": "B326",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster GP XID",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "044F",
+      "pid": "D003",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster Run N Drive PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "044F",
+      "pid": "D007",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster T Mini",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "044F",
+      "pid": "D008",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster Run N Drive PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "044F",
+      "pid": "D009",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster Run N Drive PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "044F",
+      "pid": "D00E",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster eSwap Pro Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "045E",
+      "pid": "0202",
+      "brand": "xbox",
+      "name": "Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "045E",
+      "pid": "0287",
+      "brand": "xbox",
+      "name": "Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "045E",
+      "pid": "0291",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "045E",
+      "pid": "02A1",
+      "brand": "xbox",
+      "name": "Xbox 360 Receiver",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "045E",
+      "pid": "02FD",
+      "brand": "xbox",
+      "name": "Xbox One Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "045E",
+      "pid": "02FF",
+      "brand": "xbox",
+      "name": "Xbox One Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "045E",
+      "pid": "0719",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "045E",
+      "pid": "0B0A",
+      "brand": "xbox",
+      "name": "Xbox Adaptive Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "045E",
+      "pid": "0B0C",
+      "brand": "xbox",
+      "name": "Xbox One Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "045E",
+      "pid": "0B13",
+      "brand": "xbox",
+      "name": "Xbox Series Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "045E",
+      "pid": "0B20",
+      "brand": "xbox",
+      "name": "Xbox One Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "045E",
+      "pid": "0B22",
+      "brand": "xbox",
+      "name": "Xbox One Elite 2 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "04B4",
+      "pid": "2410",
+      "brand": "flydigi",
+      "name": "Flydigi Apex",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "04B4",
+      "pid": "2411",
+      "brand": "flydigi",
+      "name": "Flydigi Vader 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "04B4",
+      "pid": "2412",
+      "brand": "flydigi",
+      "name": "Flydigi Vader 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "04D9",
+      "pid": "0F16",
+      "brand": "sony",
+      "name": "Sony PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "054C",
+      "pid": "0268",
+      "brand": "sony",
+      "name": "Sony PS3 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "054C",
+      "pid": "05C4",
+      "brand": "sony",
+      "name": "Sony PS4 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "054C",
+      "pid": "05C5",
+      "brand": "sony",
+      "name": "STRIKEPAD PS4 Grip Add-on",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "054C",
+      "pid": "09CC",
+      "brand": "sony",
+      "name": "Sony PS4 Slim Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "054C",
+      "pid": "0BA0",
+      "brand": "sony",
+      "name": "Sony PS4 Controller (Wireless dongle)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "054C",
+      "pid": "0CDA",
+      "brand": "sony",
+      "name": "Sony PlayStation Classic Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "054C",
+      "pid": "0CE6",
+      "brand": "sony",
+      "name": "Sony DualSense Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "054C",
+      "pid": "0DF2",
+      "brand": "sony",
+      "name": "Sony DualSense Edge Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "054C",
+      "pid": "0E5F",
+      "brand": "sony",
+      "name": "Access Controller for PS5",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "054C",
+      "pid": "1337",
+      "brand": "sony",
+      "name": "Sony PlayStation Vita",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "056E",
+      "pid": "2005",
+      "brand": "sony",
+      "name": "Elecom P301U PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "057E",
+      "pid": "0330",
+      "brand": "nintendo",
+      "name": "Nintendo Wii U Pro Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "057E",
+      "pid": "2006",
+      "brand": "nintendo",
+      "name": "Nintendo Switch Joy-Con (Left)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "057E",
+      "pid": "2007",
+      "brand": "nintendo",
+      "name": "Nintendo Switch Joy-Con (Right)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "057E",
+      "pid": "2008",
+      "brand": "nintendo",
+      "name": "Nintendo Switch Joy-Con (Left+Right Combined)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "057E",
+      "pid": "2009",
+      "brand": "nintendo",
+      "name": "Nintendo Switch Pro Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "057E",
+      "pid": "200E",
+      "brand": "nintendo",
+      "name": "Nintendo Switch Joy-Con (L/R)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "057E",
+      "pid": "2017",
+      "brand": "nintendo",
+      "name": "Nintendo Online SNES Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "057E",
+      "pid": "2019",
+      "brand": "nintendo",
+      "name": "Nintendo Online N64 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "057E",
+      "pid": "201E",
+      "brand": "nintendo",
+      "name": "Nintendo Online SEGA Genesis Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "057E",
+      "pid": "2066",
+      "brand": "nintendo",
+      "name": "Nintendo Switch 2 Joy-Con (Right)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "057E",
+      "pid": "2067",
+      "brand": "nintendo",
+      "name": "Nintendo Switch 2 Joy-Con (Left)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "057E",
+      "pid": "2068",
+      "brand": "nintendo",
+      "name": "Nintendo Switch 2 Joy-Con (Left+Right Combined)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "057E",
+      "pid": "2069",
+      "brand": "nintendo",
+      "name": "Nintendo Switch 2 Pro Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0583",
+      "pid": "2050",
+      "brand": "sony",
+      "name": "Rockfire PlayStation Bridge",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "05A0",
+      "pid": "3232",
+      "brand": "8bitdo",
+      "name": "8BitDo Zero",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "05AC",
+      "pid": "022C",
+      "brand": "ipega",
+      "name": "Ipega Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "05AC",
+      "pid": "022D",
+      "brand": "gamesir",
+      "name": "GameSir G4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "05AC",
+      "pid": "033D",
+      "brand": "gamesir",
+      "name": "GameSir G3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "05AC",
+      "pid": "044D",
+      "brand": "gamesir",
+      "name": "GameSir G4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "05AC",
+      "pid": "055B",
+      "brand": "gamesir",
+      "name": "GameSir G3w",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "05AC",
+      "pid": "057A",
+      "brand": "gamesir",
+      "name": "Gamesir G5",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "05AC",
+      "pid": "061A",
+      "brand": "gamesir",
+      "name": "GameSir T3 2.02",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "05E3",
+      "pid": "0596",
+      "brand": "sony",
+      "name": "Sony PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "062A",
+      "pid": "0020",
+      "brand": "xbox",
+      "name": "Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0662",
+      "pid": "70D5",
+      "brand": "powera",
+      "name": "PowerA PS3 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "06A3",
+      "pid": "0621",
+      "brand": "sony",
+      "name": "Saitek PS1000 PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "06A3",
+      "pid": "F620",
+      "brand": "sony",
+      "name": "Saitek PS2700 PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "06A3",
+      "pid": "F622",
+      "brand": "sony",
+      "name": "Cyborg V3 Rumble Pad PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "06A3",
+      "pid": "F623",
+      "brand": "sony",
+      "name": "Saitek Cyborg PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "3187",
+      "brand": "sony",
+      "name": "Mad Catz PlayStation Fightstick",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "3282",
+      "brand": "sony",
+      "name": "Mad Catz PlayStation Brawlpad",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "4426",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "4516",
+      "brand": "xbox",
+      "name": "Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "4520",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "4526",
+      "brand": "xbox",
+      "name": "Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "4536",
+      "brand": "xbox",
+      "name": "Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "4586",
+      "brand": "xbox",
+      "name": "Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "4716",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "4718",
+      "brand": "xbox",
+      "name": "Mad Catz Street Fighter 4 Xbox 360 FightStick",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "4726",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "4728",
+      "brand": "xbox",
+      "name": "Xbox 360 Fightpad",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "4736",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "4738",
+      "brand": "xbox",
+      "name": "Mad Catz Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0738",
+      "pid": "B726",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "07B5",
+      "pid": "9903",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster Firestorm Digital 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0810",
+      "pid": "0001",
+      "brand": "sony",
+      "name": "Twin PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0810",
+      "pid": "0003",
+      "brand": "sony",
+      "name": "PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0925",
+      "pid": "0005",
+      "brand": "sony",
+      "name": "SmartJoy PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0925",
+      "pid": "1802",
+      "brand": "sony",
+      "name": "Elecom PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0C12",
+      "pid": "0005",
+      "brand": "sony",
+      "name": "Manta DualShock 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0C12",
+      "pid": "8802",
+      "brand": "xbox",
+      "name": "Nyko Airflo Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0C12",
+      "pid": "880A",
+      "brand": "xbox",
+      "name": "Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0C12",
+      "pid": "8810",
+      "brand": "xbox",
+      "name": "Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0CA3",
+      "pid": "0024",
+      "brand": "8bitdo",
+      "name": "8BitDo M30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0D9D",
+      "pid": "3011",
+      "brand": "sony",
+      "name": "Sanwa PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0105",
+      "brand": "pdp",
+      "name": "HSM3 Xbox360 dancepad",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0109",
+      "brand": "pdp",
+      "name": "PDP Versus Fighting Pad",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "011E",
+      "brand": "pdp",
+      "name": "Rock Candy PS4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "011F",
+      "brand": "pdp",
+      "name": "PDP Rock Candy Gamepad for Xbox 360",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0125",
+      "brand": "pdp",
+      "name": "PDP INJUSTICE FightStick for Xbox 360",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0127",
+      "brand": "pdp",
+      "name": "PDP INJUSTICE FightPad for Xbox 360",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0128",
+      "brand": "pdp",
+      "name": "Rock Candy PS3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "012A",
+      "brand": "pdp",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "012F",
+      "brand": "pdp",
+      "name": "PDP PS3 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0131",
+      "brand": "pdp",
+      "name": "PDP EA Soccer Gamepad",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0133",
+      "brand": "pdp",
+      "name": "PDP Battlefield 4 Gamepad",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "013A",
+      "brand": "pdp",
+      "name": "PDP Xbox One Controller (unlisted)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "013B",
+      "brand": "pdp",
+      "name": "PDP Face-Off Gamepad for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0143",
+      "brand": "pdp",
+      "name": "PDP MK X Fight Stick for Xbox 360",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0145",
+      "brand": "pdp",
+      "name": "PDP MK X Fight Pad for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0147",
+      "brand": "pdp",
+      "name": "PDP Marvel Controller for Xbox 360",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0152",
+      "brand": "pdp",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0159",
+      "brand": "pdp",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "015B",
+      "brand": "pdp",
+      "name": "PDP Fallout 4 Vault Boy Wired Controller for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "015C",
+      "brand": "pdp",
+      "name": "PDP @Play Wired Controller for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "015D",
+      "brand": "pdp",
+      "name": "PDP Mirror's Edge Wired Controller for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "015F",
+      "brand": "pdp",
+      "name": "PDP Metallic Wired Controller for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0160",
+      "brand": "pdp",
+      "name": "PDP NFL Official Face-Off Wired Controller for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0161",
+      "brand": "pdp",
+      "name": "PDP Camo Wired Controller for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0162",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0163",
+      "brand": "pdp",
+      "name": "PDP Legendary Collection: Deliverer of Truth",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0164",
+      "brand": "pdp",
+      "name": "PDP Battlefield 1 Official Wired Controller for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0165",
+      "brand": "pdp",
+      "name": "PDP Titanfall 2 Official Wired Controller for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0166",
+      "brand": "pdp",
+      "name": "PDP Mass Effect: Andromeda Official Wired Controller for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0167",
+      "brand": "pdp",
+      "name": "PDP Halo Wars 2 Official Face-Off Wired Controller for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0185",
+      "brand": "pdp",
+      "name": "PDP Wired Fight Pad Pro for Nintendo Switch",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0186",
+      "brand": "pdp",
+      "name": "PDP Afterglow Wireless Switch Controller - working gyro. USB is for charging only. Many later \"Wireless\" line devices w/ gyro also use this vid/pid",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0189",
+      "brand": "nintendo",
+      "name": "PDP Realmz Nintendo Switch Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "018B",
+      "brand": "pdp",
+      "name": "PDP Afterglow Wave Wired/Wireless Controller for Switch",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "018C",
+      "brand": "pdp",
+      "name": "PDP REALMz Wireless Controller for Switch",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0193",
+      "brand": "pdp",
+      "name": "Turtle Beach Afterglow Wireless RGB Gaming Controller for Nintendo Switch 2 and the Turtle Beach Rematch Wireless RGB Gaming Controller for Nintendo Switch 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0196",
+      "brand": "pdp",
+      "name": "Turtle Beach Rematch Wired Controller for Nintendo Switch 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0197",
+      "brand": "pdp",
+      "name": "Turtle Beach Afterglow Wave Wired Controller for Nintendo Switch 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0198",
+      "brand": "pdp",
+      "name": "Turtle Beach Afterglow Wired Controller for Switch 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0203",
+      "brand": "pdp",
+      "name": "Victrix Pro FS (PS4 peripheral but no trackpad/lightbar)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0205",
+      "brand": "pdp",
+      "name": "PDP Victrix Pro Fight Stick",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0206",
+      "brand": "pdp",
+      "name": "PDP Mortal Kombat 25 Anniversary Edition Stick (Xbox One)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0207",
+      "brand": "pdp",
+      "name": "Victrix Pro FS V2 w/ Touchpad for PS4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0209",
+      "brand": "pdp",
+      "name": "Victrix Pro FS PS4/PS5 (PS5 mode)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "020A",
+      "brand": "pdp",
+      "name": "Victrix Pro FS PS4/PS5 (PS4 mode)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0214",
+      "brand": "pdp",
+      "name": "afterglow ps3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "021F",
+      "brand": "pdp",
+      "name": "PDP Rock Candy Gamepad for Xbox 360",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0246",
+      "brand": "pdp",
+      "name": "PDP Rock Candy Wired Controller for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0261",
+      "brand": "pdp",
+      "name": "PDP Camo Wired Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0262",
+      "brand": "pdp",
+      "name": "PDP Wired Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02A0",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Midnight Blue",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02A1",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Verdant Green",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02A2",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Crimson Red",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02A3",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Arctic White",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02A4",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Stealth Series | Phantom Black",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02A5",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Stealth Series | Ghost White",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02A6",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Stealth Series | Revenant Blue",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02A9",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Midnight Blue",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02AA",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Verdant Green",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02AB",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Crimson Red",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02AC",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Ember Orange",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02AD",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Stealth Series | Phantom Black",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02AE",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Stealth Series | Ghost White",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02AF",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Stealth Series | Revenant Blue",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02B0",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Raven Black",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02B1",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Arctic White",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02B2",
+      "brand": "pdp",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02B3",
+      "brand": "pdp",
+      "name": "PDP Afterglow Prismatic Wired Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02B5",
+      "brand": "pdp",
+      "name": "PDP GAMEware Wired Controller Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02B6",
+      "brand": "pdp",
+      "name": "PDP One-Handed Joystick Adaptive Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02BD",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Royal Purple",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02BE",
+      "brand": "pdp",
+      "name": "PDP Deluxe Wired Controller for Xbox One - Raven Black",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02BF",
+      "brand": "pdp",
+      "name": "PDP Deluxe Wired Controller for Xbox One - Midnight Blue",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02C0",
+      "brand": "pdp",
+      "name": "PDP Deluxe Wired Controller for Xbox One - Stealth Series | Phantom Black",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02C1",
+      "brand": "pdp",
+      "name": "PDP Deluxe Wired Controller for Xbox One - Stealth Series | Ghost White",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02C2",
+      "brand": "pdp",
+      "name": "PDP Deluxe Wired Controller for Xbox One - Stealth Series | Revenant Blue",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02C3",
+      "brand": "pdp",
+      "name": "PDP Deluxe Wired Controller for Xbox One - Verdant Green",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02C4",
+      "brand": "pdp",
+      "name": "PDP Deluxe Wired Controller for Xbox One - Ember Orange",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02C5",
+      "brand": "pdp",
+      "name": "PDP Deluxe Wired Controller for Xbox One - Royal Purple",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02C6",
+      "brand": "pdp",
+      "name": "PDP Deluxe Wired Controller for Xbox One - Crimson Red",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02C7",
+      "brand": "pdp",
+      "name": "PDP Deluxe Wired Controller for Xbox One - Arctic White",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02C9",
+      "brand": "pdp",
+      "name": "PDP Deluxe Wired Controller for Xbox One - Stealth Series | Phantasm Red",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02CA",
+      "brand": "pdp",
+      "name": "PDP Deluxe Wired Controller for Xbox One - Stealth Series | Specter Violet",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02CB",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Stealth Series | Specter Violet",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02CD",
+      "brand": "pdp",
+      "name": "PDP Rock Candy Wired Controller for Xbox One - Blu-merang",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02CE",
+      "brand": "pdp",
+      "name": "PDP Rock Candy Wired Controller for Xbox One - Cranblast",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02CF",
+      "brand": "pdp",
+      "name": "PDP Rock Candy Wired Controller for Xbox One - Aqualime",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02D5",
+      "brand": "pdp",
+      "name": "PDP Wired Controller for Xbox One - Red Camo",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02D6",
+      "brand": "pdp",
+      "name": "Victrix Gambit Tournament Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02D7",
+      "brand": "xbox",
+      "name": "PDP Black Camo Xbox Series Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02D8",
+      "brand": "xbox",
+      "name": "PDP Xbox Series Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02D9",
+      "brand": "pdp",
+      "name": "PDP Xbox Series X Midnight Blue",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02EF",
+      "brand": "xbox",
+      "name": "PDP Xbox Series Kinetic Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "02F1",
+      "brand": "xbox",
+      "name": "PDP Xbox Atomic",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0301",
+      "brand": "pdp",
+      "name": "PDP Gamepad for Xbox 360",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0313",
+      "brand": "pdp",
+      "name": "PDP Afterglow Gamepad for Xbox 360",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0314",
+      "brand": "pdp",
+      "name": "PDP Afterglow Gamepad for Xbox 360",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0315",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0338",
+      "brand": "pdp",
+      "name": "PDP Afterglow Gamepad for Xbox 360",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0346",
+      "brand": "pdp",
+      "name": "PDP RC Gamepad for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0446",
+      "brand": "pdp",
+      "name": "PDP RC Gamepad for Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "0501",
+      "brand": "pdp",
+      "name": "PDP Xbox 360 Controller (unlisted)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "1414",
+      "brand": "pdp",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "6302",
+      "brand": "pdp",
+      "name": "From SDL",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "F501",
+      "brand": "pdp",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E6F",
+      "pid": "F900",
+      "brand": "pdp",
+      "name": "PDP Afterglow AX.1 (unlisted)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0E8F",
+      "pid": "0008",
+      "brand": "sony",
+      "name": "Gasia PlayStation Gamepad",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0E8F",
+      "pid": "1009",
+      "brand": "sony",
+      "name": "Sony DualShock 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0009",
+      "brand": "hori",
+      "name": "HORI BDA GP1",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "000A",
+      "brand": "hori",
+      "name": "Hori Co. DOA4 FightStick",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "000C",
+      "brand": "hori",
+      "name": "Hori PadEX Turbo",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "000D",
+      "brand": "hori",
+      "name": "Hori Fighting Stick EX2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0010",
+      "brand": "hori",
+      "name": "Hori Fightstick",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0011",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro 3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0013",
+      "brand": "hori",
+      "name": "Horipad 3W",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0016",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro.EX",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "001B",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro VX",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0021",
+      "brand": "hori",
+      "name": "Hori Fightstick V3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0022",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro V3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0025",
+      "brand": "hori",
+      "name": "Hori Fighting Commander 3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0026",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro 3P",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0027",
+      "brand": "hori",
+      "name": "Hori Fightstick V3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "002D",
+      "brand": "hori",
+      "name": "Hori Fighting Commander 3 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0032",
+      "brand": "hori",
+      "name": "Hori Fightstick 3W",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "003D",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro N3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0040",
+      "brand": "hori",
+      "name": "Hori Fightstick Mini 3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0042",
+      "brand": "hori",
+      "name": "Horipad A",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "004B",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro 3W",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "004D",
+      "brand": "hori",
+      "name": "Horipad 3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0051",
+      "brand": "hori",
+      "name": "Hori Fighting Commander PS3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0054",
+      "brand": "hori",
+      "name": "Hori Pad 3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0055",
+      "brand": "hori",
+      "name": "HORIPAD 4 FPS",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "005B",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro V4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "005C",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro V4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "005E",
+      "brand": "hori",
+      "name": "HORI Fighting Commander 4 PS4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "005F",
+      "brand": "hori",
+      "name": "HORI Fighting Commander 4 PS3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0063",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro Hayabusa (USA) Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0064",
+      "brand": "hori",
+      "name": "Horipad 3TP",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0066",
+      "brand": "hori",
+      "name": "HORIPAD 4 FPS Plus",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0067",
+      "brand": "hori",
+      "name": "HORIPAD ONE",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "006A",
+      "brand": "hori",
+      "name": "Real Arcade Pro 4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "006B",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro 4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "006D",
+      "brand": "hori",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "006E",
+      "brand": "hori",
+      "name": "HORI horipad4 ps3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "006F",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro 4 VLX",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0070",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro 4 VLX",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0078",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro V Kai Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0084",
+      "brand": "hori",
+      "name": "HORI Fighting Commander PS4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0085",
+      "brand": "hori",
+      "name": "HORI Fighting Commander PS3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0087",
+      "brand": "hori",
+      "name": "HORI Fighting Stick mini 4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0088",
+      "brand": "hori",
+      "name": "HORI Fighting Stick mini 4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "008A",
+      "brand": "hori",
+      "name": "HORI Real Arcade Pro 4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "008B",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro 4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "008C",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro 4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0092",
+      "brand": "hori",
+      "name": "HORI Pokken Tournament DX Pro Pad",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0097",
+      "brand": "hori",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "009C",
+      "brand": "hori",
+      "name": "HORI TAC PRO mousething",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00A0",
+      "brand": "hori",
+      "name": "HORI TAC4 mousething",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00A4",
+      "brand": "hori",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00A5",
+      "brand": "hori",
+      "name": "Hori Miku Project Diva X HD PS4 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00A6",
+      "brand": "hori",
+      "name": "Hori Miku Project Diva X HD PS4 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00AE",
+      "brand": "hori",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00AF",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro VHS",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00B1",
+      "brand": "hori",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00C0",
+      "brand": "hori",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00C5",
+      "brand": "hori",
+      "name": "HORI Fighting Commander",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00C9",
+      "brand": "hori",
+      "name": "Hori Taiko Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00D8",
+      "brand": "hori",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00DB",
+      "brand": "hori",
+      "name": "Hori Dragon Quest Slime Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00DC",
+      "brand": "hori",
+      "name": "HORIPAD S - Looks like a Switch controller but uses the Xbox 360 controller protocol, there is also a version of this that looks like a GameCube controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00ED",
+      "brand": "hori",
+      "name": "Hori Fighting Stick mini 4 kai - becomes an Xbox 360 controller on PC",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00EE",
+      "brand": "hori",
+      "name": "Hori mini wired https://www.playstation.com/en-us/explore/accessories/gaming-controllers/mini-wired-gamepad/",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00F0",
+      "brand": "hori",
+      "name": "HORI Taiko Controller For Switch",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "00FB",
+      "brand": "hori",
+      "name": "Hori Hatsune Miku 39S",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0101",
+      "brand": "hori",
+      "name": "Hori Mini Hatsune Miku FT",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "011C",
+      "brand": "hori",
+      "name": "Hori Fighting Stick α",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "011E",
+      "brand": "hori",
+      "name": "Hori Fighting Stick α",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0123",
+      "brand": "hori",
+      "name": "HORI Wireless Controller Light (Japan only) - only over bt- over usb is xbox and pid 0x0124",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0137",
+      "brand": "hori",
+      "name": "Hori Fightstick Mini",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0138",
+      "brand": "hori",
+      "name": "Hori PC Engine Mini Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0162",
+      "brand": "hori",
+      "name": "HORI Fighting Commander OCTA",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0163",
+      "brand": "hori",
+      "name": "HORI Fighting Commander OCTA",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0164",
+      "brand": "hori",
+      "name": "HORI Fighting Commander OCTA",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0184",
+      "brand": "hori",
+      "name": "Hori Fighting Stick α",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0185",
+      "brand": "hori",
+      "name": "Hori Split Pad Fit",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0196",
+      "brand": "hori",
+      "name": "HORI Wireless HORIPAD for Steam ( BT )",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "01AB",
+      "brand": "hori",
+      "name": "HORI Wireless HORIPAD for Steam",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0200",
+      "brand": "hori",
+      "name": "Hori Split Pad Fit",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "0F0D",
+      "pid": "0202",
+      "brand": "nintendo",
+      "name": "Horipad O Nintendo Switch 2 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1001",
+      "pid": "0002",
+      "brand": "thunderobot",
+      "name": "ThundeRobot G30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1002",
+      "pid": "9000",
+      "brand": "8bitdo",
+      "name": "8BitDo FC30 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1080",
+      "pid": "0009",
+      "brand": "8bitdo",
+      "name": "8BitDo F30 Arcade Stick",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "10F5",
+      "pid": "018F",
+      "brand": "turtlebeach",
+      "name": "Turtle Beach Rematch Nintendo Switch Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "10F5",
+      "pid": "7009",
+      "brand": "turtlebeach",
+      "name": "Turtle Beach Recon Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "10F5",
+      "pid": "7013",
+      "brand": "turtlebeach",
+      "name": "Turtle Beach REACT-R",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "11C0",
+      "pid": "5505",
+      "brand": "betop",
+      "name": "Betop Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "11C0",
+      "pid": "5506",
+      "brand": "betop",
+      "name": "Betop Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "11C1",
+      "pid": "9101",
+      "brand": "easysmx",
+      "name": "EasySMX",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "11C2",
+      "pid": "9107",
+      "brand": "nacon",
+      "name": "Nacon GC101 1.03",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "11C9",
+      "pid": "55F0",
+      "brand": "nacon",
+      "name": "Nacon GC100XF",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "11EC",
+      "pid": "A7E1",
+      "brand": "nintendo",
+      "name": "Nintendo Switch",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1209",
+      "pid": "8844",
+      "brand": "sony",
+      "name": "MUSIA PlayStation 2 Input Display",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1235",
+      "pid": "AB11",
+      "brand": "8bitdo",
+      "name": "8BitDo F30 Arcade Joystick",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1235",
+      "pid": "AB12",
+      "brand": "8bitdo",
+      "name": "8BitDo NES30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1235",
+      "pid": "AB20",
+      "brand": "8bitdo",
+      "name": "8BitDo SN30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1235",
+      "pid": "AB21",
+      "brand": "8bitdo",
+      "name": "8BitDo SFC30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "12AB",
+      "pid": "0301",
+      "brand": "xbox",
+      "name": "Afterglow Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "146B",
+      "pid": "0601",
+      "brand": "nacon",
+      "name": "BigBen Interactive XBOX 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0602",
+      "brand": "nacon",
+      "name": "Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0603",
+      "brand": "nacon",
+      "name": "Nacon PS4 Compact Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0604",
+      "brand": "nacon",
+      "name": "NACON Daija Arcade Stick",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0605",
+      "brand": "nacon",
+      "name": "NACON PS4 controller in Xbox mode - might also be other bigben brand xbox controllers",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0606",
+      "brand": "nacon",
+      "name": "NACON Unknown Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0609",
+      "brand": "nacon",
+      "name": "NACON Wireless Controller for PS4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0611",
+      "brand": "nacon",
+      "name": "Xbox Controller Mode for NACON Revolution 3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0C01",
+      "brand": "nacon",
+      "name": "Nacon GC400ES",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "146B",
+      "pid": "0D01",
+      "brand": "nacon",
+      "name": "Nacon Revolution Pro Controller - has gyro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0D02",
+      "brand": "nacon",
+      "name": "Nacon Revolution Pro Controller v2 - has gyro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0D06",
+      "brand": "nacon",
+      "name": "NACON Asymmetric Controller Wireless Dongle -- show up as ps4 until you connect controller to it then it reboots into Xbox controller with different vvid/pid",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0D08",
+      "brand": "nacon",
+      "name": "NACON Revolution Unlimited Wireless Dongle",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0D09",
+      "brand": "nacon",
+      "name": "NACON Daija Fight Stick - touchpad but no gyro/rumble",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0D10",
+      "brand": "nacon",
+      "name": "NACON Revolution Infinite - has gyro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "0D13",
+      "brand": "nacon",
+      "name": "NACON Revolution Pro Controller 3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "1103",
+      "brand": "nacon",
+      "name": "NACON Asymmetric Controller -- on windows this doesn't enumerate",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "146B",
+      "pid": "5500",
+      "brand": "nacon",
+      "name": "From SDL",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "14FE",
+      "pid": "232A",
+      "brand": "sony",
+      "name": "Sony PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "162E",
+      "pid": "BEEF",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "187C",
+      "pid": "0600",
+      "brand": "sony",
+      "name": "Alienware Dual Compatible PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1915",
+      "pid": "0040",
+      "brand": "flydigi",
+      "name": "Flydigi Vader 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1949",
+      "pid": "0402",
+      "brand": "ipega",
+      "name": "Ipega PG9023",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1949",
+      "pid": "0403",
+      "brand": "ipega",
+      "name": "Ipega PG9087",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1A15",
+      "pid": "2262",
+      "brand": "sony",
+      "name": "Dual Plus PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1A34",
+      "pid": "0203",
+      "brand": "hori",
+      "name": "Hori Fighting Stick Mini",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1BAD",
+      "pid": "028E",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1BAD",
+      "pid": "F016",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1BAD",
+      "pid": "F501",
+      "brand": "hori",
+      "name": "Horipad EXT2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1BAD",
+      "pid": "F502",
+      "brand": "hori",
+      "name": "Hori Real Arcade Pro VX",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1BAD",
+      "pid": "F503",
+      "brand": "hori",
+      "name": "Hori Fightstick VX",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1BAD",
+      "pid": "F900",
+      "brand": "xbox",
+      "name": "Afterglow Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1BAD",
+      "pid": "F904",
+      "brand": "xbox",
+      "name": "PDP Xbox 360 Versus Fighting",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1BAD",
+      "pid": "FD00",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "1BAD",
+      "pid": "FD01",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2002",
+      "pid": "9000",
+      "brand": "8bitdo",
+      "name": "8BitDo NES30 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20BC",
+      "pid": "1260",
+      "brand": "betop",
+      "name": "Betop 2126F",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20BC",
+      "pid": "1263",
+      "brand": "betop",
+      "name": "Betop Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20BC",
+      "pid": "1264",
+      "brand": "betop",
+      "name": "Betop Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20BC",
+      "pid": "2163",
+      "brand": "betop",
+      "name": "Betop Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20BC",
+      "pid": "504D",
+      "brand": "betop",
+      "name": "Beitong A1T2 BFM",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20BC",
+      "pid": "5052",
+      "brand": "betop",
+      "name": "Beitong G3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20BC",
+      "pid": "5656",
+      "brand": "gamesir",
+      "name": "GameSir T4w",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20BC",
+      "pid": "9100",
+      "brand": "easysmx",
+      "name": "EasySMX Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2001",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller - Black Inline",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2002",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller Gray/White Inline",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2003",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller Green Inline",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2004",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller Pink inline",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2005",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X Wired Controller Core - Black",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2006",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X Wired Controller Core - White",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2009",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller Red inline",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "200A",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller Blue inline",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "200B",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller Camo Metallic Red",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "200C",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller Camo Metallic Blue",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "200D",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller Seafoam Fade",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "200E",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller Midnight Blue",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "200F",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Soldier Green",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2011",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired - Metallic Ice",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2012",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X Cuphead EnWired Controller - Mugman",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2015",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller - Blue Hint",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2016",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller - Green Hint",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2017",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller - Arctic Camo",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2018",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller Arc Lightning",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2019",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller Royal Purple",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "201A",
+      "brand": "powera",
+      "name": "PowerA Xbox Series X EnWired Controller Nebula",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2065",
+      "brand": "powera",
+      "name": "PowerA Xbox Series Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20D6",
+      "pid": "2802",
+      "brand": "powera",
+      "name": "PowerA Xbox One Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20D6",
+      "pid": "4001",
+      "brand": "powera",
+      "name": "PowerA Fusion Pro 2 Wired Controller (Xbox Series X style)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "4002",
+      "brand": "powera",
+      "name": "PowerA Spectra Infinity Wired Controller (Xbox Series X style)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "4005",
+      "brand": "powera",
+      "name": "PowerA Advantage Xbox Series Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20D6",
+      "pid": "4026",
+      "brand": "powera",
+      "name": "PowerA OPS Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20D6",
+      "pid": "4033",
+      "brand": "powera",
+      "name": "PowerA OPS Pro Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20D6",
+      "pid": "576D",
+      "brand": "powera",
+      "name": "Power A PS3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "57E5",
+      "brand": "sony",
+      "name": "Batarang PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20D6",
+      "pid": "792A",
+      "brand": "powera",
+      "name": "PowerA Fusion Fight Pad",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "890B",
+      "brand": "powera",
+      "name": "PowerA MOGA XP-Ultra Controller (Xbox Series X style)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "A715",
+      "brand": "powera",
+      "name": "Power A Fusion Wireless Arcade Stick (USB Mode) Over BT is shows up as 057e 2009",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "A716",
+      "brand": "powera",
+      "name": "PowerA Nintendo Switch Fusion Pro Controller - USB requires toggling switch on back of device",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "A718",
+      "brand": "powera",
+      "name": "PowerA Nintendo Switch Nano Wired Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "20D6",
+      "pid": "A720",
+      "brand": "nintendo",
+      "name": "PowerA Advantage Nintendo Switch 2 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20D6",
+      "pid": "CA6D",
+      "brand": "powera",
+      "name": "BDA Pro Ex",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "22BA",
+      "pid": "0107",
+      "brand": "sony",
+      "name": "Technology Innovation PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "24C6",
+      "pid": "531A",
+      "brand": "powera",
+      "name": "PowerA Mini Pro Ex",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "24C6",
+      "pid": "541A",
+      "brand": "powera",
+      "name": "PowerA Xbox One Mini Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "24C6",
+      "pid": "581A",
+      "brand": "powera",
+      "name": "PowerA Xbox One Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "24C6",
+      "pid": "5B02",
+      "brand": "thrustmaster",
+      "name": "Thrustmaster GPX",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "24C6",
+      "pid": "FAFD",
+      "brand": "xbox",
+      "name": "Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "24C6",
+      "pid": "FAFE",
+      "brand": "xbox",
+      "name": "Rock Candy Xbox 360 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2563",
+      "pid": "0575",
+      "brand": "ipega",
+      "name": "Ipega PG 9099",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2563",
+      "pid": "0623",
+      "brand": "sony",
+      "name": "Sony PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "25F0",
+      "pid": "83C1",
+      "brand": "sony",
+      "name": "Sony PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "25F0",
+      "pid": "83C2",
+      "brand": "sony",
+      "name": "Gioteck PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "25F0",
+      "pid": "83C3",
+      "brand": "sony",
+      "name": "Gioteck VX2 PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "25F0",
+      "pid": "83C4",
+      "brand": "sony",
+      "name": "Gioteck VX2 PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2810",
+      "pid": "0009",
+      "brand": "8bitdo",
+      "name": "8BitDo SFC30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2820",
+      "pid": "0009",
+      "brand": "8bitdo",
+      "name": "8BitDo SNES30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "289B",
+      "pid": "0044",
+      "brand": "sony",
+      "name": "Raphnet PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "294B",
+      "pid": "3004",
+      "brand": "xbox",
+      "name": "Snakebyte Xbox Series Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "02E0",
+      "brand": "8bitdo",
+      "name": "8BitDo N30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "0651",
+      "brand": "8bitdo",
+      "name": "8BitDo M30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "1003",
+      "brand": "8bitdo",
+      "name": "8BitDo N30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "1080",
+      "brand": "8bitdo",
+      "name": "8BitDo N30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "2000",
+      "brand": "8bitdo",
+      "name": "8BitDo Pro 2 for Xbox",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "2002",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate Wired Controller for Xbox",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "200A",
+      "brand": "8bitdo",
+      "name": "8BitDo M30 Xbox",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "2019",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate Mini Wired Controller for Xbox",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "2025",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate C Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "2100",
+      "brand": "8bitdo",
+      "name": "8BitDo SN30 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "2101",
+      "brand": "8bitdo",
+      "name": "8BitDo Xbox One SN30 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "2810",
+      "brand": "8bitdo",
+      "name": "8BitDo F30 Arcade Joystick",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "2820",
+      "brand": "8bitdo",
+      "name": "8BitDo N30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "2830",
+      "brand": "8bitdo",
+      "name": "8BitDo SFC30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "2840",
+      "brand": "8bitdo",
+      "name": "8BitDo SN30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "2862",
+      "brand": "8bitdo",
+      "name": "8BitDo SN30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "2865",
+      "brand": "8bitdo",
+      "name": "8BitDo N30 Pro 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "2869",
+      "brand": "8bitdo",
+      "name": "8BitDo N64",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "286A",
+      "brand": "8bitdo",
+      "name": "8BitDo GameCube",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3000",
+      "brand": "8bitdo",
+      "name": "8BitDo SN30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3001",
+      "brand": "8bitdo",
+      "name": "8BitDo SF30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3010",
+      "brand": "8bitdo",
+      "name": "8BitDo Pro 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3011",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3012",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3013",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3015",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate C",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3016",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate C",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3017",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate C",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3019",
+      "brand": "8bitdo",
+      "name": "8BitDo 64",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "301B",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate 2C",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "301C",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate 2C",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "301D",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate 2C",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3100",
+      "brand": "8bitdo",
+      "name": "8BitDo Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3101",
+      "brand": "8bitdo",
+      "name": "8BitDo Receiver",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3102",
+      "brand": "8bitdo",
+      "name": "8BitDo Receiver",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3103",
+      "brand": "8bitdo",
+      "name": "8BitDo Receiver",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3104",
+      "brand": "8bitdo",
+      "name": "8BitDo Receiver",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3105",
+      "brand": "8bitdo",
+      "name": "8BitDo Adapter 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3106",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate Wired Controller. Windows, Android, Switch.",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "310A",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate 2C Wireless Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "310B",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3230",
+      "brand": "8bitdo",
+      "name": "8BitDo Zero 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3810",
+      "brand": "8bitdo",
+      "name": "8BitDo F30 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3820",
+      "brand": "8bitdo",
+      "name": "8BitDo NES30 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "3830",
+      "brand": "8bitdo",
+      "name": "8BitDo N64",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "5001",
+      "brand": "8bitdo",
+      "name": "8BitDo M30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "5006",
+      "brand": "8bitdo",
+      "name": "8BitDo M30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "5101",
+      "brand": "8bitdo",
+      "name": "8BitDo M30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "5103",
+      "brand": "8bitdo",
+      "name": "8BitDo SN30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "5104",
+      "brand": "8bitdo",
+      "name": "8BitDo N30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "5107",
+      "brand": "8bitdo",
+      "name": "8BitDo P30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "5108",
+      "brand": "8bitdo",
+      "name": "8BitDo P30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "5109",
+      "brand": "8bitdo",
+      "name": "8BitDo Dogbone",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "5111",
+      "brand": "8bitdo",
+      "name": "8BitDo Lite SE",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "5112",
+      "brand": "8bitdo",
+      "name": "8BitDo Lite 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "6000",
+      "brand": "8bitdo",
+      "name": "8BitDo SF30 Pro Controller in Steam Mode",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "6001",
+      "brand": "8bitdo",
+      "name": "8BitDo SN30 Pro Controller in Steam Mode",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "6002",
+      "brand": "8bitdo",
+      "name": "8BitDo SN30 Pro Plus",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "6003",
+      "brand": "8bitdo",
+      "name": "8BitDo Pro 2 Controller in Steam Mode",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "6006",
+      "brand": "8bitdo",
+      "name": "8BitDo Pro 2 Controller in Steam Mode",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "6007",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "6009",
+      "brand": "8bitdo",
+      "name": "8BitDo Pro 3 Controller in Steam Mode (Bluetooth)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "6012",
+      "brand": "8bitdo",
+      "name": "8BitDo Ultimate 2 Wireless Controller in Steam Mode (Bluetooth)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "6100",
+      "brand": "8bitdo",
+      "name": "8BitDo SF30 Pro Controller in Steam Mode (Bluetooth)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "6101",
+      "brand": "8bitdo",
+      "name": "8BitDo SN30 Pro Controller in Steam Mode (Bluetooth)",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "6102",
+      "brand": "8bitdo",
+      "name": "8BitDo SN30 Pro Plus",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "6103",
+      "brand": "8bitdo",
+      "name": "8BitDo Pro 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "6728",
+      "brand": "8bitdo",
+      "name": "8BitDo S30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "9000",
+      "brand": "8bitdo",
+      "name": "8BitDo FC30 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "9001",
+      "brand": "8bitdo",
+      "name": "8BitDo N30 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "9002",
+      "brand": "8bitdo",
+      "name": "8BitDo N64",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "9012",
+      "brand": "8bitdo",
+      "name": "8BitDo SN30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "9015",
+      "brand": "8bitdo",
+      "name": "8BitDo N30 Pro 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "9018",
+      "brand": "8bitdo",
+      "name": "8BitDo Zero 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "9020",
+      "brand": "8bitdo",
+      "name": "8BitDo Micro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "9025",
+      "brand": "8bitdo",
+      "name": "8BitDo NEOGEO",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "9026",
+      "brand": "8bitdo",
+      "name": "8BitDo NEOGEO",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "AB11",
+      "brand": "8bitdo",
+      "name": "8BitDo F30 Arcade Joystick",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "AB12",
+      "brand": "8bitdo",
+      "name": "8BitDo NES30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "AB20",
+      "brand": "8bitdo",
+      "name": "8BitDo SN30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2DC8",
+      "pid": "AB21",
+      "brand": "8bitdo",
+      "name": "8BitDo SFC30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2E24",
+      "pid": "0652",
+      "brand": "hyperkin",
+      "name": "Hyperkin Duke",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2E24",
+      "pid": "0BFF",
+      "brand": "hyperkin",
+      "name": "Hyperkin N64 Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2E24",
+      "pid": "1128",
+      "brand": "hyperkin",
+      "name": "Hyperkin Competitor",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2E24",
+      "pid": "1618",
+      "brand": "hyperkin",
+      "name": "Hyperkin Duke",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2E24",
+      "pid": "1688",
+      "brand": "hyperkin",
+      "name": "Hyperkin X91",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/4bb5020be2a3e3f7a963b84c95f49fe7ef5d35a4/src/joystick/controller_list.h"
+    },
+    {
+      "vid": "2E24",
+      "pid": "200A",
+      "brand": "hyperkin",
+      "name": "Hyperkin Scout Premium SNES Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2E24",
+      "pid": "200B",
+      "brand": "hyperkin",
+      "name": "Hyperkin Admiral N64 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2E24",
+      "pid": "386A",
+      "brand": "hyperkin",
+      "name": "Hyperkin Trooper 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2E24",
+      "pid": "486A",
+      "brand": "hyperkin",
+      "name": "Hyperkin RetroN Sq",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2E95",
+      "pid": "434B",
+      "brand": "scuf",
+      "name": "Scuf Envision",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2E95",
+      "pid": "434D",
+      "brand": "scuf",
+      "name": "Scuf Envision",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2E95",
+      "pid": "434E",
+      "brand": "scuf",
+      "name": "Scuf Envision",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2E95",
+      "pid": "7725",
+      "brand": "scuf",
+      "name": "Scuf PS4 Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2F24",
+      "pid": "0091",
+      "brand": "easysmx",
+      "name": "EasySMX ESM-9101",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "2F24",
+      "pid": "200A",
+      "brand": "hyperkin",
+      "name": "Hyperkin Scout",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3285",
+      "pid": "0305",
+      "brand": "nacon",
+      "name": "Nacon MGX Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3285",
+      "pid": "0607",
+      "brand": "nacon",
+      "name": "Nacon GC100",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3285",
+      "pid": "0689",
+      "brand": "nacon",
+      "name": "Nacon Revolution X Unlimited",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3285",
+      "pid": "0C03",
+      "brand": "nacon",
+      "name": "Nacon GC100",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3285",
+      "pid": "0D16",
+      "brand": "nacon",
+      "name": "Nacon Revolution 5 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3285",
+      "pid": "0D17",
+      "brand": "nacon",
+      "name": "Nacon Revolution 5 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3285",
+      "pid": "0D18",
+      "brand": "nacon",
+      "name": "Nacon Revolution 5 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3285",
+      "pid": "0D19",
+      "brand": "nacon",
+      "name": "Nacon Revolution 5 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3537",
+      "pid": "1004",
+      "brand": "gamesir",
+      "name": "GameSir T4 Kaleid",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3537",
+      "pid": "100B",
+      "brand": "gamesir",
+      "name": "GameSir Cyclone 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3537",
+      "pid": "1022",
+      "brand": "gamesir",
+      "name": "GameSir G7 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3537",
+      "pid": "1041",
+      "brand": "gamesir",
+      "name": "GameSir Nova Lite",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3537",
+      "pid": "1058",
+      "brand": "gamesir",
+      "name": "GameSir K1",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3537",
+      "pid": "1094",
+      "brand": "gamesir",
+      "name": "GameSir Tegenaria Lite",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3537",
+      "pid": "1097",
+      "brand": "gamesir",
+      "name": "GameSir Kaleid Flux",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3537",
+      "pid": "1104",
+      "brand": "gamesir",
+      "name": "GameSir X4A Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3537",
+      "pid": "1116",
+      "brand": "gamesir",
+      "name": "GameSir X5 Lite",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "358A",
+      "pid": "0203",
+      "brand": "sony",
+      "name": "Backbone One PlayStation Edition",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "37D7",
+      "pid": "2414",
+      "brand": "flydigi",
+      "name": "Flydigi Direwolf 4",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "3820",
+      "pid": "0009",
+      "brand": "8bitdo",
+      "name": "8BitDo NES30 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "62DD",
+      "pid": "A715",
+      "brand": "nintendo",
+      "name": "PowerA Fusion Nintendo Switch Arcade Stick",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "62DD",
+      "pid": "A716",
+      "brand": "nintendo",
+      "name": "PowerA Fusion Pro Nintendo Switch Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "6666",
+      "pid": "0667",
+      "brand": "sony",
+      "name": "Sony PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "6666",
+      "pid": "8802",
+      "brand": "sony",
+      "name": "TigerGame PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "6666",
+      "pid": "8804",
+      "brand": "sony",
+      "name": "TigerGame PlayStation Adapter",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "694C",
+      "pid": "7250",
+      "brand": "nintendo",
+      "name": "Nintendo Switch Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "7331",
+      "pid": "0001",
+      "brand": "sony",
+      "name": "Sony DualShock 3",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "8000",
+      "pid": "1002",
+      "brand": "8bitdo",
+      "name": "8BitDo F30",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "8380",
+      "pid": "0003",
+      "brand": "betop",
+      "name": "Betop Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "8555",
+      "pid": "061B",
+      "brand": "gamesir",
+      "name": "GameSir G4 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "ACC4",
+      "pid": "801C",
+      "brand": "sony",
+      "name": "KidzPlay Adventure PlayStation Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "FADE",
+      "pid": "C001",
+      "brand": "flydigi",
+      "name": "Flydigi Vader 5 Pro",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "FFFF",
+      "pid": "FFFF",
+      "brand": "xbox",
+      "name": "Xbox Controller",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/mdqinc/SDL_GameControllerDB"
+    },
+    {
+      "vid": "20BC",
+      "pid": "5134",
+      "brand": "betop",
+      "name": "北通鲲鹏 BTP-KP50B",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "receiver": true,
+      "source": "本机产品字符串 BTP-KP50B XINPUT DONGLE；用户确认鲲鹏系列"
+    },
+    {
+      "vid": "413D",
+      "pid": "2104",
+      "brand": "bigbigwon",
+      "name": "墨将彩虹 2 / XInput",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "receiver": false,
+      "source": "用户确认当前实物为彩虹2；同 ID 其他型号仍需核对"
+    },
+    {
+      "vid": "20DD",
+      "pid": "5134",
+      "brand": "betop",
+      "name": "北通鲲鹏 BTP-KP50B 接收器",
+      "kind": "gamepad",
+      "receiver": true,
+      "backend": "gamepad",
+      "source": "本机 BEITONG KP50B DONGLE 厂商集合；XInput 节点为 20BC:5134"
+    },
+    {
+      "vid": "413D",
+      "pid": "2106",
+      "brand": "bigbigwon",
+      "name": "墨将手柄控制接口（型号待确认）",
+      "kind": "gamepad",
+      "receiver": true,
+      "backend": "gamepad",
+      "source": "本机 Zikway HID zkm 控制集合；该共享 ID 亦见 https://github.com/feshinkof-boop/armorx-toolkit ，不据此独断型号"
     }
   ],
   "notes": [

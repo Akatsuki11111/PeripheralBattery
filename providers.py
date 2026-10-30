@@ -75,7 +75,7 @@ def diagnose_hid():
     for group in groups[:16]:
         remaining=deadline-time.monotonic()
         if remaining<1:errors.append('达到诊断总时限，部分设备尚未检查');break
-        response=bounded_operation({'operation':'research-inspect','identity':group['device']['identity']},min(7,remaining))
+        response=bounded_operation({'operation':'inspect-device','identity':group['device']['identity']},min(7,remaining))
         if response.get('ok'):
             devices.append({k:response[k] for k in ('device','backend','interfaces','feature_diagnostics','valkyrie_candidates','scope')})
         else:devices.append({'device':{k:group['device'].get(k) for k in ('name','brand','vid','pid')},'error':response.get('user_message',response.get('error'))})

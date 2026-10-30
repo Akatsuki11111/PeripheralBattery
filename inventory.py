@@ -17,8 +17,8 @@ def classify_auxiliary(vid,pid,name,companions):
 
 def model_name(profile,product):
     generic=str(product).strip().casefold().replace('_','-').replace(' ','-')
-    if profile and generic in ('wireless-receiver','wirelessreceiver','usb-keyboard','usb-mouse','wireless-mouse',
-                               '2.4g-wireless-device','2.4g-wireless-mouse','gaming-mouse','wireless-gaming-mouse'):
+    if profile and (profile.get('kind')=='gamepad' and generic.startswith('controller-(') or generic in ('wireless-receiver','wirelessreceiver','usb-keyboard','usb-mouse','wireless-mouse',
+                               '2.4g-wireless-device','2.4g-wireless-mouse','gaming-mouse','wireless-gaming-mouse','controller','wireless-controller','wireless-gamepad','gamepad','usb-gamepad','xbox-360-for-windows','xinput-controller','kp50b-dongle','hid-zkm')):
         return profile['name']
     return product or (profile or {}).get('name','')
 
@@ -32,6 +32,23 @@ def decode_info(info):
     if isinstance(result.get('path'), str):
         result['path'] = bytes.fromhex(result['path'])
     return result
+
+
+def merge_controller_collections(groups):
+    """Known control/XInput pairs, only with a shared physical identity."""
+    pairs=(((0x20dd,0x5134),(0x20bc,0x5134)),((0x413d,0x2106),(0x413d,0x2104)))
+    def tokens(group):
+        return {m.get(k) for m in group['metadata'] for k in ('container','physical') if m.get(k)}
+    for control,virtual in pairs:
+        controls=[k for k in groups if k[:2]==control]
+        for key in controls:
+            matches=[k for k,g in groups.items() if k[:2]==virtual and tokens(g)&tokens(groups[key])]
+            if len(matches)!=1:continue
+            other=matches[0]
+            if sum(bool(tokens(groups[k])&tokens(groups[other])) for k in controls)!=1:continue
+            for field in ('infos','metadata'):groups[key][field].extend(groups[other][field])
+            del groups[other]
+    return groups
 
 
 def enumerate_groups(overrides=None):
@@ -59,7 +76,7 @@ def enumerate_groups(overrides=None):
         group['infos'].append(info)
         group['metadata'].append(meta)
     result = []
-    for group in physical.values():
+    for group in merge_controller_collections(physical).values():
         infos, metas = group['infos'], group['metadata']
         first = infos[0]
         vid, pid = first['vendor_id'], first['product_id']
@@ -71,20 +88,21 @@ def enumerate_groups(overrides=None):
         if not name:
             name = profile['name'] if profile else next((m.get('friendly') for m in metas if m.get('friendly')), '')
         brand, evidence = recognize(vid,pid,manufacturer,name,(overrides or {}).get(f'{vid:04X}:{pid:04X}',''))
-        is_input = any(i.get('usage_page') == 1 and i.get('usage') in (2,6) for i in infos)
+        is_input = any(i.get('usage_page') == 1 and i.get('usage') in (2,4,5,6,8) for i in infos)
         is_usb_keyboard=any(i.get('usage_page')==1 and i.get('usage')==6 and i.get('bus_type')==1 for i in infos)
         is_audio=any(i.get('audio_interface') for i in infos)
         if not brand and not is_input and not is_audio:
             continue
         # Don't list unrelated USB controllers merely because ASUS/MSI made them.
         if brand and not is_input and not profile and not any(word in str(name).lower() for word in
-                ('mouse','keyboard','headset','receiver','dongle','arctis','鼠标','键盘','耳机')):
+                ('mouse','keyboard','headset','receiver','dongle','arctis','controller','gamepad','鼠标','键盘','耳机','手柄')):
             continue
         name = name or ('通用鼠标' if any(i.get('usage') == 2 for i in infos) else '通用键盘')
         kind = (profile or {}).get('kind') or kind_for(name,infos)
         brand_name = brand['name'] if brand else 'Unknown'
         identifier, serial_hash = physical_identity(infos,metas)
         backend = backend_for(vid,pid,name)
+        if kind=='gamepad':backend='gamepad'
         companions=[]
         if vid==0x303a and pid==0x4005:
             parent_instance=next((m['physical'] for m in metas if m.get('physical')),'')
@@ -103,7 +121,7 @@ def enumerate_groups(overrides=None):
         # USB input device, retain its keyboard collection without asserting that
         # the physical device is wired or batteryless.
         if (is_usb_keyboard and not receiver and not backend and not is_audio and not special_input
-                and not (profile or {}).get('kind') and not any(word in text for word in ('mouse','鼠标'))):
+                and kind!='gamepad' and not (profile or {}).get('kind') and not any(word in text for word in ('mouse','鼠标'))):
             kind='keyboard'
         usb_keyboard=bool(is_usb_keyboard and kind=='keyboard' and not receiver and not special_input)
         transport = 'Bluetooth' if any(i.get('bus_type') == 2 for i in infos) else '2.4 GHz 接收器' if receiver else 'USB / 有线或接收器'
@@ -130,4 +148,10 @@ def enumerate_groups(overrides=None):
                 note='同一 USB 复合设备包含 cxair、串口与键鼠 HID 功能，疑似显示/控制模块。具体硬件需对应实物确认；归为辅助设备，默认不显示在外设电量列表。')
             backend=''
         result.append({'device': device.to_dict(), 'infos': [encode_info(i) for i in infos], 'backend': backend})
+    # Slot order is never an identity. Equal VID/PID units need a stronger
+    # association before Windows battery data may be assigned to either one.
+    for group in result:
+        d=group['device']
+        if d['kind']=='gamepad':
+            group['controller_count']=sum(g['device']['kind']=='gamepad' and (g['device']['vid'],g['device']['pid'])==(d['vid'],d['pid']) for g in result)
     return result

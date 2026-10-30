@@ -64,6 +64,19 @@ class UiTests(unittest.TestCase):
         self.flyout.rebuild([wired],[]);card=self.flyout.cards['wired']
         self.assertEqual(card.value_label.text(),'有线');self.assertTrue(card.bar.isHidden())
         self.flyout.show_detail('wired');self.assertEqual(self.flyout.detail_labels['当前电量'].text(),'不适用（有线供电）')
+
+    def test_sleep_time_is_visible_on_card_and_live_reading_clears_it(self):
+        d=replace(self.devices[0],percent=None,connected=False,last_percent=56,last_observed_at=time.time()-180)
+        self.flyout.rebuild([d],[]);card=self.flyout.cards[d.key]
+        self.assertIn(d.last_read_time,card.status_label.text())
+        self.assertEqual(card.value_label.text(),'56%');self.assertTrue(card.bar.stale)
+        self.flyout.rebuild([self.devices[0]],[]);self.assertNotIn('上次',card.status_label.text())
+
+    def test_gamepad_grade_and_native_icon_render_without_a_fake_percent(self):
+        d=replace(self.devices[0],key='pad',kind='gamepad',brand='BETOP',name='北通鲲鹏',percent=None,battery_grade='中')
+        self.flyout.rebuild([d],[]);self.assertEqual(self.flyout.cards['pad'].value_label.text(),'中')
+        self.flyout.show_detail('pad');self.assertIn('非百分比',self.flyout.detail_labels['当前电量'].text())
+        for size in (16,20,32,64):self.assertFalse(tray_icon(d).pixmap(size,size).isNull())
     def test_native_icon_sizes_and_all_brand_icons(self):
         from catalog import brands
         for info in brands():

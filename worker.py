@@ -8,7 +8,7 @@ import time
 from inventory import decode_info,enumerate_groups
 from models import valid_percent
 from protocols import read_local,parse_razer
-from settings import atomic_json,data_dir,read_json,redact
+from settings import atomic_json,data_dir,read_json,redact,EXPERIMENTAL_ENABLED
 
 PROVIDERS={
  'razer':('razer','RazerProvider'),'logitech':('logitech','LogitechProvider'),
@@ -51,7 +51,11 @@ def probe(group,diagnostics=None):
     infos=[decode_info(item) for item in group['infos']]
     base=group['device'];backend=group['backend']
     records=[]
+    if backend=='gamepad':
+        from gamepads import query_gamepad
+        return [query_gamepad(group,infos,diagnostics)]
     if backend=='learned':
+        if not EXPERIMENTAL_ENABLED:raise ValueError('正式版不支持实验电量映射')
         from research import sample
         from long_learning import mappings,decode_mapping
         mapping=mappings().get(base['identity'])
@@ -115,6 +119,11 @@ def probe(group,diagnostics=None):
 
 def execute(request):
     operation=request.get('operation')
+    if not EXPERIMENTAL_ENABLED and operation in ('research-sample','research-inspect'):
+        raise ValueError('正式版不提供电量实验，请使用实验版')
+    if operation=='inspect-device':
+        from device_inspection import inspect_device
+        return inspect_device(request.get('identity',''))
     if operation=='check-updates':
         from updates import check_updates
         from settings import VERSION

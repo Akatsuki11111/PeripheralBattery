@@ -77,7 +77,7 @@ class DiagnosticTests(unittest.TestCase):
     def test_exported_metadata_has_no_paths_serials_or_raw_input(self):
         group={'device':{'identity':'a'*24,'name':'Wireless-Receiver','brand':'Unknown','vid':0x374a,'pid':0xa329,'kind':'mouse','receiver':True},'backend':'',
                'infos':[{**self.info,'path':self.info['path'].hex(),'serial_number':'PRIVATE_SERIAL','manufacturer_string':'OEM'}]}
-        with patch('research.enumerate_groups',return_value=[group]),patch('feature_reports.inspect_features',return_value=[]):result=inspect_device('a'*24)
+        with patch('device_inspection.enumerate_groups',return_value=[group]),patch('feature_reports.inspect_features',return_value=[]):result=inspect_device('a'*24)
         encoded=json.dumps(result)
         self.assertNotIn('private-device-path',encoded);self.assertNotIn('PRIVATE_SERIAL',encoded);self.assertNotIn('serial_number',encoded)
         self.assertEqual(result['valkyrie_candidates'][0]['valkyrie_names'],['VK M5 PRO'])

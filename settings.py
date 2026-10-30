@@ -13,14 +13,16 @@ import time
 from models import Device
 
 APP_NAME = 'PeripheralBattery'
-VERSION = '2.4.1'
-RELEASE_CHANNEL = 'experimental'
+_RELEASE=json.loads(Path(__file__).with_name('release.json').read_text(encoding='utf-8'))
+VERSION = _RELEASE['version']
+RELEASE_CHANNEL = _RELEASE['channel']
+EXPERIMENTAL_ENABLED = RELEASE_CHANNEL=='experimental'
 REFRESH_INTERVALS=(5,15,30,60)
 
 
 def probe_timeout_ms(backend):
     # Some receivers need several seconds for their read-only status exchange.
-    return {'corsair':13_000,'logitech':12_000,'razer':11_000,'lofree':9_000}.get(backend,6500)
+    return {'corsair':13_000,'logitech':12_000,'razer':11_000,'lofree':9_000,'gamepad':10_000}.get(backend,6500)
 
 
 def data_dir():
@@ -93,7 +95,7 @@ def redact(text):
 
 class Settings:
     DEFAULTS = {'show_offline': False, 'show_unreadable':False, 'show_auxiliary':False, 'low_notifications': True, 'low_threshold': 20,
-                'hidden': [], 'brand_overrides': {}, 'device_modes':{},'refresh_seconds':15,'autostart_requested': False,'pinned_key':'','update_prereleases':True}
+                'hidden': [], 'brand_overrides': {}, 'device_modes':{},'refresh_seconds':15,'autostart_requested': False,'pinned_key':'','update_prereleases':EXPERIMENTAL_ENABLED}
 
     def __init__(self, path=None):
         self.path = Path(path) if path else data_dir() / 'settings.json'
@@ -133,6 +135,9 @@ class DeviceStore:
             for item in saved[:200]:
                 try:
                     device = Device.from_dict(item)
+                    if not EXPERIMENTAL_ENABLED and device.confidence=='experimental':
+                        device=replace(device,percent=None,last_percent=None,last_observed_at=0,confidence='unknown',
+                                       note='正式版不加载实验推测值；需要设备的有效电量应答。')
                     if time.time() - device.last_seen < self.RETENTION:
                         if not device.last_observed_at:
                             if device.usable:
@@ -181,12 +186,13 @@ class DeviceStore:
             if previous:
                 last = device.last_percent if device.last_percent is not None else previous.last_percent
                 device = replace(device, last_percent=device.percent if device.percent is not None else last,
-                                 last_observed_at=previous.last_observed_at)
+                                 last_observed_at=previous.last_observed_at,
+                                 approximate=previous.approximate if device.percent is None else device.approximate)
                 if (device.percent is None and device.connected is None and previous.present and
-                        (previous.usable or previous.experimental) and time.time()-previous.observed_at<90):
+                        (previous.usable or EXPERIMENTAL_ENABLED and previous.experimental) and time.time()-previous.observed_at<90):
                     device=replace(device,percent=previous.percent,connected=previous.connected,charging=previous.charging,
                                    confidence=previous.confidence,observed_at=previous.observed_at,monotonic_at=previous.monotonic_at,
-                                   source=previous.source,voltage_mv=previous.voltage_mv,note='正在刷新，暂显示最近一次有效应答。')
+                                   source=previous.source,voltage_mv=previous.voltage_mv,approximate=previous.approximate,note='正在刷新，暂显示最近一次有效应答。')
             if device.usable:device=replace(device,last_percent=device.percent,last_observed_at=device.observed_at)
             result[device.key] = replace(device, last_seen=now)
         for key, previous in old.items():
@@ -199,6 +205,9 @@ class DeviceStore:
 
     def apply_readings(self, group_identity, readings):
         """Reconcile readings with the paired-child contract described above."""
+        if not EXPERIMENTAL_ENABLED:
+            readings=[{**r,'percent':None,'last_percent':None,'connected':None,'charging':None,'confidence':'unknown'}
+                      if r.get('confidence')=='experimental' else r for r in readings]
         existing = [d for d in self.devices.values() if d.identity == group_identity and d.present]
         if not readings or not existing:
             return self.snapshot()

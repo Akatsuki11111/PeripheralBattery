@@ -2,6 +2,7 @@
 from dataclasses import dataclass, asdict, fields
 import math
 import time
+import datetime as dt
 
 
 @dataclass(frozen=True)
@@ -36,14 +37,24 @@ class Device:
     power_mode: str = 'unknown'
     voltage_mv: int | None = None
     usb_keyboard: bool = False
+    battery_grade: str = ''
 
     @property
     def type_name(self):
-        return {'mouse':'鼠标','keyboard':'键盘','headset':'耳机','auxiliary':'辅助 USB 设备'}.get(self.kind,'外设')
+        return {'mouse':'鼠标','keyboard':'键盘','headset':'耳机','gamepad':'手柄','auxiliary':'辅助 USB 设备'}.get(self.kind,'外设')
 
     @property
     def reading_text(self):
-        return '有线' if self.power_mode=='wired' else '辅助设备' if self.kind=='auxiliary' else f'{self.percent}%' if self.usable else f'{self.percent}%?' if self.experimental else f'{self.last_percent}%' if self.cached else '—'
+        return ('有线' if self.power_mode=='wired' else '辅助设备' if self.kind=='auxiliary'
+                else ('约' if self.approximate else '')+f'{self.percent}%' if self.usable
+                else f'{self.percent}%?' if self.experimental else ('约' if self.approximate else '')+f'{self.last_percent}%' if self.cached
+                else self.battery_grade if self.connected is True and not self.stale and self.battery_grade else '—')
+
+    @property
+    def last_read_time(self):
+        if not self.last_observed_at:return '时间未知'
+        stamp=dt.datetime.fromtimestamp(self.last_observed_at)
+        return stamp.strftime('%H:%M:%S' if stamp.date()==dt.datetime.now().date() else '%m-%d %H:%M')
 
     @property
     def experimental(self):
@@ -78,16 +89,18 @@ class Device:
         if self.power_mode=='wired':return '有线连接' if self.connected is True else '有线 · 连接待确认' if self.connected is None else '已断开'
         if self.experimental:return '实验推测 · 待核实' if self.connected is True else '实验推测 · 远端未确认'
         if self.connected is False:
-            return ('休眠 / 关闭 · 上次电量' if self.cached else '休眠或已关闭') if self.receiver else '已断开 · 上次电量' if self.cached else '已断开'
+            return ('休眠 / 关闭 · 上次 '+self.last_read_time if self.cached else '休眠或已关闭') if self.receiver else '已断开 · 上次 '+self.last_read_time if self.cached else '已断开'
         if self.percent is not None and self.stale:
             return '读数已过期'
         if self.connected is None:
-            if self.cached:return '连接待确认 · 上次电量'
+            if self.cached:return '连接待确认 · 上次 '+self.last_read_time
+            if self.kind=='gamepad':return '已接入 · 电量待适配'
             if self.usb_keyboard and self.power_mode=='unknown' and not self.receiver:
                 return 'USB 已接入 · 供电待确认'
             return '已识别 · 电量未知' if self.battery_support == 'identify-only' else '连接待确认'
         if self.charging:
             return '正在充电'
+        if self.battery_grade:return '已连接 · 四档电量'
         return '已连接' if self.percent is not None else '已连接 · 电量未知'
 
     def to_dict(self):
@@ -102,7 +115,8 @@ class Device:
         for key in ('key', 'brand', 'name'):
             if not isinstance(data.get(key), str) or not data[key] or len(data[key]) > 240:
                 raise ValueError('Invalid device identity')
-        data['kind'] = data.get('kind') if data.get('kind') in ('mouse', 'keyboard', 'headset','auxiliary') else 'mouse'
+        data['kind'] = data.get('kind') if data.get('kind') in ('mouse', 'keyboard', 'headset','gamepad','auxiliary') else 'mouse'
+        data['battery_grade']=data.get('battery_grade') if data.get('battery_grade') in ('耗尽','低','中','高') and data.get('connected') is True else ''
         data['power_mode']=data.get('power_mode') if data.get('power_mode') in ('unknown','wired','battery') else 'unknown'
         data['usb_keyboard']=data.get('usb_keyboard') is True and data['kind']=='keyboard'
         if data['power_mode']=='wired' or data['kind']=='auxiliary':data.update(percent=None,last_percent=None,charging=None,voltage_mv=None)
@@ -128,7 +142,7 @@ class Device:
 
 
 def lowest(devices):
-    eligible = [d for d in devices if d.usable]
+    eligible = [d for d in devices if d.usable and not d.approximate]
     return min(eligible, key=lambda d: (d.percent, d.key), default=None)
 
 

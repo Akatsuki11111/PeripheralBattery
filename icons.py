@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QWidget
 import windows
 
 ASSETS = Path(__file__).parent / 'assets'
-GLYPHS = {'mouse':'\ue962', 'keyboard':'\ue765', 'headset':'\ue95b', 'battery':'\ue83f',
+GLYPHS = {'mouse':'\ue962', 'keyboard':'\ue765', 'headset':'\ue95b', 'gamepad':'\ue7fc', 'battery':'\ue83f',
           'refresh':'\ue72c', 'close':'\ue711', 'back':'\ue72b', 'settings':'\ue713',
           'chevron':'\ue76c', 'power':'\ue7e8', 'signal':'\ue701', 'info':'\ue946','auxiliary':'\ue946'}
 
@@ -81,6 +81,13 @@ def draw_tray_device(painter, kind, area, color, charging=False, dark=None):
         painter.drawPath(path)
         painter.drawLine(point(left, bottom - height * .38), point(left, bottom))
         painter.drawLine(point(right, bottom - height * .38), point(right, bottom))
+    elif kind == 'gamepad':
+        width=max(7,round(height*1.9));left=align(center-width/2)
+        painter.drawRoundedRect(QRectF(left,top,width,height),height*.38,height*.38)
+        painter.drawLine(point(left+width*.23,top+height*.5),point(left+width*.43,top+height*.5))
+        painter.drawLine(point(left+width*.33,top+height*.27),point(left+width*.33,top+height*.73))
+        painter.drawPoint(point(left+width*.72,top+height*.35))
+        painter.drawPoint(point(left+width*.82,top+height*.65))
     elif kind == 'keyboard':
         width = max(7, round(height * 1.9))
         left = align(center - width / 2)
@@ -129,7 +136,7 @@ def tray_pixmap(device, size, dark=None):
     # lets the font rasterizer hint strokes for 16/20/24px rather than resampling.
     number_height = round(size * .64)
     number_area = QRectF(0, 0, size, number_height)
-    text = str(value) if value is not None else '–'
+    text = ('~' if device and device.approximate and device.usable else '')+str(value) if value is not None else '–'
     number_font, bounds = tray_number_font(text, size, number_area)
     painter.setFont(number_font)
     painter.setPen(QColor(color))
@@ -184,8 +191,10 @@ class BrandIcon(QWidget):
         p.drawRoundedRect(QRectF(.5,.5,43,43),9,9)
         if self.icon.isNull():
             # A brand wordmark is preferable to assigning another company's logo.
-            p.setPen(QColor('#202020'));p.setFont(font(10,QFont.Weight.DemiBold))
-            p.drawText(QRectF(2,2,40,35),Qt.AlignmentFlag.AlignCenter,self.brand[:8] if self.brand!='Unknown' else '?')
+            text=self.brand if self.brand!='Unknown' else '?'
+            if len(text)>8 and ' ' in text:text=text.replace(' ','\n',1)
+            p.setPen(QColor('#202020'));p.setFont(font(9 if len(self.brand)>8 else 10,QFont.Weight.DemiBold))
+            p.drawText(QRectF(2,2,40,35),Qt.AlignmentFlag.AlignCenter,text)
             p.setPen(Qt.PenStyle.NoPen)
         else:
             self.icon.paint(p,4 if self.wide else 8,7,36 if self.wide else 28,28)

@@ -34,7 +34,7 @@ class CatalogDialog(QDialog):
             row=table.rowCount();table.insertRow(row);table.setRowHeight(row,40)
             item=QTableWidgetItem(info['zh']+' · '+info['name']);logo=BrandIcon(info['name'],'mouse');self.logos.append(logo)
             item.setIcon(logo.icon);item.setToolTip(info['website']);table.setItem(row,0,item)
-            status=QTableWidgetItem('部分型号可读取' if any(p['backend'] for p in profiles) or info['id']=='logitech' else '有线设备，电量不适用' if any(p.get('wired') for p in profiles) else '可识别，电量待适配')
+            status=QTableWidgetItem('手柄标准通道，依型号/模式' if info.get('controller') else '部分型号可读取' if any(p['backend'] for p in profiles) or info['id']=='logitech' else '有线设备，电量不适用' if any(p.get('wired') for p in profiles) else '可识别，电量待适配')
             status.setToolTip('\n'.join(p['name'] for p in profiles) or '不会向未知型号猜测发送电量命令。')
             table.setItem(row,1,status);table.setItem(row,2,QTableWidgetItem(str(len(profiles))))
         def filter_rows(text):

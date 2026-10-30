@@ -34,7 +34,7 @@ def main():
         join_worker_job()
         from worker import run
         return run(args.worker)
-    from settings import VERSION,Settings,DeviceStore,configure_logging,atomic_json,data_dir,redact,cleanup_workers,migrate_legacy_data
+    from settings import VERSION,EXPERIMENTAL_ENABLED,Settings,DeviceStore,configure_logging,atomic_json,data_dir,redact,cleanup_workers,migrate_legacy_data
     import startup
     migrate_legacy_data()
     logger=configure_logging();preferences=Settings()
@@ -116,7 +116,7 @@ def main():
     export_action=menu.addAction('导出诊断信息…');menu.addAction('任务栏设置',windows.show_tray_settings)
     menu.addSeparator();quit_action=menu.addAction('退出');tray.setContextMenu(menu)
     controller=ScanController(store,preferences,logger,app)
-    flyout.research_controller=controller
+    if EXPERIMENTAL_ENABLED:flyout.research_controller=controller
     def install_update(info):
         from installer import prepare_update
         try:prepare_update(info)
@@ -124,12 +124,14 @@ def main():
             flyout.update_button.setToolTip(str(error));flyout.update_button.setText('安装失败，重试');flyout.download_progress.setFormat('安装未启动，可重试');return
         QTimer.singleShot(0,quit_app)
     flyout.installUpdateRequested.connect(install_update)
-    from learning_jobs import LearningController
-    learning=LearningController(controller,app);flyout.learning=learning
+    learning=None
+    if EXPERIMENTAL_ENABLED:
+        from learning_jobs import LearningController
+        learning=LearningController(controller,app);flyout.learning=learning
     def learning_changed():
         s=learning.session
         flyout.learning_button.setText(f'观察 {int(s.get("elapsed_seconds",0)/60)}/{int(s.get("target_seconds",3600)/60)} 分钟' if s.get('state') in ('observing','awaiting_unplug') else '长时间观察')
-    learning.changed.connect(learning_changed);learning_changed()
+    if learning:learning.changed.connect(learning_changed);learning_changed()
     state={'quitting':False,'captured':False,'devices':store.snapshot(),'errors':[],
            'alerts':set(),'tray_ready':False,'theme':None,'clients':set()}
 
@@ -149,7 +151,7 @@ def main():
         state['tray_key']=chosen.key if chosen else '';tray.setIcon(tray_icon(chosen))
         ordered=sorted(available,key=lambda d:(d.key!=(chosen.key if chosen else ''),not d.usable,d.name))
         tip='设备电量'+(' · 演示数据' if args.demo else '')+'\n'+'\n'.join(
-            d.name+'：'+(d.reading_text if d.power_mode=='wired' or d.usable or d.cached else '不适用' if d.kind=='auxiliary' else '未知')+' · '+d.status for d in ordered)
+            d.name+'：'+(d.reading_text if d.power_mode=='wired' or d.usable or d.cached or d.battery_grade else '不适用' if d.kind=='auxiliary' else '未知')+' · '+d.status for d in ordered)
         tray.setToolTip(tip[:127]);state['theme']=(windows.is_dark(),windows.is_taskbar_dark())
         threshold=preferences.get('low_threshold',20)
         newly_low=collect_low_alerts(available,state['alerts'],threshold,
@@ -207,7 +209,7 @@ def main():
     def quit_app():
         if state['quitting']:return
         state['quitting']=True;poll.stop();tray_ready.stop()
-        if learning.session.get('state') in ('observing','awaiting_unplug'):learning.pause('程序已退出，观察暂停。')
+        if learning and learning.session.get('state') in ('observing','awaiting_unplug'):learning.pause('程序已退出，观察暂停。')
         controller.shutdown()
         try:store.save()
         except OSError as error:logger.warning('cache write failed: %s',redact(error))

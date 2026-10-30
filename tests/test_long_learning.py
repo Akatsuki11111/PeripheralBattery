@@ -101,7 +101,7 @@ class LongLearningTests(unittest.TestCase):
         session={'state':'completed','identity':'a'*24,'before':self.before,'charged':self.charged,'usage':self.usage}
         candidate=analyze(self.before,self.charged,self.usage)['candidates'][0];save_mapping(session,candidate)
         group={'backend':'learned','device':{'name':'Experimental','identity':'a'*24},'infos':[]}
-        with patch('research.sample',return_value=self.usage[-1]):reading=probe(group)[0]
+        with patch('worker.EXPERIMENTAL_ENABLED',True),patch('research.sample',return_value=self.usage[-1]):reading=probe(group)[0]
         self.assertEqual(reading['confidence'],'experimental');self.assertIsNone(reading['connected']);self.assertEqual(reading['percent'],76)
 
 

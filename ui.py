@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (QWidget,QLabel,QPushButton,QToolButton,QVBoxLayou
 from icons import font,glyph_icon,BrandIcon,BatteryBar,GLYPHS
 from models import lowest
 from catalog import visible_devices
-from settings import Settings,REFRESH_INTERVALS,VERSION,RELEASE_CHANNEL
+from settings import Settings,REFRESH_INTERVALS,VERSION,RELEASE_CHANNEL,EXPERIMENTAL_ENABLED
 import startup
 import windows
 
@@ -86,7 +86,7 @@ class DeviceCard(QFrame):
         self.bar=bar;bar.setVisible(d.power_mode!='wired' and d.kind!='auxiliary');center.addWidget(bar);row.addLayout(center,1)
         pct=QVBoxLayout();pct.setSpacing(0)
         value=label(d.reading_text,20 if d.kind!='auxiliary' else 13,bold=True)
-        value.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else '实时电量')
+        value.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else 'XInput 四档电量，非百分比' if d.battery_grade else d.approximate or '实时电量')
         if not d.usable:value.setObjectName('muted')
         value.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter);pct.addWidget(value)
         self.value_label=value;self.brand_label=label(d.brand if d.brand!='Unknown' else '品牌待指定',10,True);pct.addWidget(self.brand_label);row.addLayout(pct)
@@ -99,7 +99,7 @@ class DeviceCard(QFrame):
         self.kind_label.setText(GLYPHS.get(d.kind,GLYPHS['mouse']))
         self.status_label.setText(d.type_name+' · '+d.status)
         self.status_label.setToolTip(d.note);self.value_label.setText(d.reading_text)
-        self.value_label.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else '实时电量')
+        self.value_label.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else 'XInput 四档电量，非百分比' if d.battery_grade else d.approximate or '实时电量')
         tone='' if d.usable else 'muted'
         if self.value_label.objectName()!=tone:
             self.value_label.setObjectName(tone);self.value_label.style().unpolish(self.value_label);self.value_label.style().polish(self.value_label)
@@ -139,10 +139,12 @@ class Flyout(QWidget):
         head.addWidget(tool('info','品牌目录与设备管理',self.open_catalog));head.addWidget(tool('close','收起到系统托盘',self.hide))
         self.root.addLayout(head)
         self.summary=label('正在读取设备状态…',11,True);self.root.addWidget(self.summary)
-        experiment_row=QHBoxLayout();self.root.addLayout(experiment_row)
-        self.research_button=QPushButton('电量适配（实验）');self.research_button.setToolTip('仅列出待适配设备；已适配设备休眠或关机不会进入清单')
-        self.research_button.clicked.connect(self.open_research);experiment_row.addWidget(self.research_button)
-        self.learning_button=QPushButton('长时间观察');self.learning_button.clicked.connect(self.open_learning);experiment_row.addWidget(self.learning_button)
+        self.research_button=None;self.learning_button=None
+        if EXPERIMENTAL_ENABLED:
+            experiment_row=QHBoxLayout();self.root.addLayout(experiment_row)
+            self.research_button=QPushButton('电量适配（实验）');self.research_button.setToolTip('仅列出待适配设备；已适配设备休眠或关机不会进入清单')
+            self.research_button.clicked.connect(self.open_research);experiment_row.addWidget(self.research_button)
+            self.learning_button=QPushButton('长时间观察');self.learning_button.clicked.connect(self.open_learning);experiment_row.addWidget(self.learning_button)
         self.stack=QStackedWidget();self.root.addWidget(self.stack,1)
         self.scroll=QScrollArea();self.scroll.setWidgetResizable(True);self.scroll.setFrameShape(QFrame.Shape.NoFrame)
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -172,7 +174,8 @@ class Flyout(QWidget):
         self.update_channel.setCurrentIndex(0 if self.preferences.get('update_prereleases',True) else 1)
         self.update_channel.setToolTip('选择要检查的 GitHub 发布通道');channel_row.addWidget(self.update_channel);controls.addWidget(channel_box,1,0)
         version_box=QWidget();version_row=QHBoxLayout(version_box);version_row.setContentsMargins(0,0,0,0);version_row.setSpacing(6)
-        self.version_label=label('v'+VERSION,10,True);self.version_label.setToolTip('当前版本：'+VERSION+(' · 实验版' if RELEASE_CHANNEL=='experimental' else ' · 正式版'));version_row.addWidget(self.version_label,1)
+        version_text='v'+VERSION.split('-')[0]+(' · 实验'+VERSION.rsplit('.',1)[-1] if '-' in VERSION and RELEASE_CHANNEL=='experimental' else ' · 正式' if RELEASE_CHANNEL=='stable' else ' · 实验')
+        self.version_label=label(version_text,10,True);self.version_label.setToolTip('当前版本：'+VERSION+(' · 实验版' if RELEASE_CHANNEL=='experimental' else ' · 正式版'));version_row.addWidget(self.version_label,1)
         self.update_button=QPushButton('检查更新');self.update_button.setFont(font(10));self.update_button.setMinimumSize(106,28);version_row.addWidget(self.update_button);controls.addWidget(version_box,1,1)
         self.statusline=label('托盘显示最低电量',10,True);self.statusline.setSizePolicy(QSizePolicy.Policy.Ignored,QSizePolicy.Policy.Preferred);self.statusline.hide();self.root.addWidget(self.statusline)
         self.update_job=None;self.update_url=None;self.update_button.clicked.connect(self.check_update)
@@ -394,7 +397,7 @@ class Flyout(QWidget):
     def detail_values(self,d):
         estimate=self.history.estimate(d)
         return [('设备类型',d.type_name),
-                ('当前电量','不适用（有线供电）' if d.power_mode=='wired' else '不适用（辅助设备）' if d.kind=='auxiliary' else f'{d.percent}%'+(' · 已过期' if d.stale else '') if d.percent is not None else '未知'),
+                ('当前电量','不适用（有线供电）' if d.power_mode=='wired' else '不适用（辅助设备）' if d.kind=='auxiliary' else ('约' if d.approximate else '')+f'{d.percent}%'+(' · 已过期' if d.stale else '') if d.percent is not None else d.battery_grade+'（XInput 四档，非百分比）' if d.battery_grade else '未知'),
                 ('连接情况',d.status),('USB 接口','已接入' if d.present else '未接入'),('连接方式',d.transport),
                 ('充电状态','不适用' if d.power_mode=='wired' or d.kind=='auxiliary' else '正在充电' if d.charging is True else '未充电' if d.charging is False and d.connected else '未知'),
                 ('连接依据',d.evidence or '未知'),('数据来源',d.source or '暂无'),
@@ -403,7 +406,7 @@ class Flyout(QWidget):
                 ('电量精度',d.approximate or ('设备报告值' if d.percent is not None else '未知')),
                 ('当前电压',f'{d.voltage_mv} mV' if d.usable and d.voltage_mv is not None else '设备未提供' if d.usable else '暂无有效读数'),
                 ('放电速率',estimate.rate_text),('预计剩余',estimate.remaining_text),('估算依据',estimate.reason),
-                ('上次有效值',f'{d.last_percent}% · '+(dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S') if d.last_observed_at else '时间未知')+' · 非实时' if d.last_percent is not None else '暂无')]
+                ('上次有效值',('约' if d.approximate else '')+f'{d.last_percent}% · '+(dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S') if d.last_observed_at else '时间未知')+' · 非实时' if d.last_percent is not None else '暂无')]
 
     def clear_history(self,key):
         try:self.history.forget(key);self.show_detail(key)
@@ -452,6 +455,7 @@ class Flyout(QWidget):
         dialog.show();dialog.raise_();dialog.activateWindow()
 
     def open_research(self):
+        if not EXPERIMENTAL_ENABLED:return
         if self.research_controller is None:
             self.statusline.setText('当前没有可用的设备扫描器');return
         if self.research_dialog is not None:
@@ -469,6 +473,7 @@ class Flyout(QWidget):
         dialog.move(x,y);dialog.show();dialog.raise_();dialog.activateWindow()
 
     def open_learning(self):
+        if not EXPERIMENTAL_ENABLED:return
         if self.learning is None:return
         if self.learning_dialog is not None:self.learning_dialog.show();self.learning_dialog.raise_();return
         from learning_ui import LearningPanel
@@ -544,5 +549,5 @@ class Flyout(QWidget):
 
 def adaptive_height(count,available_height,detail=False):
     maximum=max(160,min(760,round(available_height*.78),available_height-20))
-    desired=max(286,214+max(1,count)*70+max(0,count-1)*6)
+    desired=max(256,214-(0 if EXPERIMENTAL_ENABLED else 30)+max(1,count)*70+max(0,count-1)*6)
     return min(maximum,max(430,desired) if detail else desired)
