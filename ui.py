@@ -3,11 +3,11 @@ import time
 from PySide6.QtCore import Qt, QTimer, Signal, QRectF, QEasingCurve, QPropertyAnimation, Property
 from PySide6.QtGui import QColor,QPainter,QPen,QFont,QCursor
 from PySide6.QtWidgets import (QWidget,QLabel,QPushButton,QToolButton,QVBoxLayout,QHBoxLayout,
-    QFrame,QScrollArea,QStackedWidget,QAbstractButton,QSizePolicy,QApplication,QGridLayout,QComboBox)
+    QFrame,QScrollArea,QStackedWidget,QAbstractButton,QSizePolicy,QApplication,QGridLayout,QComboBox,QProgressBar)
 from icons import font,glyph_icon,BrandIcon,BatteryBar,GLYPHS
 from models import lowest
 from catalog import visible_devices
-from settings import Settings,REFRESH_INTERVALS
+from settings import Settings,REFRESH_INTERVALS,VERSION,RELEASE_CHANNEL
 import startup
 import windows
 
@@ -117,6 +117,7 @@ class DeviceCard(QFrame):
 
 
 class Flyout(QWidget):
+    installUpdateRequested=Signal(object)
     refreshRequested=Signal()
     preferencesChanged=Signal()
     forgetRequested=Signal(str)
@@ -163,8 +164,99 @@ class Flyout(QWidget):
         self.refresh_choice.setToolTip('切换后立即保存并生效。查询未结束时不会重复启动。')
         self.refresh_choice.currentIndexChanged.connect(lambda:self.change_interval(self.refresh_choice.currentData()))
         status_row.addWidget(self.refresh_choice);self.root.addLayout(status_row)
+        version_row=QHBoxLayout();self.root.addLayout(version_row)
+        self.version_label=label('v'+VERSION+(' · 实验版' if RELEASE_CHANNEL=='experimental' else ' · 正式版'),10,True);version_row.addWidget(self.version_label,1)
+        self.update_channel=QComboBox();self.update_channel.setFont(font(10));self.update_channel.addItem('正式＋实验',True);self.update_channel.addItem('仅正式版',False)
+        self.update_channel.setCurrentIndex(0 if self.preferences.get('update_prereleases',True) else 1)
+        self.update_channel.setToolTip('选择要检查的 GitHub 发布通道');version_row.addWidget(self.update_channel)
+        self.update_button=QPushButton('检查更新');self.update_button.setFont(font(10));version_row.addWidget(self.update_button)
+        self.update_job=None;self.update_url=None;self.update_button.clicked.connect(self.check_update)
+        self.update_candidate=None;self.download_ready=None
+        download_row=QHBoxLayout();self.root.addLayout(download_row)
+        self.download_progress=QProgressBar();self.download_progress.setRange(0,100);self.download_progress.hide();download_row.addWidget(self.download_progress,1)
+        self.cancel_download=QPushButton('取消');self.cancel_download.hide();self.cancel_download.clicked.connect(self.cancel_update);download_row.addWidget(self.cancel_download)
+        self.update_progress_timer=QTimer(self);self.update_progress_timer.setInterval(400);self.update_progress_timer.timeout.connect(self.read_download_progress)
+        self.update_channel.currentIndexChanged.connect(self.change_update_channel)
+        from settings import read_json,data_dir
+        previous_update=read_json(data_dir()/'updates/last-result.json',{})
+        if previous_update.get('ok') is False and 0<=time.time()-previous_update.get('at',0)<86400:
+            self.update_button.setText('上次更新失败');self.update_button.setToolTip(previous_update.get('message','请重新检查更新'))
         self.apply_theme()
         self.refresh_startup()
+
+    def change_update_channel(self):
+        self.preferences.set('update_prereleases',self.update_channel.currentData());self.update_url=None;self.update_candidate=None;self.download_ready=None
+        self.update_button.setText('检查更新');self.update_button.setToolTip('仅在点击时连接 GitHub Releases')
+
+    def check_update(self):
+        if self.update_job:return
+        if self.download_ready:self.installUpdateRequested.emit(self.download_ready);return
+        if self.update_candidate:self.download_update();return
+        if self.update_url:
+            from PySide6.QtCore import QUrl
+            from PySide6.QtGui import QDesktopServices
+            if not QDesktopServices.openUrl(QUrl(self.update_url)):self.update_button.setToolTip('无法打开浏览器，请访问 github.com/Akatsuki11111/PeripheralBattery/releases')
+            return
+        from jobs import WorkerJob
+        self.update_button.setEnabled(False);self.update_channel.setEnabled(False);self.update_button.setText('正在检查…')
+        job=WorkerJob({'operation':'check-updates','include_prereleases':self.update_channel.currentData()},18000,self);self.update_job=job
+        job.finished.connect(lambda result:self.update_checked(job,result));job.start()
+
+    def update_checked(self,job,result):
+        if self.update_job is not job:return
+        self.update_job=None;self.update_button.setEnabled(True);self.update_channel.setEnabled(True)
+        if not result.get('ok'):
+            self.update_button.setText('重试更新');self.update_button.setToolTip(result.get('user_message',result.get('error','检查失败')));return
+        info=result.get('update',{});status=info.get('status');self.update_button.setToolTip(info.get('message',''))
+        self.version_label.setToolTip(info.get('message',''))
+        if status in ('available','unavailable','no_release'):
+            from updates import RELEASES_URL
+            url=info.get('url','')
+            if url==RELEASES_URL or url.startswith(RELEASES_URL+'/tag/'):
+                if status=='available':self.update_candidate=info;self.update_button.setText('下载并更新')
+                else:self.update_url=url;self.update_button.setText('查看发布')
+                return
+        self.update_button.setText('已是最新' if status=='current' else '当前较新' if status=='ahead' else '检查更新')
+
+    def download_update(self):
+        import sys
+        if not getattr(sys,'frozen',False):self.update_button.setToolTip('源码运行模式请使用 Git 更新');return
+        from jobs import WorkerJob
+        self.download_progress.show();self.download_progress.setValue(0);self.download_progress.setFormat('正在连接 GitHub…')
+        self.cancel_download.show();self.update_button.setEnabled(False);self.update_channel.setEnabled(False)
+        job=WorkerJob({'operation':'download-update','tag':self.update_candidate['latest'],
+                       'include_prereleases':self.update_channel.currentData()},1800000,self)
+        self.update_job=job;job.finished.connect(lambda result:self.download_finished(job,result));job.start();self.update_progress_timer.start()
+        self.resize_for_content()
+
+    def read_download_progress(self):
+        if not self.update_job:return
+        from settings import read_json
+        info=read_json(self.update_job.path.with_name(self.update_job.nonce+'.progress.json'),{})
+        total=info.get('total',0);received=info.get('received',0)
+        if type(total) is int and total>0 and type(received) is int and 0<=received<=total:
+            self.download_progress.setValue(int(received/total*100))
+            self.download_progress.setFormat(f'{received/1048576:.1f} / {total/1048576:.1f} MB · %p%')
+
+    def download_finished(self,job,result):
+        if self.update_job is not job:return
+        self.update_job=None;self.update_progress_timer.stop();self.cancel_download.hide();self.update_button.setEnabled(True);self.update_channel.setEnabled(True)
+        if not result.get('ok'):
+            self.download_progress.setFormat('下载失败，未安装');self.update_candidate=None;self.update_button.setText('重新检查')
+            self.update_button.setToolTip(result.get('user_message',result.get('error','下载失败')));return
+        self.download_ready=result['download'];self.download_progress.setValue(100);self.download_progress.setFormat('校验完成，正在安装并重启…')
+        self.update_button.setText('安装并重启');self.installUpdateRequested.emit(self.download_ready)
+
+    def cancel_update(self):
+        job=self.update_job;self.update_job=None;self.update_progress_timer.stop()
+        if job:
+            job.cancel()
+            from settings import data_dir
+            for suffix in ('.part','.exe'):
+                try:(data_dir()/'updates'/(job.nonce+suffix)).unlink(missing_ok=True)
+                except OSError:pass
+        self.download_progress.hide();self.cancel_download.hide();self.update_button.setEnabled(True);self.update_channel.setEnabled(True)
+        self.update_button.setText('下载并更新' if self.update_candidate else '检查更新')
 
     def apply_theme(self):
         dark=windows.is_dark();self.theme=dark
@@ -402,6 +494,7 @@ class Flyout(QWidget):
         self.show_detail(key);self.show_at_tray(self.anchor)
 
     def close_windows(self):
+        if self.update_job:self.cancel_update()
         if self.catalog_dialog:self.catalog_dialog.close()
         if self.research_dialog:self.research_dialog.close()
         if self.learning_dialog:self.learning_dialog.close()
@@ -421,6 +514,7 @@ class Flyout(QWidget):
         screen=screen or QApplication.primaryScreen();bounds=screen.availableGeometry()
         count=len(visible_devices(self.devices,self.preferences))
         self.setFixedSize(min(440,bounds.width()-24),adaptive_height(count,bounds.height(),bool(self.selected)))
+        if self.download_progress.isVisible():self.setFixedHeight(min(bounds.height()-20,self.height()+30))
         x=rect.center().x()-self.width()//2 if rect and not rect.isNull() else bounds.right()-self.width()-12
         y=bounds.bottom()-self.height()-10
         if rect and not rect.isNull() and rect.center().y()<bounds.top()+50:y=bounds.top()+10
@@ -445,5 +539,5 @@ class Flyout(QWidget):
 
 def adaptive_height(count,available_height,detail=False):
     maximum=max(160,min(760,round(available_height*.78),available_height-20))
-    desired=max(286,214+max(1,count)*70+max(0,count-1)*6)
+    desired=max(316,244+max(1,count)*70+max(0,count-1)*6)
     return min(maximum,max(430,desired) if detail else desired)

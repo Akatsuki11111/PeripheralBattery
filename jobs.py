@@ -84,7 +84,7 @@ class WorkerJob(QObject):
 
     def cleanup(self):
         if self.tree:self.tree.close()
-        for path in (self.path,self.result_path,self.path.with_name(self.nonce+'.started.json')):
+        for path in (self.path,self.result_path,self.path.with_name(self.nonce+'.started.json'),self.path.with_name(self.nonce+'.progress.json')):
             try:path.unlink(missing_ok=True)
             except OSError:pass
         self.deleteLater()

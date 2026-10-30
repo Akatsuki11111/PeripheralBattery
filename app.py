@@ -13,6 +13,7 @@ def main():
     parser.add_argument('--background',action='store_true')
     parser.add_argument('--autostart',action='store_true',help='由当前用户登录启动任务调用')
     parser.add_argument('--worker',metavar='REQUEST')
+    parser.add_argument('--apply-update',metavar='REQUEST')
     parser.add_argument('--diagnose',action='store_true')
     parser.add_argument('--diagnose-mchose',action='store_true',help='仅诊断迈从状态接口，结果不含设备路径或序列号')
     parser.add_argument('--diagnose-hid',action='store_true',help='导出外设身份和 Feature 描述诊断，不读取键鼠输入')
@@ -24,6 +25,9 @@ def main():
     parser.add_argument('--demo',action='store_true',help='明确标注的演示数据，不查询硬件')
     parser.add_argument('--demo-count',type=int,default=3)
     args=parser.parse_args()
+    if args.apply_update:
+        from installer import apply_update
+        return apply_update(args.apply_update)
     # Dispatch before importing Qt. The GUI can terminate a blocked native worker.
     if args.worker:
         from process_tree import join_worker_job
@@ -113,6 +117,13 @@ def main():
     menu.addSeparator();quit_action=menu.addAction('退出');tray.setContextMenu(menu)
     controller=ScanController(store,preferences,logger,app)
     flyout.research_controller=controller
+    def install_update(info):
+        from installer import prepare_update
+        try:prepare_update(info)
+        except (OSError,ValueError) as error:
+            flyout.update_button.setToolTip(str(error));flyout.update_button.setText('安装失败，重试');flyout.download_progress.setFormat('安装未启动，可重试');return
+        QTimer.singleShot(0,quit_app)
+    flyout.installUpdateRequested.connect(install_update)
     from learning_jobs import LearningController
     learning=LearningController(controller,app);flyout.learning=learning
     def learning_changed():

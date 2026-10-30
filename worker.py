@@ -115,6 +115,16 @@ def probe(group,diagnostics=None):
 
 def execute(request):
     operation=request.get('operation')
+    if operation=='check-updates':
+        from updates import check_updates
+        from settings import VERSION
+        return {'update':check_updates(VERSION,request.get('include_prereleases') is True)}
+    if operation=='download-update':
+        from updates import download_update
+        from settings import VERSION
+        def progress(received,total):atomic_json(data_dir()/'workers'/(request['nonce']+'.progress.json'),{'received':received,'total':total})
+        return {'download':download_update(VERSION,request.get('include_prereleases') is True,request.get('tag'),
+                    data_dir()/'updates'/(request['nonce']+'.exe'),progress)}
     if operation=='inventory':
         return {'groups':enumerate_groups(request.get('overrides',{}))}
     if operation=='probe':

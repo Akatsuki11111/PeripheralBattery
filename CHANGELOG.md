@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.4.0 (experimental)
+- Add current version and stable/experimental GitHub Release checks.
+- Add in-app download progress and cancellation, SHA256 verification, restart installation and rollback backups.
+- Preserve application preferences and the fixed startup executable.
+- 154 regression tests pass; old versions require a one-time manual upgrade.
+
+
 ## v2.3.1 (experimental)
 - Add 35 exact Valkyrie model identifiers from the official VK HUB catalog; exclude shared OEM IDs from unconditional brand recognition.
 - Prefer known catalog model names over generic USB receiver strings.
