@@ -118,9 +118,9 @@ class ScanController(QObject):
             paths=(hid_paths,usb_audio_device_ids()) if hid_paths is not None else None
         except Exception:paths=None
         changed=paths is None or paths!=self.paths
-        if force or changed or time.monotonic()-self.last_inventory>60 or not self.inventory:
+        if force or changed or time.monotonic()-self.last_inventory>30 or not self.inventory:
             self.paths=paths
-            job=WorkerJob({'operation':'inventory','overrides':self.preferences.get('brand_overrides',{})},9000,self)
+            job=WorkerJob({'operation':'inventory','overrides':self.preferences.get('brand_overrides',{})},12000,self)
             self.jobs.add(job);job.finished.connect(lambda result:self._inventory_done(job,result));job.start()
         else:self._start_queries()
 

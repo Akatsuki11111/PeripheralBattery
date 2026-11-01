@@ -1,1 +1,4 @@
-{"version":"2.6.1-experimental.1","channel":"experimental"}
+{
+  "version": "2.7.0",
+  "channel": "stable"
+}

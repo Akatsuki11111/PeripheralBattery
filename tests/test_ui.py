@@ -76,6 +76,8 @@ class UiTests(unittest.TestCase):
         d=replace(self.devices[0],key='pad',kind='gamepad',brand='BETOP',name='北通鲲鹏',percent=None,battery_grade='中')
         self.flyout.rebuild([d],[]);self.assertEqual(self.flyout.cards['pad'].value_label.text(),'中')
         self.flyout.show_detail('pad');self.assertIn('非百分比',self.flyout.detail_labels['当前电量'].text())
+        self.assertEqual(self.flyout.cards['pad'].bar.grade,'中');self.assertFalse(self.flyout.cards['pad'].bar.stale)
+        self.assertIn('分档电量',self.flyout.summary.text())
         for size in (16,20,32,64):self.assertFalse(tray_icon(d).pixmap(size,size).isNull())
     def test_native_icon_sizes_and_all_brand_icons(self):
         from catalog import brands

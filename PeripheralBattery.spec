@@ -10,11 +10,11 @@ root=Path(SPECPATH)
 sys.path.insert(0,str(root))
 channel=os.environ.get('PB_BUILD_CHANNEL','stable')
 if channel not in ('stable','experimental'):raise ValueError('Invalid build channel')
-version='2.6.0' if channel=='stable' else '2.6.1-experimental.1'
+version='2.7.0' if channel=='stable' else '2.7.1-experimental.1'
 generated=Path(CONF['workpath'])/'channel';generated.mkdir(parents=True,exist_ok=True)
 (generated/'release.json').write_text(json.dumps(dict(version=version,channel=channel)),encoding='utf-8')
 version_text=(root/'version_info.txt').read_text(encoding='utf-8')
-numeric='2,6,0,0' if channel=='stable' else '2,6,1,1'
+numeric='2,7,0,0' if channel=='stable' else '2,7,1,1'
 version_text=re.sub(r'filevers=\([^)]*\),prodvers=\([^)]*\)',f'filevers=({numeric}),prodvers=({numeric})',version_text)
 version_text=re.sub(r"(StringStruct\('(?:FileVersion|ProductVersion)',')[^']*",lambda m:m[1]+version,version_text)
 (generated/'version_info.txt').write_text(version_text,encoding='utf-8')

@@ -38,6 +38,8 @@ class Device:
     voltage_mv: int | None = None
     usb_keyboard: bool = False
     battery_grade: str = ''
+    last_battery_grade: str = ''
+    battery_cache: bool = True
     protocol_model_id: int | None = None
 
     @property
@@ -48,8 +50,17 @@ class Device:
     def reading_text(self):
         return ('有线' if self.power_mode=='wired' else '辅助设备' if self.kind=='auxiliary'
                 else ('约' if self.approximate else '')+f'{self.percent}%' if self.usable
-                else f'{self.percent}%?' if self.experimental else ('约' if self.approximate else '')+f'{self.last_percent}%' if self.cached
-                else self.battery_grade if self.connected is True and not self.stale and self.battery_grade else '—')
+                else f'{self.percent}%?' if self.experimental else self.battery_grade if self.fresh_grade
+                else (('约' if self.approximate else '')+f'{self.last_percent}%' if self.last_percent is not None else self.last_battery_grade) if self.cached else '—')
+
+    @property
+    def fresh_grade(self):
+        return (self.power_mode!='wired' and self.present and self.connected is True and self.confidence=='confirmed'
+                and not self.stale and self.battery_grade in ('耗尽','低','中','高','满'))
+
+    @property
+    def display_grade(self):
+        return self.battery_grade if self.fresh_grade else self.last_battery_grade if self.cached and self.last_percent is None else ''
 
     @property
     def last_read_time(self):
@@ -64,8 +75,8 @@ class Device:
 
     @property
     def cached(self):
-        return (self.present and not self.usable and self.power_mode!='wired' and self.kind!='auxiliary'
-                and valid_percent(self.last_percent) is not None and self.last_observed_at>0
+        return (self.battery_cache and self.present and not self.usable and not self.fresh_grade and self.power_mode!='wired' and self.kind!='auxiliary'
+                and (valid_percent(self.last_percent) is not None or self.last_battery_grade in ('耗尽','低','中','高','满')) and self.last_observed_at>0
                 and 0<=time.time()-self.last_observed_at<86400)
 
     @property
@@ -91,7 +102,7 @@ class Device:
         if self.experimental:return '实验推测 · 待核实' if self.connected is True else '实验推测 · 远端未确认'
         if self.connected is False:
             return ('休眠 / 关闭 · 上次 '+self.last_read_time if self.cached else '休眠或已关闭') if self.receiver else '已断开 · 上次 '+self.last_read_time if self.cached else '已断开'
-        if self.percent is not None and self.stale:
+        if (self.percent is not None or self.battery_grade) and self.stale:
             return '读数已过期'
         if self.connected is None:
             if self.cached:return '连接待确认 · 上次 '+self.last_read_time
@@ -101,7 +112,7 @@ class Device:
             return '已识别 · 电量未知' if self.battery_support == 'identify-only' else '连接待确认'
         if self.charging:
             return '正在充电'
-        if self.battery_grade:return '已连接 · 四档电量'
+        if self.fresh_grade:return '已连接 · 分档电量'
         return '已连接' if self.percent is not None else '已连接 · 电量未知'
 
     def to_dict(self):
@@ -117,12 +128,15 @@ class Device:
             if not isinstance(data.get(key), str) or not data[key] or len(data[key]) > 240:
                 raise ValueError('Invalid device identity')
         data['kind'] = data.get('kind') if data.get('kind') in ('mouse', 'keyboard', 'headset','gamepad','auxiliary') else 'mouse'
-        data['battery_grade']=data.get('battery_grade') if data.get('battery_grade') in ('耗尽','低','中','高') and data.get('connected') is True else ''
+        data['battery_grade']=data.get('battery_grade') if data.get('battery_grade') in ('耗尽','低','中','高','满') and data.get('connected') is True else ''
+        data['last_battery_grade']=data.get('last_battery_grade') if data.get('last_battery_grade') in ('耗尽','低','中','高','满') else ''
+        data['battery_cache']=data.get('battery_cache') is not False
         model_id=data.get('protocol_model_id')
         data['protocol_model_id']=model_id if type(model_id) is int and 0<model_id<0xffffffff else None
         data['power_mode']=data.get('power_mode') if data.get('power_mode') in ('unknown','wired','battery') else 'unknown'
         data['usb_keyboard']=data.get('usb_keyboard') is True and data['kind']=='keyboard'
-        if data['power_mode']=='wired' or data['kind']=='auxiliary':data.update(percent=None,last_percent=None,charging=None,voltage_mv=None)
+        if data['power_mode']=='wired' or data['kind']=='auxiliary':data.update(percent=None,last_percent=None,charging=None,voltage_mv=None,battery_grade='',last_battery_grade='')
+        if not data['battery_cache']:data.update(last_percent=None,last_battery_grade='',last_observed_at=0)
         voltage=data.get('voltage_mv')
         data['voltage_mv']=voltage if type(voltage) is int and 2000<=voltage<=5000 else None
         if data.get('connected') is not True:data['voltage_mv']=None

@@ -22,7 +22,7 @@ REFRESH_INTERVALS=(5,15,30,60)
 
 def probe_timeout_ms(backend):
     # Some receivers need several seconds for their read-only status exchange.
-    return {'corsair':13_000,'logitech':12_000,'razer':11_000,'lofree':9_000,'gamepad':10_000}.get(backend,6500)
+    return {'corsair':13_000,'logitech':12_000,'razer':11_000,'lofree':9_000,'gamepad':13_000}.get(backend,6500)
 
 
 def data_dir():
@@ -140,8 +140,8 @@ class DeviceStore:
                                        note='正式版不加载实验推测值；需要设备的有效电量应答。')
                     if time.time() - device.last_seen < self.RETENTION:
                         if not device.last_observed_at:
-                            if device.usable:
-                                device=replace(device,last_percent=device.percent,last_observed_at=device.observed_at)
+                            if device.usable or device.fresh_grade:
+                                device=self._with_last(device,device)
                             else:
                                 valid=[p for p in self.history.samples(device.key) if p['percent'] is not None]
                                 if valid and valid[-1]['percent']==device.last_percent:
@@ -170,7 +170,7 @@ class DeviceStore:
             children=[d for d in old.values() if d.identity==device.identity and ':paired:' in d.key]
             if children:
                 for child in children:
-                    fresh=child.usable and now-child.observed_at<90
+                    fresh=(child.usable or child.fresh_grade) and now-child.observed_at<90
                     result[child.key]=replace(child,present=True,last_seen=now,brand=device.brand,
                         connected=child.connected if fresh else None,percent=child.percent if fresh else None)
                 continue
@@ -191,14 +191,16 @@ class DeviceStore:
                     device=replace(device,brand=previous.brand,name=previous.name)
                 last = device.last_percent if device.last_percent is not None else previous.last_percent
                 device = replace(device, last_percent=device.percent if device.percent is not None else last,
+                                 last_battery_grade=previous.last_battery_grade,
                                  last_observed_at=previous.last_observed_at,
                                  approximate=previous.approximate if device.percent is None else device.approximate)
-                if (device.percent is None and device.connected is None and previous.present and
-                        (previous.usable or EXPERIMENTAL_ENABLED and previous.experimental) and time.time()-previous.observed_at<90):
+                if (device.percent is None and device.connected is None and previous.present and device.battery_cache and previous.battery_cache and
+                        (previous.usable or previous.fresh_grade or EXPERIMENTAL_ENABLED and previous.experimental) and time.time()-previous.observed_at<90):
                     device=replace(device,percent=previous.percent,connected=previous.connected,charging=previous.charging,
+                                   battery_grade=previous.battery_grade,
                                    confidence=previous.confidence,observed_at=previous.observed_at,monotonic_at=previous.monotonic_at,
                                    source=previous.source,voltage_mv=previous.voltage_mv,approximate=previous.approximate,note='正在刷新，暂显示最近一次有效应答。')
-            if device.usable:device=replace(device,last_percent=device.percent,last_observed_at=device.observed_at)
+            device=self._with_last(device,device)
             result[device.key] = replace(device, last_seen=now)
         for key, previous in old.items():
             if key not in result and key not in migrated and now - previous.last_seen < self.RETENTION:
@@ -235,11 +237,16 @@ class DeviceStore:
 
     @staticmethod
     def _with_last(current,previous):
+        if not current.battery_cache or current.power_mode=='wired' or current.kind=='auxiliary':
+            return replace(current,last_percent=None,last_battery_grade='',last_observed_at=0)
         if current.usable:
-            return replace(current,last_percent=current.percent,last_observed_at=current.observed_at)
+            return replace(current,last_percent=current.percent,last_battery_grade='',last_observed_at=current.observed_at)
+        if current.fresh_grade:
+            return replace(current,last_percent=None,last_battery_grade=current.battery_grade,last_observed_at=current.observed_at)
         if current.protocol_model_id is not None and current.protocol_model_id!=previous.protocol_model_id:
-            return replace(current,last_percent=None,last_observed_at=0)
+            return replace(current,last_percent=None,last_battery_grade='',last_observed_at=0)
         return replace(current,last_percent=previous.last_percent,last_observed_at=previous.last_observed_at,
+                       last_battery_grade=previous.last_battery_grade,
                        charging=None if current.connected is not True else current.charging)
 
     def snapshot(self):

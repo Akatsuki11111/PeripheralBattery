@@ -3814,7 +3814,7 @@
       "vid": "045E",
       "pid": "0B0C",
       "brand": "xbox",
-      "name": "Xbox One Controller",
+      "name": "Xbox Adaptive · Bluetooth",
       "kind": "gamepad",
       "backend": "gamepad",
       "source": "https://github.com/mdqinc/SDL_GameControllerDB"
@@ -3832,7 +3832,7 @@
       "vid": "045E",
       "pid": "0B20",
       "brand": "xbox",
-      "name": "Xbox One Controller",
+      "name": "Xbox One S · BLE",
       "kind": "gamepad",
       "backend": "gamepad",
       "source": "https://github.com/mdqinc/SDL_GameControllerDB"
@@ -8421,6 +8421,87 @@
       "receiver": true,
       "backend": "gamepad",
       "source": "本机 Zikway HID zkm 控制集合；该共享 ID 亦见 https://github.com/feshinkof-boop/armorx-toolkit ，不据此独断型号"
+    },
+    {
+      "vid": "045E",
+      "pid": "02D1",
+      "brand": "xbox",
+      "name": "Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/main/src/joystick/usb_ids.h"
+    },
+    {
+      "vid": "045E",
+      "pid": "02DD",
+      "brand": "xbox",
+      "name": "Xbox One",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/main/src/joystick/usb_ids.h"
+    },
+    {
+      "vid": "045E",
+      "pid": "02EA",
+      "brand": "xbox",
+      "name": "Xbox One S",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/main/src/joystick/usb_ids.h"
+    },
+    {
+      "vid": "045E",
+      "pid": "02E0",
+      "brand": "xbox",
+      "name": "Xbox One S · Bluetooth",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/main/src/joystick/usb_ids.h"
+    },
+    {
+      "vid": "045E",
+      "pid": "02E3",
+      "brand": "xbox",
+      "name": "Xbox Elite Series 1",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/main/src/joystick/usb_ids.h"
+    },
+    {
+      "vid": "045E",
+      "pid": "0B00",
+      "brand": "xbox",
+      "name": "Xbox Elite Series 2",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/main/src/joystick/usb_ids.h"
+    },
+    {
+      "vid": "045E",
+      "pid": "0B05",
+      "brand": "xbox",
+      "name": "Xbox Elite Series 2 · Bluetooth",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/main/src/joystick/usb_ids.h"
+    },
+    {
+      "vid": "045E",
+      "pid": "0B12",
+      "brand": "xbox",
+      "name": "Xbox Series X|S",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/main/src/joystick/usb_ids.h"
+    },
+    {
+      "vid": "045E",
+      "pid": "0B21",
+      "brand": "xbox",
+      "name": "Xbox Adaptive · BLE",
+      "kind": "gamepad",
+      "backend": "gamepad",
+      "source": "https://github.com/libsdl-org/SDL/blob/main/src/joystick/usb_ids.h"
     }
   ],
   "notes": [

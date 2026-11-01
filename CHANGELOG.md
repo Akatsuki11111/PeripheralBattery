@@ -1,5 +1,19 @@
 # Changelog
 
+## v2.7.1-experimental.1 (experimental)
+- Retain guided battery research and long observations; share all controller improvements from stable v2.7.0.
+- Keep experimental mappings separate from trusted readings; no new claim that unknown protocols can be inferred automatically.
+
+## v2.7.0 (stable)
+- Enumerate both Windows RawGameController and Gamepad, including native GIP/wireless-adapter controllers absent from hidapi.
+- Add Xbox One/S/Series/Elite/Adaptive USB/Bluetooth/BLE identities and conservative model-family matching.
+- Add current-connected Bluetooth PnP/AEP battery properties and independently decoded Xbox report 0x04, with read-only input-report fallback.
+- Preserve XInput/Bluetooth grades as grades; show segmented bars and legible tray glyphs without invented percentages.
+- Cache last valid grade and timestamp during sleep; do not persist battery across anonymous XInput slot reassignment.
+- Route equal-model native controllers by opaque ID hashes, never list order; reject missing identities and synthetic full-capacity reports.
+- 244 regression tests pass. No physical Xbox hardware was available; different firmware/transport combinations still require hardware validation.
+- Stable continues to omit all battery experiment/observation runtime modules; signed server-only update policy is unchanged.
+
 ## v2.6.1-experimental.1 (experimental)
 - Keep guided adaptation/long observations and prioritize verified device-specific status protocols.
 - End immediately when validated battery data is found; skip declared padding-only Feature reports and stop when no usable channel exists.

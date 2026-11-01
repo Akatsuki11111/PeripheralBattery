@@ -145,13 +145,14 @@ def main():
         state['devices']=devices;state['errors']=errors;flyout.rebuild(devices,errors)
         if args.demo:flyout.summary.setText('演示数据 · 不代表真实设备')
         available=visible_devices(devices,preferences)
-        low=lowest(available);pinned=next((d for d in available if d.key==preferences.get('pinned_key') and (d.usable or d.cached)),None)
+        low=lowest(available);pinned=next((d for d in available if d.key==preferences.get('pinned_key') and (d.usable or d.fresh_grade or d.cached)),None)
         cached=next((d for d in available if d.key==state.get('tray_key') and d.cached),None)
-        chosen=pinned or low or cached or max((d for d in available if d.cached),key=lambda d:d.last_observed_at,default=None)
+        grade=min((d for d in available if d.fresh_grade),key=lambda d:({'耗尽':0,'低':1,'中':2,'高':3,'满':4}[d.battery_grade],d.key),default=None)
+        chosen=pinned or low or grade or cached or max((d for d in available if d.cached),key=lambda d:d.last_observed_at,default=None)
         state['tray_key']=chosen.key if chosen else '';tray.setIcon(tray_icon(chosen))
-        ordered=sorted(available,key=lambda d:(d.key!=(chosen.key if chosen else ''),not d.usable,d.name))
+        ordered=sorted(available,key=lambda d:(d.key!=(chosen.key if chosen else ''),not (d.usable or d.fresh_grade),d.name))
         tip='设备电量'+(' · 演示数据' if args.demo else '')+'\n'+'\n'.join(
-            d.name+'：'+(d.reading_text if d.power_mode=='wired' or d.usable or d.cached or d.battery_grade else '不适用' if d.kind=='auxiliary' else '未知')+' · '+d.status for d in ordered)
+            d.name+'：'+(d.reading_text if d.power_mode=='wired' or d.usable or d.fresh_grade or d.cached else '不适用' if d.kind=='auxiliary' else '未知')+' · '+d.status for d in ordered)
         tray.setToolTip(tip[:127]);state['theme']=(windows.is_dark(),windows.is_taskbar_dark())
         threshold=preferences.get('low_threshold',20)
         newly_low=collect_low_alerts(available,state['alerts'],threshold,

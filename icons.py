@@ -136,7 +136,8 @@ def tray_pixmap(device, size, dark=None):
     # lets the font rasterizer hint strokes for 16/20/24px rather than resampling.
     number_height = round(size * .64)
     number_area = QRectF(0, 0, size, number_height)
-    text = ('~' if device and device.approximate and device.usable else '')+str(value) if value is not None else '–'
+    text = ('~' if device and device.approximate and device.usable else '')+str(value) if value is not None else device.display_grade if device and device.display_grade else '–'
+    if text=='耗尽':text='空'  # One legible glyph even in Windows' 16px tray slot.
     number_font, bounds = tray_number_font(text, size, number_area)
     painter.setFont(number_font)
     painter.setPen(QColor(color))
@@ -146,7 +147,7 @@ def tray_pixmap(device, size, dark=None):
     kind = device.kind if device else 'battery'
     gap = max(1, round(size * .04))
     badge = QRectF(0, number_height + gap, size, size - number_height - 2 * gap)
-    draw_tray_device(painter, kind, badge, color, bool(device and device.usable and device.charging), dark)
+    draw_tray_device(painter, kind, badge, color, bool(device and (device.usable or device.fresh_grade) and device.charging), dark)
     painter.end()
     return pm
 
@@ -204,12 +205,19 @@ class BrandIcon(QWidget):
 
 class BatteryBar(QWidget):
     def __init__(self,parent=None):
-        super().__init__(parent);self.value=None;self.charging=False;self.stale=False
+        super().__init__(parent);self.value=None;self.grade='';self.charging=False;self.stale=False
         self.setFixedHeight(8)
 
     def paintEvent(self,event):
         p=QPainter(self);p.setRenderHint(QPainter.RenderHint.Antialiasing)
         p.setPen(Qt.PenStyle.NoPen)
+        if self.grade and self.value is None:
+            filled={'耗尽':0,'低':1,'中':2,'高':3,'满':4}.get(self.grade,0)
+            width=max(1,(self.width()-9)/4)
+            for i in range(4):
+                color=('#858585' if self.stale else '#c42b1c' if filled<=1 else windows.accent()) if i<filled else ('#525252' if windows.is_dark() else '#d6d6d6')
+                p.setBrush(QColor(color));p.drawRoundedRect(QRectF(i*(width+3),2,width,4),2,2)
+            return
         p.setBrush(QColor('#525252' if windows.is_dark() else '#d6d6d6'))
         p.drawRoundedRect(QRectF(0,2,self.width(),4),2,2)
         if self.value is not None:

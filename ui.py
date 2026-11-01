@@ -82,12 +82,12 @@ class DeviceCard(QFrame):
         type_name=d.type_name
         self.kind_label=kind;self.status_label=label(type_name+' · '+d.status,11,True)
         status.addWidget(self.status_label);status.addStretch();center.addLayout(status)
-        bar=BatteryBar();bar.value=d.display_percent;bar.stale=not d.usable;bar.charging=d.charging if d.usable else False
+        bar=BatteryBar();bar.value=d.display_percent;bar.grade=d.display_grade;bar.stale=not (d.usable or d.fresh_grade);bar.charging=d.charging if d.usable or d.fresh_grade else False
         self.bar=bar;bar.setVisible(d.power_mode!='wired' and d.kind!='auxiliary');center.addWidget(bar);row.addLayout(center,1)
         pct=QVBoxLayout();pct.setSpacing(0)
         value=label(d.reading_text,20 if d.kind!='auxiliary' else 13,bold=True)
-        value.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else 'XInput 四档电量，非百分比' if d.battery_grade else d.approximate or '实时电量')
-        if not d.usable:value.setObjectName('muted')
+        value.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else '分档电量，非百分比' if d.battery_grade else d.approximate or '实时电量')
+        if not (d.usable or d.fresh_grade):value.setObjectName('muted')
         value.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter);pct.addWidget(value)
         self.value_label=value;self.brand_label=label(d.brand if d.brand!='Unknown' else '品牌待指定',10,True);pct.addWidget(self.brand_label);row.addLayout(pct)
         arrow=label(GLYPHS['chevron'],11,True);arrow.setObjectName('glyph');arrow.setFont(font(11,icons=True));row.addWidget(arrow)
@@ -99,12 +99,12 @@ class DeviceCard(QFrame):
         self.kind_label.setText(GLYPHS.get(d.kind,GLYPHS['mouse']))
         self.status_label.setText(d.type_name+' · '+d.status)
         self.status_label.setToolTip(d.note);self.value_label.setText(d.reading_text)
-        self.value_label.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else 'XInput 四档电量，非百分比' if d.battery_grade else d.approximate or '实时电量')
-        tone='' if d.usable else 'muted'
+        self.value_label.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else '分档电量，非百分比' if d.battery_grade else d.approximate or '实时电量')
+        tone='' if d.usable or d.fresh_grade else 'muted'
         if self.value_label.objectName()!=tone:
             self.value_label.setObjectName(tone);self.value_label.style().unpolish(self.value_label);self.value_label.style().polish(self.value_label)
         self.brand_label.setText(d.brand if d.brand!='Unknown' else '品牌待指定')
-        self.bar.value=d.display_percent;self.bar.stale=not d.usable;self.bar.charging=d.charging if d.usable else False;self.bar.update()
+        self.bar.value=d.display_percent;self.bar.grade=d.display_grade;self.bar.stale=not (d.usable or d.fresh_grade);self.bar.charging=d.charging if d.usable or d.fresh_grade else False;self.bar.update()
         self.bar.setVisible(d.power_mode!='wired' and d.kind!='auxiliary')
         self.setAccessibleName(d.name+'，'+d.status+'，'+self.value_label.text())
 
@@ -330,7 +330,7 @@ class Flyout(QWidget):
         present=sum(d.present for d in devices)
         wired=sum(d.present and d.power_mode=='wired' and d.kind!='auxiliary' for d in displayed)
         pending=sum(d.usb_keyboard and d.power_mode=='unknown' and d.connected is None for d in displayed)
-        self.summary.setText(f'{count} 台电池设备在线 · {wired} 台有线'+(f' · {pending} 台 USB 待确认' if pending else '')+' · '+(f'最低 {low.percent}%' if low else '暂无有效电量'))
+        self.summary.setText(f'{count} 台电池设备在线 · {wired} 台有线'+(f' · {pending} 台 USB 待确认' if pending else '')+' · '+(f'最低 {low.percent}%' if low else '已获取分档电量' if any(d.fresh_grade for d in displayed) else '暂无有效电量'))
         self.statusline.setText(errors[0] if errors else '托盘显示最低电量');self.statusline.setVisible(bool(errors))
         self.refresh_choice.blockSignals(True);self.refresh_choice.setCurrentIndex(REFRESH_INTERVALS.index(self.preferences.get('refresh_seconds',15)));self.refresh_choice.blockSignals(False)
         self.statusline.setToolTip('\n'.join(errors) if errors else '仅计算已连接且未过期的有效电量。可把托盘图标拖入或拖出 ^ 溢出区。')
@@ -396,17 +396,20 @@ class Flyout(QWidget):
 
     def detail_values(self,d):
         estimate=self.history.estimate(d)
+        last=(('约' if d.approximate else '')+f'{d.last_percent}%' if d.last_percent is not None else d.last_battery_grade)
+        last_text=(last+' · '+d.last_read_time+' · 非实时') if last and d.last_observed_at else '暂无'
+        battery_stamp=d.observed_at if d.usable or d.fresh_grade else d.last_observed_at
         return [('设备类型',d.type_name),
-                ('当前电量','不适用（有线供电）' if d.power_mode=='wired' else '不适用（辅助设备）' if d.kind=='auxiliary' else ('约' if d.approximate else '')+f'{d.percent}%'+(' · 已过期' if d.stale else '') if d.percent is not None else d.battery_grade+'（XInput 四档，非百分比）' if d.battery_grade else '未知'),
+                ('当前电量','不适用（有线供电）' if d.power_mode=='wired' else '不适用（辅助设备）' if d.kind=='auxiliary' else ('约' if d.approximate else '')+f'{d.percent}%'+(' · 已过期' if d.stale else '') if d.percent is not None else d.battery_grade+'（分档电量，非百分比）' if d.battery_grade else '未知'),
                 ('连接情况',d.status),('USB 接口','已接入' if d.present else '未接入'),('连接方式',d.transport),
                 ('充电状态','不适用' if d.power_mode=='wired' or d.kind=='auxiliary' else '正在充电' if d.charging is True else '未充电' if d.charging is False and d.connected else '未知'),
                 ('连接依据',d.evidence or '未知'),('数据来源',d.source or '暂无'),
-                ('电量更新时间',dt.datetime.fromtimestamp(d.observed_at).strftime('%m-%d %H:%M:%S') if d.observed_at else '暂无读数'),
+                ('电量更新时间',dt.datetime.fromtimestamp(battery_stamp).strftime('%m-%d %H:%M:%S') if battery_stamp else '暂无有效读数'),
                 ('USB 标识',f'{d.vid:04X}:{d.pid:04X}'),('固件信息',d.firmware or '未提供'),
-                ('电量精度',d.approximate or ('设备报告值' if d.percent is not None else '未知')),
+                ('电量精度',d.approximate or ('分档电量，非百分比' if d.display_grade else '设备报告值' if d.percent is not None else '未知')),
                 ('当前电压',f'{d.voltage_mv} mV' if d.usable and d.voltage_mv is not None else '设备未提供' if d.usable else '暂无有效读数'),
                 ('放电速率',estimate.rate_text),('预计剩余',estimate.remaining_text),('估算依据',estimate.reason),
-                ('上次有效值',('约' if d.approximate else '')+f'{d.last_percent}% · '+(dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S') if d.last_observed_at else '时间未知')+' · 非实时' if d.last_percent is not None else '暂无')]
+                ('上次有效值',last_text)]
 
     def clear_history(self,key):
         try:self.history.forget(key);self.show_detail(key)

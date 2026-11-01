@@ -157,7 +157,8 @@ def execute(request):
         return {'download':download_update(VERSION,request.get('include_prereleases') is True,request.get('tag'),
                     data_dir()/'updates'/(request['nonce']+'.exe'),progress)}
     if operation=='inventory':
-        return {'groups':enumerate_groups(request.get('overrides',{}))}
+        from gamepads import augment_inventory
+        return {'groups':augment_inventory(enumerate_groups(request.get('overrides',{})))}
     if operation=='probe':
         diagnostics=[] if request.get('diagnostics') is True else None
         readings=probe(request['group'],diagnostics)
