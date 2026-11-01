@@ -77,7 +77,7 @@ def inspect_features(infos):
     return results
 
 
-def get_feature(infos,expected=None):
+def get_feature(infos,expected=None,reject_blank=False):
     details=[]
     candidates=[i for i in infos if i.get('usage_page',0)>=0xff00 or i.get('usage_page')==0x85]
     for info in candidates[:8]:
@@ -94,11 +94,19 @@ def get_feature(infos,expected=None):
                         item.setdefault('attempts',[]).append({'report_id':channel['report_id'],'status':'feature_read_failed','windows_error':C.get_last_error()});continue
                     if buf[0]!=channel['report_id']:
                         item.setdefault('attempts',[]).append({'report_id':channel['report_id'],'status':'unexpected_report_id'});continue
+                    body=bytes(buf)[1:]
+                    if reject_blank and (all(value==0 for value in body) or all(value==255 for value in body)):
+                        item.setdefault('attempts',[]).append({'report_id':channel['report_id'],'status':'uninitialized_report','length':len(buf)})
+                        if expected is not None:
+                            raise FeatureReadError('uninitialized_report','已锁定的采样通道返回全零/填充数据，未证实为当前设备状态。已停止本次采样；不会自动改换报告通道。',details)
+                        continue
                     return bytes(buf),channel
+        except FeatureReadError:raise
         except (OSError,ValueError) as error:details.append({'interface':info.get('interface_number',-1),'status':'descriptor_unavailable','error':str(error)})
     statuses={d['status'] for d in details}
     attempts=[a for d in details for a in d.get('attempts',[])]
     if not candidates:code='no_vendor_collection';message='没有找到可供此实验使用的厂商或电池集合；普通鼠标输入接口不提供这种采样。'
+    elif attempts and all(item['status']=='uninitialized_report' for item in attempts):code='uninitialized_report';message='已尝试的 Feature 报告均只返回全零/填充数据，未证实是设备状态。可能需要专用查询初始化；已停止，延长观察不能补足缺失的状态通道。'
     elif attempts:code='feature_read_failed';message='系统没有返回可用的 Feature 报告。该设备可能需要专用电量查询，也可能存在接口访问问题，请导出诊断。'
     elif expected is not None and 'channel_changed' in statuses:code='channel_changed';message='原采样通道已改变或报告描述不符，请重新选择设备。'
     elif 'feature_length_limit' in statuses:code='feature_length_limit';message='设备的 Feature 报告长度超过当前实验支持范围，已停止采样。'

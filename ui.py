@@ -172,7 +172,7 @@ class Flyout(QWidget):
         self.update_channel=QComboBox();self.update_channel.setFont(font(10));self.update_channel.setFixedSize(118,28)
         self.update_channel.addItem('正式＋实验',True);self.update_channel.addItem('仅正式版',False)
         self.update_channel.setCurrentIndex(0 if self.preferences.get('update_prereleases',True) else 1)
-        self.update_channel.setToolTip('选择要检查的 GitHub 发布通道');channel_row.addWidget(self.update_channel);controls.addWidget(channel_box,1,0)
+        self.update_channel.setToolTip('选择版本服务器的正式 / 实验发布通道');channel_row.addWidget(self.update_channel);controls.addWidget(channel_box,1,0)
         version_box=QWidget();version_row=QHBoxLayout(version_box);version_row.setContentsMargins(0,0,0,0);version_row.setSpacing(6)
         version_text='v'+VERSION.split('-')[0]+(' · 实验'+VERSION.rsplit('.',1)[-1] if '-' in VERSION and RELEASE_CHANNEL=='experimental' else ' · 正式' if RELEASE_CHANNEL=='stable' else ' · 实验')
         self.version_label=label(version_text,10,True);self.version_label.setToolTip('当前版本：'+VERSION+(' · 实验版' if RELEASE_CHANNEL=='experimental' else ' · 正式版'));version_row.addWidget(self.version_label,1)
@@ -194,7 +194,7 @@ class Flyout(QWidget):
 
     def change_update_channel(self):
         self.preferences.set('update_prereleases',self.update_channel.currentData());self.update_url=None;self.update_candidate=None;self.download_ready=None
-        self.update_button.setText('检查更新');self.update_button.setToolTip('仅在点击时连接 GitHub Releases')
+        self.update_button.setText('检查更新');self.update_button.setToolTip('仅在点击时连接版本管理服务器；验证发布签名后下载')
 
     def check_update(self):
         if self.update_job:return
@@ -203,7 +203,7 @@ class Flyout(QWidget):
         if self.update_url:
             from PySide6.QtCore import QUrl
             from PySide6.QtGui import QDesktopServices
-            if not QDesktopServices.openUrl(QUrl(self.update_url)):self.update_button.setToolTip('无法打开浏览器，请访问 github.com/Akatsuki11111/PeripheralBattery/releases')
+            if not QDesktopServices.openUrl(QUrl(self.update_url)):self.update_button.setToolTip('无法打开浏览器，请访问版本管理服务器 http://updates.example.invalid:8089/')
             return
         from jobs import WorkerJob
         self.update_button.setEnabled(False);self.update_channel.setEnabled(False);self.update_button.setText('正在检查…')
@@ -230,7 +230,7 @@ class Flyout(QWidget):
         import sys
         if not getattr(sys,'frozen',False):self.update_button.setToolTip('源码运行模式请使用 Git 更新');return
         from jobs import WorkerJob
-        self.download_progress.show();self.download_progress.setValue(0);self.download_progress.setFormat('正在连接 GitHub…')
+        self.download_progress.show();self.download_progress.setValue(0);self.download_progress.setFormat('正在连接版本服务器…')
         self.cancel_download.show();self.update_button.setEnabled(False);self.update_channel.setEnabled(False)
         job=WorkerJob({'operation':'download-update','tag':self.update_candidate['latest'],
                        'include_prereleases':self.update_channel.currentData()},1800000,self)

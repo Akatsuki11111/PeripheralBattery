@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-10-30",
+  "updated": "2026-11-01",
   "brands": [
     {
       "id": "logitech",
@@ -3440,10 +3440,11 @@
       "vid": "374A",
       "pid": "A318",
       "name": "VK M5 Lite",
-      "backend": "",
+      "backend": "valkyrie_ry_usb",
       "brand": "valkyrie",
       "kind": "mouse",
-      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js"
+      "source": "https://vkhub.valkyrie.com.cn/js/index.a2394467.js",
+      "battery_protocol_note": "USB driver seeds 100%; not a verified battery response"
     },
     {
       "vid": "374A",

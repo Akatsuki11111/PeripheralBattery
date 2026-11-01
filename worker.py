@@ -51,6 +51,28 @@ def probe(group,diagnostics=None):
     infos=[decode_info(item) for item in group['infos']]
     base=group['device'];backend=group['backend']
     records=[]
+    if backend=='valkyrie_ry_usb':
+        return [{'name':base['name'],'percent':None,'connected':True,'charging':None,'confidence':'unknown',
+                 'source':'M5 Lite USB 设备节点','power_mode':'battery','transport':'USB（含电池）',
+                 'battery_support':'identify-only','evidence':'已识别 VK M5 Lite 的 USB 型号标识',
+                 'note':'USB 模式的官方代码直接填充 100%，不是电池应答，未采用。请拔线并通过 2.4G 接收器读取真实电量；当前充电标志未知。'}]
+    if backend=='valkyrie_ry':
+        from valkyrie_ry import query_receiver
+        matching=[i for i in infos if i.get('interface_number')==2 and i.get('usage_page')==0xffff and i.get('usage')==2]
+        if len(matching)!=1:raise ValueError('RY 接收器状态接口不唯一或不可用')
+        result=query_receiver(matching[0]);status=result['status'];model=result['model'];model_id=result['model_id']
+        reading={'name':model[1] if model else base['name'],'percent':status.percent if model else None,'connected':status.online,
+                 'charging':None,'kind':'mouse','receiver':True,'transport':'2.4 GHz 接收器','power_mode':'battery',
+                 'confidence':'confirmed' if status.online and model is not None else 'unknown',
+                 'battery_support':'supported','source':f'RY F7 / 8F · 型号 {model_id}' if model_id else f'RY F7 离线状态 · 上次型号 {base.get("protocol_model_id") or "未知"}',
+                 'observed_at':time.time(),'monotonic_at':time.monotonic(),
+                 'evidence':f'官方 RY 状态协议；鼠标型号 ID {model_id}' if model_id else '接收器存在，远端鼠标未在线',
+                 'note':'已确认无线在线并读取电池字段；协议未提供已验证的充电标志。' if status.online else '鼠标休眠、关闭或正使用 USB；接收器里的历史百分比未作为实时读数。'}
+        if model:reading['brand']=model[0]
+        elif status.online:reading.update(brand='Unknown',name=f'RY 无线鼠标（型号 ID {model_id}）',
+                                         note='已确认接收器协议和鼠标在线，但该型号尚未验证电池字段，未采用为实时电量。')
+        if model_id is not None:reading['protocol_model_id']=model_id
+        return [reading]
     if backend=='gamepad':
         from gamepads import query_gamepad
         return [query_gamepad(group,infos,diagnostics)]

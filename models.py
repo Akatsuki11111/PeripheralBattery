@@ -38,6 +38,7 @@ class Device:
     voltage_mv: int | None = None
     usb_keyboard: bool = False
     battery_grade: str = ''
+    protocol_model_id: int | None = None
 
     @property
     def type_name(self):
@@ -117,6 +118,8 @@ class Device:
                 raise ValueError('Invalid device identity')
         data['kind'] = data.get('kind') if data.get('kind') in ('mouse', 'keyboard', 'headset','gamepad','auxiliary') else 'mouse'
         data['battery_grade']=data.get('battery_grade') if data.get('battery_grade') in ('耗尽','低','中','高') and data.get('connected') is True else ''
+        model_id=data.get('protocol_model_id')
+        data['protocol_model_id']=model_id if type(model_id) is int and 0<model_id<0xffffffff else None
         data['power_mode']=data.get('power_mode') if data.get('power_mode') in ('unknown','wired','battery') else 'unknown'
         data['usb_keyboard']=data.get('usb_keyboard') is True and data['kind']=='keyboard'
         if data['power_mode']=='wired' or data['kind']=='auxiliary':data.update(percent=None,last_percent=None,charging=None,voltage_mv=None)

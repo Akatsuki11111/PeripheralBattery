@@ -60,7 +60,8 @@ class ResearchDrawer(QDialog):
    '现在插上充电线；程序会等待已知协议中的充电标志翻转，最多约 45 秒。',
    '充电状态已确认，采集 3 份同一接口状态报告。',
    '以下差分只是低置信度线索。点击“保存证据”仅保存在本机，不会自动用于显示电量。']
-  self.heading.setText(f'第 {self.stage+1} / 6 步 · {titles[self.stage]}')
+  titles.append('专用协议验证完成');descriptions.append('已从设备专用状态查询获得电量，不再通过插拔差分猜测字段；可以关闭窗口或再次查询。')
+  self.heading.setText('已完成 · 专用协议验证' if self.stage==6 else f'第 {self.stage+1} / 6 步 · {titles[self.stage]}')
   manual=bool(self.before and self.before[0].get('charging') is None)
   if self.stage==3 and manual:descriptions[3]='现在插上充电线，再点击“我已插线”。未知 Feature 报告没有已验证的充电标志，本阶段由你的操作标注。'
   self.text.setText(message or descriptions[self.stage]);self.choices.setVisible(self.stage==0);self.include_supported.setVisible(self.stage==0)
@@ -68,7 +69,7 @@ class ResearchDrawer(QDialog):
   self.diagnostic_button.setEnabled(self.job is None and bool(self.identity if self.stage else self.choices.currentData()))
   self.progress.setVisible(self.stage in (2,3,4));self.back.setEnabled(self.stage>0 and self.job is None)
   self.next.setEnabled(self.job is None and (self.stage!=0 or self.choices.count()>0))
-  self.next.setText('保存证据' if self.stage==5 else '开始检查' if self.stage==1 else '开始采样' if self.stage in (2,4) else '开始等待' if self.stage==3 else '继续')
+  self.next.setText('再次查询' if self.stage==6 else '保存证据' if self.stage==5 else '开始检查' if self.stage==1 else '开始采样' if self.stage in (2,4) else '开始等待' if self.stage==3 else '继续')
   if self.stage==3 and manual:self.next.setText('我已插线')
   self.reject_button.setVisible(self.stage==5);self.reject_button.setEnabled(bool(self.result and self.result['stable_changed']))
   if self.stage==0 and not self.choices.count():self.text.setText('目前没有待适配设备。已适配设备休眠或关闭不会进入这个清单。')
@@ -80,12 +81,13 @@ class ResearchDrawer(QDialog):
    job=self.job;self.job=None;job.cancel()
   self.release_scanner()
  def previous(self):
-  self.halt();self.stage=max(0,self.stage-1)
+  self.halt();self.stage=0 if self.stage==6 else max(0,self.stage-1)
   if self.stage<=1:self.before=[];self.after=[]
   elif self.stage<=3:self.after=[]
   self.details.clear();self.render()
   if self.stage==0:self.show_topology()
  def advance(self):
+  if self.stage==6:self.stage=1
   if self.stage==0:
    self.identity=self.choices.currentData() or '';self.channel=None;self.last_failure=None;self.stage=1;self.details.clear();self.render();return
   if self.stage==5:self.save();return
@@ -119,6 +121,9 @@ class ResearchDrawer(QDialog):
   if self.channel is None:self.channel=s.get('channel')
   if stage==1:
    self.release_scanner()
+   if s.get('protocol_verified') and s.get('remote_confirmed') and s.get('percent') is not None:
+    self.stage=6;self.progress.hide();self.render(f'已验证 {s["name"]}：{s["percent"]}%。'+s.get('protocol_note',''))
+    self.flyout.refreshRequested.emit();return
    if s['charging'] is True:self.render('设备报告仍在充电，请拔掉充电线后重试。');return
    self.stage=2;self.render('接口已返回应答，可以开始拔电采样。未知报告尚不能证明远端在线或充电状态。' if s['charging'] is None else '已确认在线且当前未充电；可以开始拔电采样。');return
   if stage==2:

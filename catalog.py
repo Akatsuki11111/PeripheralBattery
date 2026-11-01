@@ -58,6 +58,8 @@ def kind_for(name, interfaces):
 
 
 def backend_for(vid, pid, name=''):
+    # Shared RY receiver: query its own mouse identity before assigning a brand.
+    if (vid,pid)==(0x3151,0x5045):return 'valkyrie_ry'
     # G3 V2 shares MCHOSE's vendor collections but is known to use another
     # protocol, so the M7/K7 status request must not be sent to it.
     if (vid,pid)==(0x3837,0x4245):return ''

@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.6.0 (stable)
+- Adapt VK M5 Lite through official RY F7 battery/status plus 8F model identity; do not infer brand from shared receiver VID/PID.
+- Reject offline receiver battery cache and official USB fixed-100 placeholder; preserve last valid timestamp and clear cache on model changes.
+- Move all in-app update checks/downloads to VersionHub; bind releases with pinned RSA-2048 signatures and SHA256, with no GitHub fallback or management credentials.
+- Add signed server publishing tools; preserve previous server/GitHub versions.
+- Keep approximately 28.6 MB standalone runtime without further forced size cuts.
+- 218 regression tests pass, including real native signature verification.
+
+
 ## v2.5.1-experimental.1 (experimental)
 - Retain guided battery adaptation, long observations and locally confirmed experimental mappings.
 - Share v2.5.0 controller support, sleep timestamps and trimmed runtime.

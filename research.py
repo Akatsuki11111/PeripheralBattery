@@ -27,9 +27,22 @@ def sample(identity,channel=None):
     if len(groups)!=1:raise ValueError('设备已经断开、重新枚举或身份不唯一，请重新选择。')
     group=groups[0];d=group['device'];backend=group['backend'];profile=device_profile(d['vid'],d['pid'])
     infos=[decode_info(x) for x in group['infos']]
+    if backend=='valkyrie_ry_usb':
+        raise ValueError('M5 Lite USB 模式没有已验证的电池报告；官方 100% 为占位值。请拔线并选择 2.4G 接收器。')
+    if backend=='valkyrie_ry':
+        from valkyrie_ry import query_receiver
+        matching=[i for i in infos if i.get('interface_number')==2 and i.get('usage_page')==0xffff and i.get('usage')==2]
+        if len(matching)!=1:raise ValueError('没有找到唯一的 RY 状态接口')
+        result=query_receiver(matching[0]);status=result['status']
+        if not status.online:raise ValueError('接收器可应答，但远端鼠标离线。插 USB 后的无线链路变化不等于充电标志；请拔线并唤醒鼠标。')
+        if result['model'] is None:raise ValueError(f'已读取 RY 型号 ID {result["model_id"]}，当前型号尚未验证，请导出诊断，勿把相关字段当成已适配电量。')
+        return {'timestamp':time.time(),'hex':status.payload.hex(' '),'length':len(status.payload),'charging':None,'percent':status.percent,
+                'interface':2,'usage_page':0xffff,'usage':2,'backend':backend,'vid':d['vid'],'pid':d['pid'],
+                'name':result['model'][1],'remote_confirmed':True,'protocol_verified':True,
+                'protocol_note':'已找到官方 F7 电池字段与 8F 型号应答；无需插拔差分或等待 1–2 小时。充电标志仍未知。'}
     if not profile or profile.get('backend')!=backend or backend not in ('nova5','nova5_usb','scyrox'):
         from feature_reports import get_feature
-        data,chosen=get_feature(infos,channel)
+        data,chosen=get_feature(infos,channel,reject_blank=True)
         return {'timestamp':time.time(),'hex':data.hex(' '),'length':len(data),'charging':None,'percent':None,
                 'interface':chosen['interface'],'usage_page':chosen['usage_page'],'usage':chosen['usage'],
                 'backend':'feature-get','vid':d['vid'],'pid':d['pid'],'name':d['name'],'channel':chosen,

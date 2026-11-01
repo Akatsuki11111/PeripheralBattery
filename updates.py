@@ -1,16 +1,28 @@
-"""Public GitHub Releases metadata only. Never downloads or executes programs."""
-import json
-import re
-import urllib.request
-import urllib.error
+"""Signed updates from the fixed VersionHub server; no management credentials.
+
+The server currently uses HTTP. A pinned RSA release signature authenticates
+its download hash and release identity; the server's MD5 is never trusted.
+"""
+import base64
+import binascii
 import hashlib
+import json
 import os
 from pathlib import Path
-from urllib.parse import quote,urlsplit
+import re
+import urllib.error
+import urllib.request
+from urllib.parse import urlencode,urlsplit
+from update_signing import verify_envelope
 
-REPOSITORY='Akatsuki11111/PeripheralBattery'
-RELEASES_URL='https://github.com/'+REPOSITORY+'/releases'
-API_URL='https://api.github.com/repos/'+REPOSITORY+'/releases?per_page=100'
+SERVER_ORIGIN='http://updates.example.invalid:8089'
+RELEASES_URL=SERVER_ORIGIN
+API_URL=SERVER_ORIGIN+'/api/v1/update/check'
+APP_KEY='peripheral-battery'
+PLATFORM='windows'
+MANIFEST_MARKER='PB-SIGNED-MANIFEST:'
+MAX_DOWNLOAD_SIZE=256*1024*1024
+PAYLOAD_FIELDS={'app_key','platform','channel','version','version_code','release_id','download_path','size','sha256'}
 
 
 def version_key(tag):
@@ -20,78 +32,164 @@ def version_key(tag):
     return tuple(int(match[i]) for i in (1,2,3))+(1 if pre is None else 0,tuple((0,int(s)) if s.isdigit() else (1,s) for s in pre.split('.')) if pre else ())
 
 
-def select_release(rows,current,include_prereleases=True,current_prerelease=False):
-    local=version_key(current)
-    if local is None:raise ValueError('当前版本格式无效')
-    eligible=[]
-    for release in rows:
-        if not isinstance(release,dict) or release.get('draft') or not release.get('published_at'):continue
-        tag=release.get('tag_name','');key=version_key(tag)
-        if key is None or not include_prereleases and (release.get('prerelease') or key[3]==0):continue
-        eligible.append((key,release))
-    if not eligible:return {'status':'no_release','message':'GitHub 暂无所选通道的发布版本','url':RELEASES_URL}
-    key,release=max(eligible,key=lambda row:row[0]);tag=release['tag_name']
-    url=RELEASES_URL+'/tag/'+quote(tag,safe='')
-    result={'latest':tag,'url':url,'prerelease':bool(release.get('prerelease'))}
-    promotes_stable=key==local and current_prerelease and not release.get('prerelease') and key[3]==1
-    if key<=local and not promotes_stable:
-        return {**result,'status':'current' if key==local else 'ahead','message':'当前已是所选通道最新版本' if key==local else '当前版本较新，所选通道最新为 '+tag}
-    expected='/'+REPOSITORY+'/releases/download/'+quote(tag,safe='')+'/'
-    for asset in release.get('assets',[]):
-        name=asset.get('name','');parsed=urlsplit(asset.get('browser_download_url',''))
-        if (isinstance(name,str) and re.fullmatch(r'PeripheralBattery-v[0-9A-Za-z.+_-]+\.exe',name) and
-            asset.get('state')=='uploaded' and type(asset.get('size')) is int and asset['size']>0 and
-            parsed.scheme=='https' and parsed.netloc=='github.com' and not parsed.query and not parsed.fragment and
-            parsed.path==expected+quote(name,safe='')):
-            digest=asset.get('digest','')
-            return {**result,'status':'available','message':'发现新版 '+tag,
-                    'download_url':asset['browser_download_url'],'size':asset['size'],
-                    'sha256':digest[7:] if isinstance(digest,str) and re.fullmatch('sha256:[a-f0-9]{64}',digest) else ''}
-    return {**result,'status':'unavailable','message':'发现新版 '+tag+'，但尚无可用 Windows 程序；可查看发布页'}
+def _json(raw):
+    def pairs(values):
+        result={}
+        for key,value in values:
+            if key in result:raise ValueError('更新信息含重复字段')
+            result[key]=value
+        return result
+    def invalid_constant(value):raise ValueError('更新信息含无效数字')
+    try:return json.loads(raw,object_pairs_hook=pairs,parse_constant=invalid_constant)
+    except (UnicodeError,TypeError,json.JSONDecodeError) as error:raise ValueError('更新服务器返回格式无效') from error
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self,req,fp,code,msg,headers,newurl):
+        # VersionHub serves binaries directly; refuse redirects before receiving
+        # bytes from any unbound endpoint or origin.
+        return None
+
+
+def _open_url(request,timeout):
+    return urllib.request.build_opener(_NoRedirect()).open(request,timeout=timeout)
+
+
+def _public_key():
+    path=Path(__file__).with_name('assets')/'update-public-key.json'
+    try:
+        raw=path.read_bytes()
+        if len(raw)>4096:raise ValueError('更新发布公钥文件过大')
+        key=_json(raw)
+    except OSError as error:raise ValueError('缺少固定的更新发布公钥') from error
+    if type(key) is not dict:raise ValueError('更新发布公钥无效')
+    return key
+
+
+def _download_url(value,release_id):
+    path='/api/v1/update/download/'+str(release_id)
+    expected=SERVER_ORIGIN+path
+    if value not in (path,expected):raise ValueError('更新下载地址与已签名版本不符')
+    parsed=urlsplit(expected)
+    if parsed.scheme!='http' or parsed.netloc!='updates.example.invalid:8089' or parsed.query or parsed.fragment:
+        raise ValueError('更新下载地址异常')
+    return expected
+
+
+def _signed_release(data,channel):
+    if type(data) is not dict or type(data.get('hasUpdate')) is not bool:
+        raise ValueError('更新服务器返回格式无效')
+    if not data['hasUpdate']:return None
+    changelog=data.get('changelog')
+    if type(changelog) is not str or len(changelog)>4096:
+        raise ValueError('更新发布签名缺失或格式无效')
+    lines=changelog.rstrip('\r\n').splitlines()
+    if not lines or not lines[-1].startswith(MANIFEST_MARKER) or changelog.count(MANIFEST_MARKER)!=1:
+        raise ValueError('更新缺少发布签名，未信任此版本')
+    encoded=lines[-1][len(MANIFEST_MARKER):]
+    if len(encoded)>4096:raise ValueError('更新发布签名过大')
+    try:
+        raw=base64.b64decode(encoded,validate=True)
+        if base64.b64encode(raw).decode('ascii')!=encoded:raise ValueError('更新签名编码不规范')
+        envelope=_json(raw)
+    except (ValueError,binascii.Error) as error:raise ValueError('更新发布签名编码无效') from error
+    payload=verify_envelope(envelope,_public_key())
+    if type(payload) is not dict or set(payload)!=PAYLOAD_FIELDS:
+        raise ValueError('已签名更新字段不完整')
+    if payload['app_key']!=APP_KEY or payload['platform']!=PLATFORM or payload['channel']!=channel:
+        raise ValueError('更新签名不属于当前软件、平台或通道')
+    version=payload['version']
+    key=version_key(version)
+    if type(version) is not str or version.startswith('v') or key is None or channel=='stable' and key[3]==0:
+        raise ValueError('已签名更新版本号无效')
+    for name in ('version_code','release_id','size'):
+        if type(payload[name]) is not int or not 0<payload[name]<2**63:
+            raise ValueError('已签名更新数值无效')
+    if payload['size']>MAX_DOWNLOAD_SIZE:raise ValueError('安装文件大小不在支持范围')
+    if type(payload['sha256']) is not str or not re.fullmatch('[a-f0-9]{64}',payload['sha256']):
+        raise ValueError('更新缺少已签名 SHA256')
+    expected_path='/api/v1/update/download/'+str(payload['release_id'])
+    if payload['download_path']!=expected_path:raise ValueError('更新版本编号与下载路径不符')
+    if (data.get('versionName')!=version or type(data.get('versionCode')) is not int or
+            data['versionCode']!=payload['version_code'] or data.get('channel')!=channel or
+            type(data.get('size')) is not int or data['size']!=payload['size']):
+        raise ValueError('更新服务器信息与发布签名不符')
+    download_url=_download_url(data.get('downloadUrl'),payload['release_id'])
+    return {'latest':'v'+version,'url':RELEASES_URL,'prerelease':channel=='experimental',
+            'download_url':download_url,'size':payload['size'],'sha256':payload['sha256'],
+            'release_id':payload['release_id'],'version_code':payload['version_code'],
+            'channel':channel,'signature_verified':True}
+
+
+def _fetch_channel(current,channel):
+    # Query the published head and compare SemVer locally. No device identity,
+    # inventory, management token, appSecret or password is sent.
+    url=API_URL+'?'+urlencode(dict(appKey=APP_KEY,platform=PLATFORM,versionCode=0,channel=channel))
+    request=urllib.request.Request(url,headers={'Accept':'application/json','Accept-Encoding':'identity',
+                                               'User-Agent':'PeripheralBattery/'+current})
+    with _open_url(request,timeout=7) as response:
+        if response.geturl()!=url:raise ValueError('更新服务器发生未允许的重定向')
+        raw=response.read(65537)
+        if len(raw)>65536:raise ValueError('更新服务器返回数据过大')
+    result=_json(raw)
+    if type(result) is not dict or type(result.get('code')) is not int or result['code']!=0:
+        raise ValueError('更新服务器未返回有效发布信息')
+    return _signed_release(result.get('data'),channel)
 
 
 def check_updates(current,include_prereleases=True):
     from settings import RELEASE_CHANNEL
-    rows=[]
+    local=version_key(current)
+    if local is None:raise ValueError('当前版本格式无效')
     try:
-        for page in range(1,4):
-            req=urllib.request.Request(API_URL+'&page='+str(page),headers={'Accept':'application/vnd.github+json','User-Agent':'PeripheralBattery/'+current})
-            with urllib.request.urlopen(req,timeout=7) as response:
-                if urlsplit(response.geturl()).hostname!='api.github.com':raise ValueError('更新服务地址异常')
-                raw=response.read(2_000_001)
-                if len(raw)>2_000_000:raise ValueError('更新服务返回数据过大')
-                data=json.loads(raw)
-                if not isinstance(data,list):raise ValueError('更新服务返回格式无效')
-                rows.extend(data)
-                if 'rel="next"' not in response.headers.get('Link',''):return select_release(rows,current,include_prereleases,RELEASE_CHANNEL=='experimental')
-        raise ValueError('发布记录过多，请直接查看 GitHub Releases')
+        candidates=[]
+        for channel in (('stable','experimental') if include_prereleases else ('stable',)):
+            release=_fetch_channel(current,channel)
+            if release:candidates.append(release)
     except urllib.error.HTTPError as error:
-        if error.code in (403,429):raise ValueError('GitHub 暂时限制请求，请稍后重试') from error
-        raise ValueError('GitHub 更新检查失败，HTTP '+str(error.code)) from error
-    except (urllib.error.URLError,TimeoutError,OSError) as error:raise ValueError('无法连接 GitHub，请检查网络后重试') from error
+        if error.code in (301,302,303,307,308):raise ValueError('更新服务器返回重定向，已停止检查') from error
+        if error.code in (403,429):raise ValueError('更新服务器暂时限制请求，请稍后重试') from error
+        raise ValueError('更新服务器检查失败，HTTP '+str(error.code)) from error
+    except (urllib.error.URLError,TimeoutError,OSError) as error:
+        raise ValueError('无法连接版本管理服务器，请检查网络后重试') from error
+    if not candidates:return {'status':'no_release','message':'服务器暂无所选通道的发布版本','url':RELEASES_URL}
+    chosen=max(candidates,key=lambda row:version_key(row['latest']))
+    key=version_key(chosen['latest'])
+    promotes_stable=key==local and RELEASE_CHANNEL=='experimental' and not chosen['prerelease'] and key[3]==1
+    if key<=local and not promotes_stable:
+        status='current' if key==local else 'ahead'
+        return {**chosen,'status':status,'message':'当前已是所选通道最新版本' if status=='current' else '当前版本较新，服务器最新为 '+chosen['latest']}
+    return {**chosen,'status':'available','message':'发现新版 '+chosen['latest']+' · 发布签名已验证'}
 
 
 def download_update(current,include_prereleases,tag,destination,progress):
     info=check_updates(current,include_prereleases)
-    if info.get('status')!='available' or info.get('latest')!=tag:raise ValueError('发布版本已改变，请重新检查更新')
-    if not info.get('sha256'):raise ValueError('该发布缺少可验证的 SHA256，请在 GitHub 手动下载')
-    if not 0<info['size']<=256*1024*1024:raise ValueError('安装文件大小不在支持范围')
+    if info.get('status')!='available' or info.get('latest')!=tag:
+        raise ValueError('发布版本已改变，请重新检查更新')
+    if info.get('signature_verified') is not True:raise ValueError('更新发布签名未验证，拒绝下载')
+    digest=info.get('sha256')
+    if type(digest) is not str or not re.fullmatch('[a-f0-9]{64}',digest):raise ValueError('缺少可信 SHA256，未下载')
+    if type(info.get('size')) is not int or not 0<info['size']<=MAX_DOWNLOAD_SIZE:
+        raise ValueError('安装文件大小不在支持范围')
+    release_id=info.get('release_id')
+    if type(release_id) is not int or not 0<release_id<2**63:raise ValueError('更新版本编号无效')
+    url=_download_url(info.get('download_url'),release_id)
     target=Path(destination);part=target.with_suffix('.part');total=0;hasher=hashlib.sha256()
     target.parent.mkdir(parents=True,exist_ok=True)
     try:
-        req=urllib.request.Request(info['download_url'],headers={'User-Agent':'PeripheralBattery/'+current})
-        with urllib.request.urlopen(req,timeout=20) as response,part.open('wb') as stream:
-            final=urlsplit(response.geturl())
-            if final.scheme!='https' or final.hostname not in ('github.com','release-assets.githubusercontent.com','objects.githubusercontent.com'):
-                raise ValueError('下载被重定向到非 GitHub 发布地址')
+        request=urllib.request.Request(url,headers={'Accept-Encoding':'identity','User-Agent':'PeripheralBattery/'+current})
+        with _open_url(request,timeout=20) as response,part.open('wb') as stream:
+            if response.geturl()!=url:raise ValueError('下载地址发生未允许的重定向')
+            progress(0,info['size'])
             while True:
                 block=response.read(128*1024)
                 if not block:break
                 total+=len(block)
-                if total>info['size']:raise ValueError('下载大小与发布信息不符')
+                if total>info['size']:raise ValueError('下载大小与已签名发布信息不符')
                 stream.write(block);hasher.update(block);progress(total,info['size'])
-        if total!=info['size'] or hasher.hexdigest()!=info['sha256']:raise ValueError('下载校验失败，未安装')
+        if total!=info['size'] or hasher.hexdigest()!=digest:
+            raise ValueError('下载文件与已签名 SHA256 不符，未安装')
         os.replace(part,target)
-        return {'path':str(target),'sha256':info['sha256'],'version':tag,'size':total}
+        return {'path':str(target),'sha256':digest,'version':tag,'size':total}
     except Exception:
         part.unlink(missing_ok=True);raise

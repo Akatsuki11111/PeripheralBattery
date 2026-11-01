@@ -184,6 +184,11 @@ class DeviceStore:
                     migrated.add(previous.key)
                     device = replace(device, key=previous.key)
             if previous:
+                if (device.vid,device.pid)==(0x3151,0x5045):
+                    device=replace(device,protocol_model_id=previous.protocol_model_id)
+                if ((device.vid,device.pid)==(0x3151,0x5045) and previous.present and
+                        previous.source.startswith('RY F7') and previous.brand=='VALKYRIE'):
+                    device=replace(device,brand=previous.brand,name=previous.name)
                 last = device.last_percent if device.last_percent is not None else previous.last_percent
                 device = replace(device, last_percent=device.percent if device.percent is not None else last,
                                  last_observed_at=previous.last_observed_at,
@@ -232,6 +237,8 @@ class DeviceStore:
     def _with_last(current,previous):
         if current.usable:
             return replace(current,last_percent=current.percent,last_observed_at=current.observed_at)
+        if current.protocol_model_id is not None and current.protocol_model_id!=previous.protocol_model_id:
+            return replace(current,last_percent=None,last_observed_at=0)
         return replace(current,last_percent=previous.last_percent,last_observed_at=previous.last_observed_at,
                        charging=None if current.connected is not True else current.charging)
 

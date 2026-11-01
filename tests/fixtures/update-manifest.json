@@ -1,0 +1,16 @@
+{
+  "signature": "bp69G7yoazQItGBV5Q+dOzbbmrynwyKhQp52ikETz85m3KkdBbBfOLevbjuWzpAvbJZJ38YYlrS+LzVz2ssY2BouU5+OfhRw+tsP+ZoiDrgpVj5tHYL8SPOtN5WtgU1G0R//qZBx3eZgqhYllG2/J/rMciYr8/yhtoafgscrMy2vdCTPYXr4zRDSQmg+dO0duML2tUegrZAAvr2yf6byKkHKlfuKdqh/ooS+O2QwtzjnLQzGjgvhilul7NBBxJjdSaUOXKO8js9FbFHWmEsUz8lbOcr8JeddBGP7gBnEWay2iSqqKdzJahTHtxsbgDc0OwyZxmZX55sL7ukP+WNQew==",
+  "key_id": "public-test-only",
+  "algorithm": "rsa-pkcs1-sha256",
+  "payload": {
+    "app_key": "peripheral-battery",
+    "channel": "stable",
+    "download_path": "/api/v1/update/download/999999",
+    "platform": "windows",
+    "release_id": 999999,
+    "sha256": "11507a0e2f5e69d5dfa40a62a1bd7b6ee57e6bcd85c67c9b8431b36fff21c437",
+    "size": 3,
+    "version": "2.6.0",
+    "version_code": 2060000
+  }
+}
