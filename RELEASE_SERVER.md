@@ -2,7 +2,7 @@
 
 公开材料不得包含实际部署地址、私人账号、个人目录、令牌、应用认证密钥或发布私钥。发布前扫描当前源码、归档和安装包；历史版本发现泄露时先撤回受影响附件，并保留私有恢复备份。
 
-版本字段只接受不含软件名和 v 前缀的 SemVer，例如 2.8.0、2.8.1-experimental.1。软件名、stable/experimental 通道和版本号分别管理。数字 versionCode 必须单调增加，已经使用的编码不复用。上传文件名固定为 PeripheralBattery.exe，避免重复拼接版本号。
+管理端版本字段只接受三段数字，例如 2.8.2、2.8.3，不含软件名、v 前缀或实验标记。程序/Git 标签保留 SemVer 实验后缀；发布器自动转换为数字版本，通道单独传递。实验版每次发布递增补丁号，内部后缀固定 experimental.1。软件名、stable/experimental 通道和版本号分别管理。数字 versionCode 必须单调增加，已经使用的编码不复用。上传文件名固定为 PeripheralBattery.exe，避免重复拼接版本号。
 
 公开构建没有默认更新连接。部署者通过单独的 JSON 配置提供 origin、app_key、app_secret；在目标 Windows 用户下导入，转换为 DPAPI 保护的本机文件。配置不打包、不提交、不作为发布附件。可执行文件参数为 --configure-updates CONFIG.json，也可在界面提示未配置时选择导入。不要在命令行直接填写密钥。
 

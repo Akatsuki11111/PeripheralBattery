@@ -132,7 +132,8 @@ def _binary_release(data,channel):
     match=re.fullmatch(r'/api/v1/update/download/([1-9][0-9]*)',path)
     if not match:raise ValueError('更新下载标识无效')
     rid=int(match[1]);url=_download_url(value,rid)
-    return dict(latest='v'+version,url='',prerelease=channel=='experimental',download_url=url,
+    app_version=version+'-experimental.1' if channel=='experimental' and '-' not in version else version
+    return dict(latest='v'+app_version,url='',prerelease=channel=='experimental',download_url=url,
                 size=data['size'],release_id=rid,version_code=data['versionCode'],channel=channel,
                 signature_verified=False,signature_pending=True)
 

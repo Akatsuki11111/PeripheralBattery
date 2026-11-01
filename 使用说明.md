@@ -1,6 +1,6 @@
 # PeripheralBattery
 
-Windows 外设电量托盘工具，使用 Python / PySide6。当前双版本：**v2.8.0 正式版**、**v2.8.1-experimental.1 实验版**。
+Windows 外设电量托盘工具，使用 Python / PySide6。当前双版本：**v2.8.2 正式版**、**v2.8.3-experimental.1 实验版**。
 
 ## 下载与使用
 

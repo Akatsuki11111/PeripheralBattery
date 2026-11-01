@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.8.3-experimental.1 (experimental)
+- Share all privacy/window fixes and preserve battery research. Keep numeric management versions separate from the experimental build label.
+
+## v2.8.2 (stable)
+- Complete the v2.8 privacy and window fixes with strict major.minor.patch management versions and separately supplied release channels.
+- Keep binary signature identity and experimental SemVer comparisons consistent without duplicating channel names in generated filenames.
+- 259 regression tests pass; static archive privacy inspection and native Windows verification pass.
+
 ## v2.8.1-experimental.1 (experimental)
 - Retain battery research/long observations, with the same privacy, update-integrity and window fixes as stable v2.8.0.
 

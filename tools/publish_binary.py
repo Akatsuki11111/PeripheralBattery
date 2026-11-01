@@ -49,13 +49,14 @@ def publish_release(session,file,version,version_code,channel,notes,app_id=2):
     key=json.loads((ROOT/'assets/update-public-key.json').read_text(encoding='utf-8'))
     expected=dict(app_key=APP_KEY,platform='windows',channel=channel,version=version,version_code=int(version_code))
     verify_binary(file,key,expected)
-    draft=session.upload_draft(app_id,file,version,int(version_code),channel,notes)
+    server_version=version.split('-',1)[0]
+    draft=session.upload_draft(app_id,file,server_version,int(version_code),channel,notes)
     if draft['status']==0:session.edit_draft_notes(draft,notes);session.publish(draft['id'])
     elif draft['status']!=1:raise ServerError('Unexpected existing release state')
     public=session.public_check(channel)
-    if public.get('versionName')!=version or public.get('changelog')!=notes or public.get('updateLink')!='pb-signed-exe:v1':
+    if public.get('versionName')!=server_version or public.get('changelog')!=notes or public.get('updateLink')!='pb-signed-exe:v1':
         raise ServerError('Published metadata differs from expected plain release notes')
-    return dict(version=version,channel=channel,release_id=draft['id'],size=file.stat().st_size)
+    return dict(version=version,server_version=server_version,channel=channel,release_id=draft['id'],size=file.stat().st_size)
 
 
 def main():

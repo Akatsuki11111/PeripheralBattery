@@ -115,6 +115,12 @@ try {
                  channel='stable',downloadUrl='/api/v1/update/download/99',changelog='修复界面和隐私问题。',updateLink='pb-signed-exe:v1'),'stable')
         self.assertFalse(info['signature_verified']);self.assertTrue(info['signature_pending'])
 
+    def test_numeric_server_version_and_channel_map_to_the_experimental_build(self):
+        with patch('updates.SERVER_ORIGIN','https://updates.example.test'):
+            info=updates._signed_release(dict(hasUpdate=True,versionName='2.8.3',versionCode=2080301,size=len(self.data),
+                 channel='experimental',downloadUrl='/api/v1/update/download/99',changelog='界面修复',updateLink='pb-signed-exe:v1'),'experimental')
+        self.assertEqual(info['latest'],'v2.8.3-experimental.1');self.assertTrue(info['prerelease'])
+
     def test_new_download_must_pass_rsa_before_replacing_an_existing_file(self):
         origin='https://updates.example.test'
         info=dict(status='available',latest='v2.8.0',signature_verified=False,signature_pending=True,

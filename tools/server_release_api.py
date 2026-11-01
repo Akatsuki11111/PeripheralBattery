@@ -117,7 +117,7 @@ class Session:
             raise ServerError('Application quota exceeded; no old versions deleted')
         boundary='PeripheralBattery'+uuid.uuid4().hex
         import re
-        if not re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[a-z0-9]+(?:[.-][a-z0-9]+)*)?',version):raise ValueError('Version must contain only a SemVer number, without v prefix or software name')
+        if not re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)',version):raise ValueError('Server version must contain only major.minor.patch digits')
         fields=dict(appId=str(int(app_id)),versionName=version,versionCode=str(int(version_code)),
                     platform='windows',channel=channel,forceUpdate='0',changelog=notes,grayPercent='100')
         prefix=b''
