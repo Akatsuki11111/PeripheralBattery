@@ -39,7 +39,10 @@ class Response(io.BytesIO):
 class ServerUpdateTests(unittest.TestCase):
     def setUp(self):
         self.key_patch=patch('updates._public_key',return_value=PUBLIC_KEY);self.key_patch.start()
-    def tearDown(self):self.key_patch.stop()
+        self.config_patch=patch('updates.configure_runtime',return_value=True);self.config_patch.start()
+        self.runtime_patch=patch.multiple(updates,SERVER_ORIGIN='https://updates.example.test',API_URL='https://updates.example.test/api/v1/update/check',_REQUEST_SECRET='test-request-secret')
+        self.runtime_patch.start()
+    def tearDown(self):self.key_patch.stop();self.config_patch.stop();self.runtime_patch.stop()
 
     def test_real_signed_manifest_is_verified_and_bound(self):
         info=updates._signed_release(release(),'stable')
@@ -73,7 +76,7 @@ class ServerUpdateTests(unittest.TestCase):
     def test_download_addresses_cannot_switch_origin_or_use_query_fragment(self):
         paths=['https://github.com/test.exe','http://evil.example/a.exe',
                updates.SERVER_ORIGIN+'@evil.example/api/v1/update/download/999999',
-               '//updates.example.invalid:8089/api/v1/update/download/999999',
+               '//updates.example.test/api/v1/update/download/999999',
                '/api/v1/update/download/999999?token=x','/api/v1/update/download/999999#fragment']
         for value in paths:
             with self.subTest(value=value),self.assertRaises(ValueError):
@@ -119,7 +122,11 @@ class ServerUpdateTests(unittest.TestCase):
         with patch('updates._open_url',side_effect=open_url):result=updates._fetch_channel('2.5.0','stable')
         self.assertEqual(result['latest'],'v2.6.0');request=captured[0]
         parsed=urlsplit(request.full_url);self.assertEqual(parsed.scheme+'://'+parsed.netloc,updates.SERVER_ORIGIN)
-        self.assertEqual(parse_qs(parsed.query),dict(appKey=['peripheral-battery'],platform=['windows'],versionCode=['0'],channel=['stable']))
+        query=parse_qs(parsed.query)
+        self.assertEqual(set(query),{'appKey','platform','versionCode','channel','timestamp','nonce','sign'})
+        expected=hashlib.md5(('peripheral-battery|'+query['timestamp'][0]+'|'+query['nonce'][0]+'|test-request-secret').encode()).hexdigest()
+        self.assertEqual(query['sign'],[expected])
+        self.assertNotIn('test-request-secret',request.full_url)
         text=json.dumps(dict(request.headers)).lower()
         for word in ('satoken','password','authorization','deviceid','appsecret','github'):self.assertNotIn(word,text)
 

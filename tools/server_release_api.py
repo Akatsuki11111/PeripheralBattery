@@ -6,13 +6,14 @@ not create, upload, edit, publish or delete anything. Login tokens stay in RAM.
 from __future__ import annotations
 
 import hashlib
+import os,time
 import http.client
 import json
 from pathlib import Path
 import urllib.parse
 import uuid
 
-BASE_URL='http://updates.example.invalid:8089'
+BASE_URL=os.environ.get('PB_RELEASE_ORIGIN','')
 APP_KEY='peripheral-battery'
 APP_FIELDS=('id','name','appKey','platforms','description','forceBelowCode','status',
             'quotaMb','keepVersions','signEnabled','signedUrlEnabled','signedUrlMinutes',
@@ -38,7 +39,8 @@ class Session:
 
     def _connection(self,timeout=25):
         parsed=urllib.parse.urlsplit(BASE_URL)
-        return http.client.HTTPConnection(parsed.hostname,parsed.port,timeout=timeout)
+        if parsed.scheme not in ('http','https') or not parsed.hostname:raise ServerError('Release connection not configured')
+        return (http.client.HTTPSConnection if parsed.scheme=='https' else http.client.HTTPConnection)(parsed.hostname,parsed.port,timeout=timeout)
 
     @staticmethod
     def _decode(response):
@@ -88,6 +90,11 @@ class Session:
 
     def public_check(self,channel,version_code=0):
         query=urllib.parse.urlencode(dict(appKey=APP_KEY,platform='windows',versionCode=int(version_code),channel=channel))
+        app=self.call('/api/v1/app/detail/2')
+        if app.get('signEnabled')==1:
+            stamp=str(int(time.time()*1000));nonce=uuid.uuid4().hex
+            sign=hashlib.md5((APP_KEY+'|'+stamp+'|'+nonce+'|'+app['appSecret']).encode()).hexdigest()
+            query+='&'+urllib.parse.urlencode(dict(timestamp=stamp,nonce=nonce,sign=sign))
         data=self.call('/api/v1/update/check?'+query,authenticated=False)
         return sanitized(data,UPDATE_FIELDS)
 
@@ -109,12 +116,14 @@ class Session:
         if app['storageUsed']+size>app['quotaMb']*1024*1024:
             raise ServerError('Application quota exceeded; no old versions deleted')
         boundary='PeripheralBattery'+uuid.uuid4().hex
+        import re
+        if not re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[a-z0-9]+(?:[.-][a-z0-9]+)*)?',version):raise ValueError('Version must contain only a SemVer number, without v prefix or software name')
         fields=dict(appId=str(int(app_id)),versionName=version,versionCode=str(int(version_code)),
                     platform='windows',channel=channel,forceUpdate='0',changelog=notes,grayPercent='100')
         prefix=b''
         for key,value in fields.items():
             prefix+=f'--{boundary}\r\nContent-Disposition: form-data; name="{key}"\r\n\r\n{value}\r\n'.encode('utf-8')
-        if any(c in file.name for c in '\r\n"') or not file.name.isascii():raise ValueError('Use an ASCII release filename')
+        if file.name!='PeripheralBattery.exe':raise ValueError('Upload filename must be PeripheralBattery.exe; supply the version separately')
         prefix+=f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{file.name}"\r\nContent-Type: application/octet-stream\r\n\r\n'.encode('ascii')
         suffix=f'\r\n--{boundary}--\r\n'.encode('ascii')
         connection=self._connection(timeout=300)
@@ -143,7 +152,7 @@ class Session:
         if not 0<len(notes)<=2000:raise ValueError('Changelog must fit 2000 characters')
         body={key:version.get(key) for key in ('id','versionName','versionCode','platform','channel')}
         body.update(forceUpdate=0,changelog=notes,grayPercent=100,grayTargets=None,
-                    updateTitle=None,updateButtonText=None,updateLink=None)
+                    updateTitle=None,updateButtonText=None,updateLink='pb-signed-exe:v1')
         return self.call('/api/v1/version/edit','PUT',body)
 
     def publish(self,version_id):

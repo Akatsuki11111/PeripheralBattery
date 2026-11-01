@@ -20,11 +20,19 @@ def main():
     parser.add_argument('--diagnostic-output',metavar='JSON')
     parser.add_argument('--startup-check',action='store_true')
     parser.add_argument('--install-startup',action='store_true')
+    parser.add_argument('--configure-updates',metavar='JSON',help='导入仅保存在本机用户目录的更新部署配置')
     parser.add_argument('--quit',action='store_true')
     parser.add_argument('--capture',metavar='PNG')
     parser.add_argument('--demo',action='store_true',help='明确标注的演示数据，不查询硬件')
     parser.add_argument('--demo-count',type=int,default=3)
     args=parser.parse_args()
+    if args.configure_updates:
+        from update_config import save_config
+        try:
+            raw=Path(args.configure_updates).read_bytes()
+            if len(raw)>16384:return 2
+            save_config(json.loads(raw));return 0
+        except (OSError,ValueError):return 2
     if args.apply_update:
         from installer import apply_update
         return apply_update(args.apply_update)

@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.8.1-experimental.1 (experimental)
+- Retain battery research/long observations, with the same privacy, update-integrity and window fixes as stable v2.8.0.
+
+## v2.8.0 (stable)
+- Remove deployment-specific information from public artifacts and require optional per-user protected update configuration.
+- Authenticate update requests and verify signed executable content before installation; keep release notes readable.
+- Validate version numbers separately from software names; use a fixed upload filename.
+- Avoid persistent mouse focus outlines on tool buttons while keeping keyboard focus hints.
+- Launch all background workers with explicit hidden/no-console flags and preserve stable popup geometry during refresh.
+- 258 regression tests pass. Historical affected attachments have been withdrawn; use this privacy-corrected version.
+
 ## v2.7.1-experimental.1 (experimental)
 - Retain guided battery research and long observations; share all controller improvements from stable v2.7.0.
 - Keep experimental mappings separate from trusted readings; no new claim that unknown protocols can be inferred automatically.

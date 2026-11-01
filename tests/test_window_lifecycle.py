@@ -28,6 +28,21 @@ class WindowLifecycleTests(unittest.TestCase):
         self.assertFalse(self.flyout.isVisible());self.assertTrue(dialog.isVisible());self.assertTrue(self.flyout.isEnabled())
         self.assertFalse(dialog.isModal());self.assertIsNone(dialog.parentWidget())
         self.assertFalse(dialog.windowFlags() & Qt.WindowType.WindowStaysOnTopHint)
+
+    def test_mouse_click_does_not_leave_info_button_focus_outline(self):
+        QTest.mouseClick(self.flyout.info_button,Qt.MouseButton.LeftButton);app.processEvents()
+        self.assertTrue(self.flyout.catalog_dialog.isVisible())
+        self.flyout.catalog_dialog.close();app.processEvents();self.flyout.show_at_tray();app.processEvents()
+        self.assertFalse(self.flyout.info_button.hasFocus());self.assertFalse(self.flyout.refresh.hasFocus())
+
+    def test_refresh_does_not_reopen_a_hidden_window(self):
+        self.flyout.hide();self.flyout.rebuild(self.flyout.devices,[]);QTest.qWait(180)
+        self.assertFalse(self.flyout.isVisible())
+
+    def test_rebuilding_same_devices_keeps_geometry_and_card_widgets(self):
+        geometry=self.flyout.geometry();card=self.flyout.cards['a']
+        for _ in range(3):self.flyout.rebuild(self.flyout.devices,[])
+        self.assertEqual(self.flyout.geometry(),geometry);self.assertIs(self.flyout.cards['a'],card)
     def test_escape_and_close_button_release_manager_without_reopening_popup(self):
         self.flyout.open_catalog();QTest.keyClick(self.flyout.catalog_dialog,Qt.Key.Key_Escape);app.processEvents()
         self.assertIsNone(self.flyout.catalog_dialog);self.assertFalse(self.flyout.isVisible())

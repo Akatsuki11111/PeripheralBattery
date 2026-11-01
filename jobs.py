@@ -9,6 +9,7 @@ from process_tree import ProcessTree
 from classification import bind_groups,apply_saved_modes
 from identity import usb_audio_device_ids
 from settings import atomic_json,data_dir,read_json,redact,probe_timeout_ms,EXPERIMENTAL_ENABLED
+from hidden_process import HiddenProcess
 
 
 def worker_command(request_path):
@@ -29,15 +30,13 @@ class WorkerJob(QObject):
         self.result_path=self.path.with_name(self.nonce+'.result.json')
         self.request={**request,'nonce':self.nonce}
         self.timeout_ms=timeout_ms
-        self.process=QProcess(self)
+        self.process=HiddenProcess(self)
         self.timer=QTimer(self);self.timer.setSingleShot(True)
         self.completed=False;self.expired=False;self.started_at=0
         self.tree=None
         self.process.started.connect(self._started)
         self.process.finished.connect(self._finished)
         self.process.errorOccurred.connect(self._error)
-        self.process.readyReadStandardError.connect(lambda:self.process.readAllStandardError())
-        self.process.readyReadStandardOutput.connect(lambda:self.process.readAllStandardOutput())
         self.timer.timeout.connect(self._expire)
 
     def start(self):

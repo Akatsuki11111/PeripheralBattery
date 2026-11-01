@@ -1,13 +1,11 @@
-"""Signed updates from the fixed VersionHub server; no management credentials.
-
-The server currently uses HTTP. A pinned RSA release signature authenticates
-its download hash and release identity; the server's MD5 is never trusted.
-"""
+"""Optional deployment-configured updates; authenticated requests and signed EXEs."""
 import base64
 import binascii
 import hashlib
 import json
 import os
+import time
+import uuid
 from pathlib import Path
 import re
 import urllib.error
@@ -15,9 +13,9 @@ import urllib.request
 from urllib.parse import urlencode,urlsplit
 from update_signing import verify_envelope
 
-SERVER_ORIGIN='http://updates.example.invalid:8089'
-RELEASES_URL=SERVER_ORIGIN
-API_URL=SERVER_ORIGIN+'/api/v1/update/check'
+SERVER_ORIGIN=''
+RELEASES_URL=''
+API_URL=''
 APP_KEY='peripheral-battery'
 PLATFORM='windows'
 MANIFEST_MARKER='PB-SIGNED-MANIFEST:'
@@ -71,7 +69,7 @@ def _download_url(value,release_id):
     expected=SERVER_ORIGIN+path
     if value not in (path,expected):raise ValueError('更新下载地址与已签名版本不符')
     parsed=urlsplit(expected)
-    if parsed.scheme!='http' or parsed.netloc!='updates.example.invalid:8089' or parsed.query or parsed.fragment:
+    if parsed.scheme not in ('http','https') or parsed.netloc!=urlsplit(SERVER_ORIGIN).netloc or parsed.query or parsed.fragment:
         raise ValueError('更新下载地址异常')
     return expected
 
@@ -84,8 +82,10 @@ def _signed_release(data,channel):
     if type(changelog) is not str or len(changelog)>4096:
         raise ValueError('更新发布签名缺失或格式无效')
     lines=changelog.rstrip('\r\n').splitlines()
+    if MANIFEST_MARKER not in changelog and data.get('updateLink')=='pb-signed-exe:v1':
+        return _binary_release(data,channel)
     if not lines or not lines[-1].startswith(MANIFEST_MARKER) or changelog.count(MANIFEST_MARKER)!=1:
-        raise ValueError('更新缺少发布签名，未信任此版本')
+        raise ValueError('旧格式更新发布签名位置无效')
     encoded=lines[-1][len(MANIFEST_MARKER):]
     if len(encoded)>4096:raise ValueError('更新发布签名过大')
     try:
@@ -121,10 +121,46 @@ def _signed_release(data,channel):
             'channel':channel,'signature_verified':True}
 
 
+def _binary_release(data,channel):
+    version=data.get('versionName');key=version_key(version)
+    if type(version) is not str or version.startswith('v') or key is None or channel=='stable' and key[3]==0:
+        raise ValueError('更新版本号无效')
+    for field in ('versionCode','size'):
+        if type(data.get(field)) is not int or not 0<data[field]<2**63:raise ValueError('更新数值无效')
+    if data['size']>MAX_DOWNLOAD_SIZE or data.get('channel')!=channel:raise ValueError('更新大小或通道无效')
+    value=data.get('downloadUrl');path=urlsplit(value).path if isinstance(value,str) else ''
+    match=re.fullmatch(r'/api/v1/update/download/([1-9][0-9]*)',path)
+    if not match:raise ValueError('更新下载标识无效')
+    rid=int(match[1]);url=_download_url(value,rid)
+    return dict(latest='v'+version,url='',prerelease=channel=='experimental',download_url=url,
+                size=data['size'],release_id=rid,version_code=data['versionCode'],channel=channel,
+                signature_verified=False,signature_pending=True)
+
+
+def configure_runtime():
+    from update_config import load_config
+    global SERVER_ORIGIN,API_URL,RELEASES_URL,APP_KEY,_REQUEST_SECRET
+    config=load_config()
+    if config is None:return False
+    SERVER_ORIGIN=config['origin'];API_URL=SERVER_ORIGIN+'/api/v1/update/check'
+    RELEASES_URL='';APP_KEY=config['app_key'];_REQUEST_SECRET=config['app_secret']
+    return True
+
+
+_REQUEST_SECRET=''
+
+
+def signed_parameters(values):
+    if not _REQUEST_SECRET:raise ValueError('缺少本机更新请求签名配置')
+    stamp=str(int(time.time()*1000));nonce=uuid.uuid4().hex
+    sign=hashlib.md5((APP_KEY+'|'+stamp+'|'+nonce+'|'+_REQUEST_SECRET).encode('utf-8')).hexdigest()
+    return {**values,'timestamp':stamp,'nonce':nonce,'sign':sign}
+
+
 def _fetch_channel(current,channel):
     # Query the published head and compare SemVer locally. No device identity,
     # inventory, management token, appSecret or password is sent.
-    url=API_URL+'?'+urlencode(dict(appKey=APP_KEY,platform=PLATFORM,versionCode=0,channel=channel))
+    url=API_URL+'?'+urlencode(signed_parameters(dict(appKey=APP_KEY,platform=PLATFORM,versionCode=0,channel=channel)))
     request=urllib.request.Request(url,headers={'Accept':'application/json','Accept-Encoding':'identity',
                                                'User-Agent':'PeripheralBattery/'+current})
     with _open_url(request,timeout=7) as response:
@@ -139,6 +175,7 @@ def _fetch_channel(current,channel):
 
 def check_updates(current,include_prereleases=True):
     from settings import RELEASE_CHANNEL
+    if not configure_runtime():return {'status':'unconfigured','message':'未配置更新服务，请导入部署者提供的更新配置','url':''}
     local=version_key(current)
     if local is None:raise ValueError('当前版本格式无效')
     try:
@@ -159,16 +196,16 @@ def check_updates(current,include_prereleases=True):
     if key<=local and not promotes_stable:
         status='current' if key==local else 'ahead'
         return {**chosen,'status':status,'message':'当前已是所选通道最新版本' if status=='current' else '当前版本较新，服务器最新为 '+chosen['latest']}
-    return {**chosen,'status':'available','message':'发现新版 '+chosen['latest']+' · 发布签名已验证'}
+    return {**chosen,'status':'available','message':'发现新版 '+chosen['latest']+(' · 发布签名已验证' if chosen.get('signature_verified') else ' · 下载后验证安装包签名')}
 
 
 def download_update(current,include_prereleases,tag,destination,progress):
     info=check_updates(current,include_prereleases)
     if info.get('status')!='available' or info.get('latest')!=tag:
         raise ValueError('发布版本已改变，请重新检查更新')
-    if info.get('signature_verified') is not True:raise ValueError('更新发布签名未验证，拒绝下载')
+    if not (info.get('signature_verified') is True or info.get('signature_pending') is True):raise ValueError('更新校验方式无效，拒绝下载')
     digest=info.get('sha256')
-    if type(digest) is not str or not re.fullmatch('[a-f0-9]{64}',digest):raise ValueError('缺少可信 SHA256，未下载')
+    if info.get('signature_verified') and (type(digest) is not str or not re.fullmatch('[a-f0-9]{64}',digest)):raise ValueError('缺少可信 SHA256，未下载')
     if type(info.get('size')) is not int or not 0<info['size']<=MAX_DOWNLOAD_SIZE:
         raise ValueError('安装文件大小不在支持范围')
     release_id=info.get('release_id')
@@ -187,9 +224,13 @@ def download_update(current,include_prereleases,tag,destination,progress):
                 total+=len(block)
                 if total>info['size']:raise ValueError('下载大小与已签名发布信息不符')
                 stream.write(block);hasher.update(block);progress(total,info['size'])
-        if total!=info['size'] or hasher.hexdigest()!=digest:
-            raise ValueError('下载文件与已签名 SHA256 不符，未安装')
+        if total!=info['size']:raise ValueError('下载文件大小不符，未安装')
+        if info.get('signature_pending'):
+            from signed_binary import verify_binary
+            verify_binary(part,_public_key(),dict(app_key=APP_KEY,platform=PLATFORM,channel=info['channel'],
+                          version=tag.removeprefix('v'),version_code=info['version_code']))
+        elif hasher.hexdigest()!=digest:raise ValueError('下载文件与已签名 SHA256 不符，未安装')
         os.replace(part,target)
-        return {'path':str(target),'sha256':digest,'version':tag,'size':total}
+        return {'path':str(target),'sha256':hasher.hexdigest(),'version':tag,'size':total}
     except Exception:
         part.unlink(missing_ok=True);raise

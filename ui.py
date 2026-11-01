@@ -20,6 +20,7 @@ def label(text='',size=12,muted=False,bold=False):
 
 def tool(kind,tip,callback):
     b=QToolButton();b.setFixedSize(30,30);b.setToolTip(tip);b.setAccessibleName(tip)
+    b.setFocusPolicy(Qt.FocusPolicy.TabFocus)
     b.setProperty('glyphKind',kind)
     b.setIcon(glyph_icon(kind,'#efefef' if windows.is_dark() else '#343434',24))
     b.clicked.connect(callback);return b
@@ -125,6 +126,7 @@ class Flyout(QWidget):
     def __init__(self,preferences=None,history=None):
         super().__init__(None,Qt.WindowType.Tool|Qt.WindowType.FramelessWindowHint|Qt.WindowType.WindowStaysOnTopHint)
         self.setWindowTitle('设备电量 · Peripheral Battery');self.setObjectName('flyout')
+        self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
         self.devices=[];self.errors=[];self.selected=None;self.pinned=False;self.menu_open=False;self.theme=None
         self.preferences=preferences or Settings();self.cards={};self.anchor=None;self.detail_labels={};self.detail_key=None
         from history import HistoryStore
@@ -136,7 +138,7 @@ class Flyout(QWidget):
         self.back=tool('back','返回设备列表',self.go_back);self.back.hide();head.addWidget(self.back)
         titlecol=QVBoxLayout();titlecol.setSpacing(1);titlecol.addWidget(label('设备电量',18,bold=True));titlecol.addWidget(label('外设状态 · 有线 / 无线',11,True));head.addLayout(titlecol,1)
         self.refresh=tool('refresh','立即刷新',self.refreshRequested.emit);head.addWidget(self.refresh)
-        head.addWidget(tool('info','品牌目录与设备管理',self.open_catalog));head.addWidget(tool('close','收起到系统托盘',self.hide))
+        self.info_button=tool('info','品牌目录与设备管理',self.open_catalog);head.addWidget(self.info_button);head.addWidget(tool('close','收起到系统托盘',self.hide))
         self.root.addLayout(head)
         self.summary=label('正在读取设备状态…',11,True);self.root.addWidget(self.summary)
         self.research_button=None;self.learning_button=None
@@ -179,7 +181,7 @@ class Flyout(QWidget):
         self.update_button=QPushButton('检查更新');self.update_button.setFont(font(10));self.update_button.setMinimumSize(106,28);version_row.addWidget(self.update_button);controls.addWidget(version_box,1,1)
         self.statusline=label('托盘显示最低电量',10,True);self.statusline.setSizePolicy(QSizePolicy.Policy.Ignored,QSizePolicy.Policy.Preferred);self.statusline.hide();self.root.addWidget(self.statusline)
         self.update_job=None;self.update_url=None;self.update_button.clicked.connect(self.check_update)
-        self.update_candidate=None;self.download_ready=None
+        self.update_candidate=None;self.download_ready=None;self.needs_update_config=False
         download_row=QHBoxLayout();self.root.addLayout(download_row)
         self.download_progress=QProgressBar();self.download_progress.setRange(0,100);self.download_progress.hide();download_row.addWidget(self.download_progress,1)
         self.cancel_download=QPushButton('取消');self.cancel_download.hide();self.cancel_download.clicked.connect(self.cancel_update);download_row.addWidget(self.cancel_download)
@@ -198,13 +200,24 @@ class Flyout(QWidget):
 
     def check_update(self):
         if self.update_job:return
+        if self.needs_update_config:
+            from PySide6.QtWidgets import QFileDialog
+            from update_config import save_config
+            import json
+            pinned=self.pinned;self.pinned=True
+            try:
+                path,_=QFileDialog.getOpenFileName(self,'导入更新配置','','JSON (*.json)')
+                if not path:return
+                from pathlib import Path
+                raw=Path(path).read_bytes()
+                if len(raw)>16384:raise ValueError('更新配置文件过大')
+                save_config(json.loads(raw));self.needs_update_config=False
+                self.update_button.setText('检查更新');self.update_button.setToolTip('更新配置已保存到本机受保护的用户目录')
+            except (ValueError,OSError):self.update_button.setToolTip('更新配置导入失败，请检查部署配置')
+            finally:self.pinned=pinned
+            return
         if self.download_ready:self.installUpdateRequested.emit(self.download_ready);return
         if self.update_candidate:self.download_update();return
-        if self.update_url:
-            from PySide6.QtCore import QUrl
-            from PySide6.QtGui import QDesktopServices
-            if not QDesktopServices.openUrl(QUrl(self.update_url)):self.update_button.setToolTip('无法打开浏览器，请访问版本管理服务器 http://updates.example.invalid:8089/')
-            return
         from jobs import WorkerJob
         self.update_button.setEnabled(False);self.update_channel.setEnabled(False);self.update_button.setText('正在检查…')
         job=WorkerJob({'operation':'check-updates','include_prereleases':self.update_channel.currentData()},18000,self);self.update_job=job
@@ -217,13 +230,10 @@ class Flyout(QWidget):
             self.update_button.setText('重试更新');self.update_button.setToolTip(result.get('user_message',result.get('error','检查失败')));return
         info=result.get('update',{});status=info.get('status');self.update_button.setToolTip(info.get('message',''))
         self.version_label.setToolTip(info.get('message',''))
-        if status in ('available','unavailable','no_release'):
-            from updates import RELEASES_URL
-            url=info.get('url','')
-            if url==RELEASES_URL or url.startswith(RELEASES_URL+'/tag/'):
-                if status=='available':self.update_candidate=info;self.update_button.setText('下载并更新')
-                else:self.update_url=url;self.update_button.setText('查看发布')
-                return
+        if status=='available':self.update_candidate=info;self.update_button.setText('下载并更新');return
+        if status=='unconfigured':
+            self.needs_update_config=True;self.update_button.setText('导入更新配置');return
+        if status=='no_release':self.update_button.setText('暂无新版');return
         self.update_button.setText('已是最新' if status=='current' else '当前较新' if status=='ahead' else '检查更新')
 
     def download_update(self):
@@ -519,19 +529,24 @@ class Flyout(QWidget):
 
     def show_at_tray(self,rect=None):
         self.anchor=rect;self.refresh_startup();self.resize_for_content()
-        self.apply_theme();self.rebuild(self.devices,self.errors);self.show();self.raise_();self.activateWindow();windows.round_window(int(self.winId()))
+        if self.theme!=windows.is_dark():self.apply_theme()
+        self.rebuild(self.devices,self.errors);self.show();self.raise_();self.activateWindow()
+        self.setFocus(Qt.FocusReason.OtherFocusReason)
+        windows.round_window(int(self.winId()))
 
     def resize_for_content(self):
         rect=self.anchor
         screen=QApplication.screenAt(rect.center()) if rect and not rect.isNull() else QApplication.screenAt(QCursor.pos())
         screen=screen or QApplication.primaryScreen();bounds=screen.availableGeometry()
         count=len(visible_devices(self.devices,self.preferences))
-        self.setFixedSize(min(440,bounds.width()-24),adaptive_height(count,bounds.height(),bool(self.selected)))
-        if not self.download_progress.isHidden():self.setFixedHeight(min(bounds.height()-20,self.height()+30))
+        width=min(440,bounds.width()-24);height=adaptive_height(count,bounds.height(),bool(self.selected))
+        if not self.download_progress.isHidden():height=min(bounds.height()-20,height+30)
+        if self.width()!=width or self.height()!=height:self.setFixedSize(width,height)
         x=rect.center().x()-self.width()//2 if rect and not rect.isNull() else bounds.right()-self.width()-12
         y=bounds.bottom()-self.height()-10
         if rect and not rect.isNull() and rect.center().y()<bounds.top()+50:y=bounds.top()+10
-        self.move(max(bounds.left()+8,min(x,bounds.right()-self.width()-8)),y)
+        x=max(bounds.left()+8,min(x,bounds.right()-self.width()-8))
+        if self.x()!=x or self.y()!=y:self.move(x,y)
 
     def keyPressEvent(self,e):
         if e.key()==Qt.Key.Key_Escape:
