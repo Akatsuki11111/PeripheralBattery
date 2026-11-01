@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.6.1-experimental.1 (experimental)
+- Keep guided adaptation/long observations and prioritize verified device-specific status protocols.
+- End immediately when validated battery data is found; skip declared padding-only Feature reports and stop when no usable channel exists.
+- Share M5 Lite support and signed VersionHub updates with stable v2.6.0.
+
+
 ## v2.6.0 (stable)
 - Adapt VK M5 Lite through official RY F7 battery/status plus 8F model identity; do not infer brand from shared receiver VID/PID.
 - Reject offline receiver battery cache and official USB fixed-100 placeholder; preserve last valid timestamp and clear cache on model changes.
