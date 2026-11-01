@@ -12,14 +12,14 @@ M5 Lite：接收器3151:5045使用RY F7状态与8F型号查询，实机确认型
 
 ## 后续发布
 
-版本源代码使用Git标签保留；服务器保存对应正式/实验EXE。现有default通道2.5.0保留。当前服务器实测灰度0不会向匿名更新客户端提供版本，发布工具明确使用100（全量）；已发布条目不可直接编辑，因此必须在草稿阶段写好签名与灰度设置。服务器应用配额100MiB，本次三份EXE共约86MB；后续发布需要扩容或明确清理策略，发布脚本不会自动删除旧版本。
+版本源代码使用Git标签保留；服务器保存对应正式/实验EXE。现有default通道2.5.0保留。本次服务器正式2.6.0实际版本编码为2060001；服务器软删除仍保留已使用编码的唯一键，已用编码不得再次上传，显示版本号与数字编码分别管理。当前服务器实测灰度0不会向匿名更新客户端提供版本，发布工具明确使用100（全量）；已发布条目不可直接编辑，因此必须在草稿阶段写好签名与灰度设置。服务器应用配额100MiB，本次三份EXE共约86MB；后续发布需要扩容或明确清理策略，发布脚本不会自动删除旧版本。
 
 `tools/publish_versionhub.py`负责上传草稿、签名、编辑签名说明、发布和读回核对。管理凭据由stdin JSON临时传入，不写参数/源码/发布说明。公钥在assets/update-public-key.json。签名私钥在当前Windows用户的 .peripheral-battery/signing/update-key.dpapi，由DPAPI保护，只能当前用户解密。请妥善保管；不要上传到GitHub或版本服务器，迁移机器前需要规划受保护密钥迁移，不能仅把该DPAPI文件复制给另一个账户。
 
 手动在网页上传一个没有发布签名的EXE不会被新版客户端自动信任。正常发布使用上述签名工具，并保持与客户端内嵌公钥一致。示例（登录JSON由安全输入管道提供）：
 
 ```powershell
-python tools/publish_versionhub.py --file PeripheralBattery-v2.6.0.exe --version 2.6.0 --version-code 2060000 --channel stable --notes-file notes.txt --credentials-stdin
+python tools/publish_versionhub.py --file PeripheralBattery-v2.6.0.exe --version 2.6.0 --version-code 2060001 --channel stable --notes-file notes.txt --credentials-stdin
 ```
 
 ## 约10MB的取舍

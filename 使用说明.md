@@ -49,3 +49,6 @@ python -m unittest discover -s tests
 使用SemVer标签，stable分支对应正式版，main对应实验开发。每版同时发布到GitHub和VersionHub，旧标签保留。服务器现有100MiB配额足够本次三份EXE；后续需扩容或明确清理策略，工具不自动删除旧版本。服务器签名发布工具位于tools/，不包含凭据；私钥仅在本机当前用户DPAPI保护的发布目录。
 
 程序尚无商业EXE代码签名，更新内容的发布签名与Windows代码签名是两种不同机制。第三方组件与品牌素材许可见THIRD_PARTY_NOTICES.md、licenses/、battery_backends/LICENSE及assets/brands/SOURCES.json。公开仓库不改变各品牌商标权；本项目原创部分尚未指定统一开源许可证。
+
+
+本次真实服务器升级验证通过：本机v2.5.1-experimental.1从VersionHub下载v2.6.1-experimental.1，取消后重试，通过签名与SHA256校验并替换重启；设置、自启动保持。服务器正式版实际代码2060001、下载ID6；实验版2060101、下载ID7。
