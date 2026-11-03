@@ -3568,6 +3568,17 @@
       "receiver": true
     },
     {
+      "vid": "249A",
+      "pid": "5C2F",
+      "name": "VK M3 系列",
+      "backend": "valkyrie_m220",
+      "brand": "valkyrie",
+      "kind": "mouse",
+      "receiver": true,
+      "source": "本机枚举（XCTECH / Wireless-Receiver）与官方驱动 config.xml 的 2.4G 模式一致：vid=249A pid=5C2F",
+      "battery_protocol_note": "接口 2（usage 0x0001:0x0000）用 33 字节输出报文查询 0x10 身份页，32 字节输入应答；该接口不声明 Feature 报告。应答第 13 字节为电量百分比，第 14 字节为链路标志；型号代码 M220 已验证，E023（VK M3）共用同一 USB ID 但未实测，故只按型号代码启用读数。"
+    },
+    {
       "vid": "0001",
       "pid": "0001",
       "brand": "nintendo",

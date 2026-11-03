@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+- Read the VK M3 series battery over the same identity page the official Windows driver uses: interface 2 (`usage 0x0001:0x0000`, 33-byte output / 32-byte input reports, no Feature report declared) answers command `0x10`, where byte 13 is the percentage and byte 14 the link flag. The 2.4G receiver `249A:5C2F` (XCTECH, `Wireless-Receiver`) now routes to the `valkyrie_m220` backend instead of showing an unknown brand.
+- Gate every reading on the model code inside that reply: `M220` = VK M3 Lite is checked against a capture from this machine plus three independent published captures at 78 %, 90 % and 100 %, while the shared `E023` (VK M3) code stays identify-only. Only the read command is ever sent, never a configuration write.
+- State the remaining limits instead of papering over them: the receiver answers `0x10` by itself while the mouse sleeps, so a percentage is treated as live only when the link byte is `1` (otherwise the tray shows 连接待确认 and no stale value is presented as current), and the unverified status byte is never read as charging.
+- Add `tests/test_valkyrie_m220.py` (real reply bytes, checksum rule, rejected/corrupted frames, the model-code gate, probe-level display) and `tests/test_m3lite_identification.py` (catalog routing and no brand for an adjacent unverified product ID). Identification comes from this machine plus the vendor driver's own device table, not the vkhub catalog, so `assets/valkyrie-devices.json` is left unchanged.
+
 ## v2.9.1 (unified release)
 - Move the renamed battery-test entry to the update row: 无法适配电量时，点此测试.
 - Automatically check once per primary application startup, with no automatic download or configuration dialog.

@@ -73,6 +73,29 @@ def probe(group,diagnostics=None):
                                          note='已确认接收器协议和鼠标在线，但该型号尚未验证电池字段，未采用为实时电量。')
         if model_id is not None:reading['protocol_model_id']=model_id
         return [reading]
+    if backend=='valkyrie_m220':
+        from valkyrie_m220 import query_receiver
+        matching=[i for i in infos if i.get('interface_number')==2 and i.get('usage_page')==1 and i.get('usage')==0]
+        if len(matching)!=1:raise ValueError('M3 系列配置接口不唯一或不可用')
+        result=query_receiver(matching[0]);identity=result['identity'];model=result['model']
+        code=identity.model_code.decode('ascii',errors='replace')
+        # The receiver answers 0x10 without the mouse, so a reply never proves
+        # presence; only link byte 1 is accepted, and only for a verified model.
+        # Any other value is reported as an unconfirmed link, not as a disconnect.
+        reading={'name':model[1] if model else base['name'],'percent':identity.percent if model else None,
+                 'connected':True if model and identity.linked else None,'charging':None,'kind':'mouse','receiver':True,
+                 'transport':'2.4 GHz 接收器','power_mode':'battery',
+                 'confidence':'confirmed' if model and identity.linked else 'unknown',
+                 'battery_support':'supported' if model else 'identify-only',
+                 'source':'M220 0x10 身份页','firmware':identity.firmware,
+                 'observed_at':time.time(),'monotonic_at':time.monotonic(),
+                 'evidence':f'官方 M220 身份应答；型号代码 {code}，电量字段 {identity.percent}%，链路字节 {identity.link_raw}' if model
+                            else f'官方驱动身份应答；型号代码 {code} 尚未验证，电量字段未采用',
+                 'note':'已按官方驱动的同一身份页读取电量；充电标志未确认，读数只在链路字节为 1 时视为实时。' if model and identity.linked
+                       else '接收器自行应答了身份查询，但链路字节不是 1：鼠标可能休眠或未建链，未作为实时读数。唤醒鼠标后的一次成功读数才会成为上次电量。' if model
+                       else '已识别为瓦尔基里 M3 系列，但该型号代码的电池字段未验证，未采用为实时电量。'}
+        if model:reading['brand']=model[0]
+        return [reading]
     if backend=='gamepad':
         from gamepads import query_gamepad
         return [query_gamepad(group,infos,diagnostics)]
