@@ -66,14 +66,21 @@ def display_name(device):
     return name.removesuffix(' RECEIVER')
 
 
+def needs_power_choice(d):
+    return (d.present and not d.receiver and d.kind!='auxiliary' and d.power_mode=='unknown'
+            and not d.usable and not d.fresh_grade and (d.usb_keyboard or 'USB' in d.transport))
+
+
 class DeviceCard(QFrame):
     clicked=Signal(str)
-    def __init__(self,d,compact=False):
+    powerModeRequested=Signal(str,str)
+    def __init__(self,d,compact=False,show_power_choice=False):
         super().__init__();self.d=d;self.setObjectName('card');self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus);self.setAccessibleName(d.name+'，'+d.status+'，'+d.reading_text)
         self.setFixedHeight(70 if compact else 82)
         row=QHBoxLayout(self);row.setContentsMargins(12,8,10,8);row.setSpacing(12)
         self.brand_icon=BrandIcon(d.brand,d.kind);row.addWidget(self.brand_icon)
+        self.show_power_choice=show_power_choice
         center=QVBoxLayout();center.setSpacing(3);center.setContentsMargins(0,0,0,0)
         name=label(display_name(d),13,bold=True)
         name.setToolTip(d.name);name.setSizePolicy(QSizePolicy.Policy.Ignored,QSizePolicy.Policy.Preferred)
@@ -83,8 +90,19 @@ class DeviceCard(QFrame):
         type_name=d.type_name
         self.kind_label=kind;self.status_label=label(type_name+' · '+d.status,11,True)
         status.addWidget(self.status_label);status.addStretch();center.addLayout(status)
+        self.power_row=QWidget();power=QHBoxLayout(self.power_row);power.setContentsMargins(0,0,0,0);power.setSpacing(4)
+        power.addWidget(label('供电状态',10,True));self.power_buttons={}
+        from PySide6.QtWidgets import QButtonGroup
+        self.power_group=QButtonGroup(self)
+        for text,mode in (('有线','wired'),('电池','battery')):
+            button=QPushButton(text);button.setObjectName('powerChoice');button.setCheckable(True);button.setFont(font(10));button.setFixedSize(38,22)
+            button.setAccessibleName('供电状态：'+text);button.setChecked(d.power_mode==mode);self.power_group.addButton(button)
+            button.clicked.connect(lambda checked,m=mode:self.powerModeRequested.emit(self.d.key,m));power.addWidget(button);self.power_buttons[mode]=button
+        power.addStretch();center.addWidget(self.power_row);self.power_row.setVisible(show_power_choice)
+        if show_power_choice:
+            self.setFixedHeight(92);self.status_label.setText(d.type_name+' · USB 已接入' if needs_power_choice(d) else d.type_name+' · '+d.status)
         bar=BatteryBar();bar.value=d.display_percent;bar.grade=d.display_grade;bar.stale=not (d.usable or d.fresh_grade);bar.charging=d.charging if d.usable or d.fresh_grade else False
-        self.bar=bar;bar.setVisible(d.power_mode!='wired' and d.kind!='auxiliary');center.addWidget(bar);row.addLayout(center,1)
+        self.bar=bar;bar.setVisible(d.power_mode!='wired' and d.kind!='auxiliary' and not needs_power_choice(d));center.addWidget(bar);row.addLayout(center,1)
         pct=QVBoxLayout();pct.setSpacing(0)
         value=label(d.reading_text,20 if d.kind!='auxiliary' else 13,bold=True)
         value.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else '分档电量，非百分比' if d.battery_grade else d.approximate or '实时电量')
@@ -93,12 +111,14 @@ class DeviceCard(QFrame):
         self.value_label=value;self.brand_label=label(d.brand if d.brand!='Unknown' else '品牌待指定',10,True);pct.addWidget(self.brand_label);row.addLayout(pct)
         arrow=label(GLYPHS['chevron'],11,True);arrow.setObjectName('glyph');arrow.setFont(font(11,icons=True));row.addWidget(arrow)
 
-    def update_device(self,d):
-        if self.d==d:return
+    def update_device(self,d,show_power_choice=False):
+        if self.d==d and self.show_power_choice==show_power_choice:return
+        self.show_power_choice=show_power_choice;self.power_row.setVisible(show_power_choice);self.setFixedHeight(92 if show_power_choice else 70)
+        for mode,button in self.power_buttons.items():button.setChecked(d.power_mode==mode)
         self.d=d;self.brand_icon.set_brand(d.brand,d.kind)
         self.name_label.setText(display_name(d));self.name_label.setToolTip(d.name)
         self.kind_label.setText(GLYPHS.get(d.kind,GLYPHS['mouse']))
-        self.status_label.setText(d.type_name+' · '+d.status)
+        self.status_label.setText(d.type_name+' · USB 已接入' if needs_power_choice(d) else d.type_name+' · '+d.status)
         self.status_label.setToolTip(d.note);self.value_label.setText(d.reading_text)
         self.value_label.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else '分档电量，非百分比' if d.battery_grade else d.approximate or '实时电量')
         tone='' if d.usable or d.fresh_grade else 'muted'
@@ -106,7 +126,7 @@ class DeviceCard(QFrame):
             self.value_label.setObjectName(tone);self.value_label.style().unpolish(self.value_label);self.value_label.style().polish(self.value_label)
         self.brand_label.setText(d.brand if d.brand!='Unknown' else '品牌待指定')
         self.bar.value=d.display_percent;self.bar.grade=d.display_grade;self.bar.stale=not (d.usable or d.fresh_grade);self.bar.charging=d.charging if d.usable or d.fresh_grade else False;self.bar.update()
-        self.bar.setVisible(d.power_mode!='wired' and d.kind!='auxiliary')
+        self.bar.setVisible(d.power_mode!='wired' and d.kind!='auxiliary' and not needs_power_choice(d))
         self.setAccessibleName(d.name+'，'+d.status+'，'+self.value_label.text())
 
     def mouseReleaseEvent(self,e):
@@ -136,7 +156,10 @@ class Flyout(QWidget):
         self.root=QVBoxLayout(self);self.root.setContentsMargins(18,14,18,12);self.root.setSpacing(8)
         head=QHBoxLayout();head.setSpacing(10)
         self.back=tool('back','返回设备列表',self.go_back);self.back.hide();head.addWidget(self.back)
-        titlecol=QVBoxLayout();titlecol.setSpacing(1);titlecol.addWidget(label('设备电量',18,bold=True));titlecol.addWidget(label('外设状态 · 有线 / 无线',11,True));head.addLayout(titlecol,1)
+        titlecol=QVBoxLayout();titlecol.setSpacing(1);title_row=QHBoxLayout();title_row.setSpacing(6)
+        title_row.addWidget(label('设备电量',18,bold=True));self.version_label=label('v'+VERSION,10,True)
+        self.version_label.setToolTip('当前版本：'+VERSION+' · 统一版');title_row.addWidget(self.version_label);title_row.addStretch()
+        titlecol.addLayout(title_row);titlecol.addWidget(label('外设状态 · 有线 / 无线',11,True));head.addLayout(titlecol,1)
         self.refresh=tool('refresh','立即刷新',self.refreshRequested.emit);head.addWidget(self.refresh)
         self.info_button=tool('info','品牌目录与设备管理',self.open_catalog);head.addWidget(self.info_button);head.addWidget(tool('close','收起到系统托盘',self.hide))
         self.root.addLayout(head)
@@ -165,17 +188,18 @@ class Flyout(QWidget):
         first.addWidget(startup_box,1)
         refresh_box=QWidget();refresh_row=QHBoxLayout(refresh_box);refresh_row.setContentsMargins(0,0,0,0);refresh_row.setSpacing(6)
         refresh_row.addWidget(label('刷新间隔',11));refresh_row.addStretch()
-        self.refresh_choice=QComboBox();self.refresh_choice.setObjectName('refreshInterval');self.refresh_choice.setFixedSize(94,28)
+        self.refresh_choice=QComboBox();self.refresh_choice.setObjectName('refreshInterval');self.refresh_choice.setFixedSize(76,28)
         self.refresh_choice.setFont(font(11));self.refresh_choice.setAccessibleName('自动刷新间隔')
         for seconds in REFRESH_INTERVALS:self.refresh_choice.addItem(f'{seconds} 秒',seconds)
         self.refresh_choice.setCurrentIndex(REFRESH_INTERVALS.index(self.preferences.get('refresh_seconds',15)))
         self.refresh_choice.setToolTip('切换后立即保存并生效。查询未结束时不会重复启动。')
         self.refresh_choice.currentIndexChanged.connect(lambda:self.change_interval(self.refresh_choice.currentData()))
-        refresh_row.addWidget(self.refresh_choice);first.addWidget(refresh_box,1);controls.addWidget(first_row,0,0,1,2)
+        refresh_row.addWidget(self.refresh_choice);first.addWidget(refresh_box,1)
+        self.desktop_button=QPushButton('桌面显示');self.desktop_button.setFont(font(11));self.desktop_button.setFixedSize(84,30)
+        self.desktop_button.clicked.connect(self.open_desktop_menu);first.addWidget(self.desktop_button);controls.addWidget(first_row,0,0,1,2)
         version_box=QWidget();self.version_box=version_box;version_row=QHBoxLayout(version_box);version_row.setContentsMargins(0,12,0,0);version_row.setSpacing(6)
         version_row.addWidget(self.test_button)
-        version_text='v'+VERSION
-        self.version_label=label(version_text,10,True);self.version_label.setToolTip('当前版本：'+VERSION+' · 统一版');version_row.addWidget(self.version_label,1)
+        version_row.addStretch()
         self.update_button=QPushButton('检查更新');self.update_button.setFont(font(10));self.update_button.setMinimumSize(106,28);version_row.addWidget(self.update_button);controls.addWidget(version_box,1,0,1,2)
         self.update_badge=QLabel('新版本可更新',version_box);self.update_badge.setFont(font(9));self.update_badge.setFixedSize(88,18)
         self.update_badge.setAlignment(Qt.AlignmentFlag.AlignCenter);self.update_badge.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents,True)
@@ -197,7 +221,7 @@ class Flyout(QWidget):
 
     def check_update(self,automatic=False):
         if self.update_job:return
-        if automatic and (self.update_candidate or self.download_ready or self.needs_update_config):return
+        if automatic and (self.download_ready or self.needs_update_config):return
         if self.needs_update_config:
             from PySide6.QtWidgets import QFileDialog
             from update_config import save_config
@@ -214,11 +238,11 @@ class Flyout(QWidget):
             except (ValueError,OSError):self.update_button.setToolTip('更新配置导入失败，请检查部署配置')
             finally:self.pinned=pinned
             return
-        if self.download_ready:self.installUpdateRequested.emit(self.download_ready);return
-        if self.update_candidate:self.download_update();return
+        if not automatic and self.download_ready:self.installUpdateRequested.emit(self.download_ready);return
+        if not automatic and self.update_candidate:self.download_update();return
         from jobs import WorkerJob
         self.update_button.setEnabled(False);self.update_button.setText('正在检查…')
-        job=WorkerJob({'operation':'check-updates','include_prereleases':False},18000,self);self.update_job=job
+        job=WorkerJob({'operation':'check-updates','include_prereleases':False,'background':automatic},18000,self);self.update_job=job
         job.finished.connect(lambda result:self.update_checked(job,result));job.start()
 
     def update_checked(self,job,result):
@@ -230,7 +254,7 @@ class Flyout(QWidget):
         self.version_label.setToolTip(info.get('message',''))
         if status=='available':
             self.update_candidate=info;self.update_badge.show();self.position_update_badge();self.update_button.setText('下载并更新');return
-        self.update_badge.hide()
+        self.update_badge.hide();self.update_candidate=None
         if status=='unconfigured':
             self.needs_update_config=True;self.update_button.setText('导入更新配置');return
         if status=='no_release':self.update_button.setText('暂无新版');return
@@ -319,6 +343,10 @@ class Flyout(QWidget):
         QLabel#glyph {{font-family:'Segoe Fluent Icons';color:{muted};}}
         QFrame#card {{background:{card};border:1px solid {border};border-radius:7px;}}
         QFrame#card:hover,QFrame#card:focus {{background:{hover};border-color:{windows.accent()};}}
+        QPushButton#powerChoice {{background:{card};border:1px solid {border};border-radius:4px;padding:0;}}
+        QPushButton#powerChoice:checked {{background:{windows.accent()};color:white;border-color:{windows.accent()};}}
+        QPushButton#batteryTest {{background:transparent;border:0;color:{windows.accent()};padding:0;text-align:left;}}
+        QPushButton#batteryTest:hover {{text-decoration:underline;}}
         QFrame#separator {{background:{border};border:0;}}
         QFrame#releaseNotice {{background:{card};border:1px solid {border};border-radius:7px;}}
         QToolButton {{background:transparent;border:0;border-radius:4px;}}
@@ -354,10 +382,10 @@ class Flyout(QWidget):
         for index,d in enumerate(displayed):
             card=self.cards.get(d.key)
             if card is None:
-                card=DeviceCard(d,True);card.clicked.connect(self.show_detail);self.cards[d.key]=card
+                card=DeviceCard(d,True,needs_power_choice(d) or d.key in self.preferences.get('device_modes',{}));card.clicked.connect(self.show_detail);card.powerModeRequested.connect(lambda key,mode:self.assign_mode(next(d for d in self.devices if d.key==key),mode));self.cards[d.key]=card
                 self.list_layout.insertWidget(index,card)
             else:
-                card.update_device(d)
+                card.update_device(d,needs_power_choice(d) or d.key in self.preferences.get('device_modes',{}))
                 if self.list_layout.indexOf(card)!=index:
                     self.list_layout.removeWidget(card);self.list_layout.insertWidget(index,card)
         if not hasattr(self,'empty_label'):
@@ -496,6 +524,18 @@ class Flyout(QWidget):
         dialog.finished.connect(lambda result:self.catalog_closed(dialog))
         dialog.show();dialog.raise_();dialog.activateWindow()
 
+    def open_desktop_menu(self):
+        from PySide6.QtWidgets import QMenu
+        from desktop_overlay import add_desktop_actions
+        menu=QMenu(self);add_desktop_actions(menu,self.preferences,self.set_desktop_option)
+        self.menu_open=True
+        try:menu.exec(self.desktop_button.mapToGlobal(self.desktop_button.rect().topLeft()))
+        finally:
+            self.menu_open=False;menu.deleteLater();QTimer.singleShot(160,self.hide_if_inactive)
+
+    def set_desktop_option(self,key,value):
+        self.preferences.set(key,value);self.preferencesChanged.emit()
+
     def open_research(self):
         if self.research_controller is None or self.learning is None:
             self.statusline.setText('设备扫描器正在准备，请稍后再试');self.statusline.show();return
@@ -552,7 +592,8 @@ class Flyout(QWidget):
         screen=QApplication.screenAt(rect.center()) if rect and not rect.isNull() else QApplication.screenAt(QCursor.pos())
         screen=screen or QApplication.primaryScreen();bounds=screen.availableGeometry()
         count=len(visible_devices(self.devices,self.preferences))
-        width=min(440,bounds.width()-24);height=adaptive_height(count,bounds.height(),bool(self.selected))
+        width=min(400,bounds.width()-24);height=adaptive_height(count,bounds.height(),bool(self.selected))
+        if not self.selected:height=min(bounds.height()-20,height+sum(max(0,card.height()-70) for card in self.cards.values()))
         if not self.release_notice.isHidden():height=min(bounds.height()-20,height+max(95,self.release_notice.sizeHint().height()))
         if not self.download_progress.isHidden():height=min(bounds.height()-20,height+30)
         if self.width()!=width or self.height()!=height:self.setFixedSize(width,height)

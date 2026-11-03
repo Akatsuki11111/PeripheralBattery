@@ -158,7 +158,21 @@ def signed_parameters(values):
     return {**values,'timestamp':stamp,'nonce':nonce,'sign':sign}
 
 
-def _fetch_channel(current,channel):
+def _read_metadata(response,background=False):
+    if not background:return response.read(65537)
+    # Metadata only: at most 16 KiB, paced to 8 KiB/s, with no retry/download.
+    chunks=[];length=0;deadline=time.monotonic()
+    while length<=16384:
+        block=response.read(min(512,16385-length))
+        if not block:break
+        chunks.append(block);length+=len(block)
+        if length>16384:raise ValueError('后台更新信息过大')
+        deadline=max(deadline,time.monotonic())+len(block)/8192
+        time.sleep(max(0,deadline-time.monotonic()))
+    return b''.join(chunks)
+
+
+def _fetch_channel(current,channel,background=False):
     # Query the published head and compare SemVer locally. No device identity,
     # inventory, management token, appSecret or password is sent.
     url=API_URL+'?'+urlencode(signed_parameters(dict(appKey=APP_KEY,platform=PLATFORM,versionCode=0,channel=channel)))
@@ -166,7 +180,7 @@ def _fetch_channel(current,channel):
                                                'User-Agent':'PeripheralBattery/'+current})
     with _open_url(request,timeout=7) as response:
         if response.geturl()!=url:raise ValueError('更新服务器发生未允许的重定向')
-        raw=response.read(65537)
+        raw=_read_metadata(response,background)
         if len(raw)>65536:raise ValueError('更新服务器返回数据过大')
     result=_json(raw)
     if type(result) is not dict or type(result.get('code')) is not int or result['code']!=0:
@@ -174,7 +188,7 @@ def _fetch_channel(current,channel):
     return _signed_release(result.get('data'),channel)
 
 
-def check_updates(current,include_prereleases=True):
+def check_updates(current,include_prereleases=True,background=False):
     from settings import RELEASE_CHANNEL
     if not configure_runtime():return {'status':'unconfigured','message':'未配置更新服务，请导入部署者提供的更新配置','url':''}
     local=version_key(current)
@@ -182,7 +196,7 @@ def check_updates(current,include_prereleases=True):
     try:
         candidates=[]
         for channel in (('stable','experimental') if include_prereleases else ('stable',)):
-            release=_fetch_channel(current,channel)
+            release=_fetch_channel(current,channel,background=True) if background else _fetch_channel(current,channel)
             if release:candidates.append(release)
     except urllib.error.HTTPError as error:
         if error.code in (301,302,303,307,308):raise ValueError('更新服务器返回重定向，已停止检查') from error

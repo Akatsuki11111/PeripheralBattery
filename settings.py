@@ -95,7 +95,7 @@ def redact(text):
 
 class Settings:
     DEFAULTS = {'show_offline': False, 'show_unreadable':False, 'show_auxiliary':False, 'low_notifications': True, 'low_threshold': 20,
-                'hidden': [], 'brand_overrides': {}, 'device_modes':{},'refresh_seconds':15,'autostart_requested': False,'pinned_key':'','update_prereleases':False}
+                'hidden': [], 'brand_overrides': {}, 'device_modes':{},'refresh_seconds':15,'autostart_requested': False,'pinned_key':'','update_prereleases':False,'desktop_mode':'off','desktop_size':'medium','desktop_position':[],'desktop_locked':False}
 
     def __init__(self, path=None):
         self.path = Path(path) if path else data_dir() / 'settings.json'
@@ -111,6 +111,11 @@ class Settings:
         self.value['device_modes']={str(k)[:240]:v for k,v in list(self.value['device_modes'].items())[:200] if v in ('wired','battery')}
         if type(self.value['refresh_seconds']) is not int or self.value['refresh_seconds'] not in REFRESH_INTERVALS:self.value['refresh_seconds']=15
 
+        if self.value['desktop_mode'] not in ('off','detailed','compact'):self.value['desktop_mode']='off'
+        if self.value['desktop_size'] not in ('small','medium','large'):self.value['desktop_size']='medium'
+        pos=self.value['desktop_position']
+        if len(pos)!=2 or any(type(n) is not int or abs(n)>100000 for n in pos):self.value['desktop_position']=[]
+
     def get(self, key, default=None):
         return self.value.get(key, default)
 
@@ -118,6 +123,9 @@ class Settings:
         if key not in self.DEFAULTS:
             raise KeyError(key)
         if key=='refresh_seconds' and (type(value) is not int or value not in REFRESH_INTERVALS):raise ValueError('刷新间隔只能为 5、15、30、60 秒')
+        if key=='desktop_mode' and value not in ('off','detailed','compact'):raise ValueError('Invalid desktop mode')
+        if key=='desktop_size' and value not in ('small','medium','large'):raise ValueError('Invalid desktop size')
+        if key=='desktop_position' and (type(value) is not list or len(value)!=2 or any(type(n) is not int or abs(n)>100000 for n in value)):raise ValueError('Invalid desktop position')
         self.value[key] = value
         atomic_json(self.path, self.value)
 

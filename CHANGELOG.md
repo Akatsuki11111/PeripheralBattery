@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased
+## v2.10.0 — desktop display and compact controls
+- Continue from the M3 Lite baseline in v2.9.2; preserve PR #1 and its protocol model gate.
+- Add transparent desktop battery rows, detailed/compact modes, three sizes, drag/lock, and persisted position.
+- Use a 400-DIP flyout, title version, two aligned footer rows and direct wired/battery selectors on uncertain USB devices.
+- Check metadata at startup and every two hours; bound background reads, avoid automatic downloads and retry bursts.
+- Reclaim owned stale caches and completed staging copies without deleting configuration, histories or device mappings.
+- 305 regression tests pass.
+
+## v2.9.2 — M3 Lite baseline release
 - Read the VK M3 series battery over the same identity page the official Windows driver uses: interface 2 (`usage 0x0001:0x0000`, 33-byte output / 32-byte input reports, no Feature report declared) answers command `0x10`, where byte 13 is the percentage and byte 14 the link flag. The 2.4G receiver `249A:5C2F` (XCTECH, `Wireless-Receiver`) now routes to the `valkyrie_m220` backend instead of showing an unknown brand.
 - Gate every reading on the model code inside that reply: `M220` = VK M3 Lite is checked against a capture from this machine plus three independent published captures at 78 %, 90 % and 100 %, while the shared `E023` (VK M3) code stays identify-only. Only the read command is ever sent, never a configuration write.
 - State the remaining limits instead of papering over them: the receiver answers `0x10` by itself while the mouse sleeps, so a percentage is treated as live only when the link byte is `1` (otherwise the tray shows 连接待确认 and no stale value is presented as current), and the unverified status byte is never read as charging.

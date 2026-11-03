@@ -109,11 +109,16 @@ def main():
     server.setMaxPendingConnections(4);QLocalServer.removeServer(name)
     if not server.listen(name):logger.error('IPC listen failed: %s',server.errorString());return 1
     if not args.demo and not args.capture:
+        from maintenance import cleanup_cache
+        logger.info('owned cache cleanup: %s',cleanup_cache())
+        QTimer.singleShot(30000,lambda:logger.info('post-install cache cleanup: %s',cleanup_cache()))
         try:
             current=startup.repair_if_requested(preferences)
             logger.info('startup state enabled=%s valid=%s blocked=%s',current.enabled,current.valid,current.blocked)
         except OSError as error:logger.warning('startup repair failed: %s',redact(error))
     store=DeviceStore();flyout=Flyout(preferences,store.history);flyout.devices=store.snapshot()
+    from desktop_overlay import DesktopOverlay
+    desktop=DesktopOverlay(preferences)
     tray=QSystemTrayIcon(tray_icon(),app);tray.setToolTip('设备电量 · 正在读取')
     app.setWindowIcon(tray_icon());menu=QMenu()
     show_action=menu.addAction('打开设备电量');refresh_action=menu.addAction('立即刷新')
@@ -140,6 +145,7 @@ def main():
     learning.changed.connect(learning_changed);learning_changed()
     state={'quitting':False,'captured':False,'devices':store.snapshot(),'errors':[],
            'alerts':set(),'tray_ready':False,'theme':None,'clients':set()}
+    update_timer=None
 
     def show():
         if flyout.raise_catalog():return
@@ -150,6 +156,7 @@ def main():
     def publish(devices,errors):
         state['devices']=devices;state['errors']=errors;flyout.rebuild(devices,errors)
         if args.demo:flyout.summary.setText('演示数据 · 不代表真实设备')
+        desktop.sync(devices)
         available=visible_devices(devices,preferences)
         low=lowest(available);pinned=next((d for d in available if d.key==preferences.get('pinned_key') and (d.usable or d.fresh_grade or d.cached)),None)
         cached=next((d for d in available if d.key==state.get('tray_key') and d.cached),None)
@@ -216,13 +223,14 @@ def main():
     def quit_app():
         if state['quitting']:return
         state['quitting']=True;poll.stop();tray_ready.stop()
+        if update_timer:update_timer.stop()
         if learning and learning.session.get('state') in ('observing','awaiting_unplug'):learning.pause('程序已退出，观察暂停。')
         controller.shutdown()
         try:store.save()
         except OSError as error:logger.warning('cache write failed: %s',redact(error))
         try:store.history.save(True)
         except OSError as error:logger.warning('history write failed: %s',redact(error))
-        tray.hide();flyout.close_windows();server.close();lock.unlock();logger.info('shutdown complete');app.quit()
+        desktop.hide();desktop.deleteLater();tray.hide();flyout.close_windows();server.close();lock.unlock();logger.info('shutdown complete');app.quit()
 
     def incoming():
         while server.hasPendingConnections():
@@ -251,6 +259,7 @@ def main():
         theme=(windows.is_dark(),windows.is_taskbar_dark())
         if state['theme']!=theme:publish(state['devices'],state['errors'])
 
+    desktop.preferencesChanged.connect(preferences_changed)
     controller.updated.connect(publish);controller.busyChanged.connect(busy)
     flyout.refreshRequested.connect(refresh);flyout.preferencesChanged.connect(preferences_changed)
     flyout.forgetRequested.connect(forget);show_action.triggered.connect(show)
@@ -274,7 +283,9 @@ def main():
         publish(devices,[]);QTimer.singleShot(100,lambda:busy(False) if args.capture else show())
     else:
         poll.start();QTimer.singleShot(0,lambda:controller.refresh(True))
-        if not args.capture:QTimer.singleShot(1200,lambda:flyout.check_update(automatic=True))
+        if not args.capture:
+            from scheduling import UpdateTimer
+            update_timer=UpdateTimer(lambda:flyout.check_update(automatic=True),app)
         if not args.background and not args.capture:QTimer.singleShot(180,show)
     logger.info('event loop ready')
     result=app.exec();server.close();lock.unlock();return result

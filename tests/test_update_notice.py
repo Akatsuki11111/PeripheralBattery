@@ -27,9 +27,11 @@ class UpdateNoticeTests(unittest.TestCase):
   self.assertTrue(f.update_badge.isHidden())
  def test_automatic_recheck_never_starts_download_or_install(self):
   f=self.window();f.update_candidate={'latest':'v9.0.0'}
-  with patch.object(f,'download_update') as download:f.check_update(automatic=True)
-  download.assert_not_called();self.assertIsNone(f.update_job)
-  f.update_candidate=None;f.needs_update_config=True
+  with patch('jobs.WorkerJob') as factory,patch.object(f,'download_update') as download:
+   f.check_update(automatic=True)
+   self.assertTrue(factory.call_args.args[0]['background'])
+  download.assert_not_called()
+  f.update_job=None;f.update_candidate=None;f.needs_update_config=True
   with patch('PySide6.QtWidgets.QFileDialog.getOpenFileName') as dialog:f.check_update(automatic=True)
   dialog.assert_not_called()
  def test_current_update_notice_is_short_and_dismissal_persists(self):
@@ -38,6 +40,9 @@ class UpdateNoticeTests(unittest.TestCase):
   self.assertEqual(len(f.release_notice_text.text().splitlines()),3)
   f.dismiss_release_notice();self.assertTrue(f.release_notice.isHidden())
   self.assertTrue(self.window().release_notice.isHidden())
+ def test_background_check_never_installs_an_already_downloaded_file(self):
+  f=self.window();f.download_ready={'path':'not-a-real-installer'};installed=[];f.installUpdateRequested.connect(installed.append)
+  f.check_update(automatic=True);self.assertFalse(installed);self.assertIsNone(f.update_job)
  def test_old_version_or_failed_update_does_not_show_success_notice(self):
   for result in (dict(ok=True,version='v0.0.1'),dict(ok=False,version='v'+VERSION)):
    atomic_json(Path(self.tmp.name)/'updates/last-result.json',{**result,'at':time.time()})

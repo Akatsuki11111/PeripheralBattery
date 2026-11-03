@@ -172,7 +172,7 @@ def execute(request):
     if operation=='check-updates':
         from updates import check_updates
         from settings import VERSION
-        return {'update':check_updates(VERSION,request.get('include_prereleases') is True)}
+        return {'update':check_updates(VERSION,request.get('include_prereleases') is True,background=request.get('background') is True)}
     if operation=='download-update':
         from updates import download_update
         from settings import VERSION
