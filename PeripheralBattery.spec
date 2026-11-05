@@ -8,12 +8,16 @@ import sys
 
 root=Path(SPECPATH)
 sys.path.insert(0,str(root))
-channel='stable'
-version='2.10.0'
+local_preview = os.environ.get('PB_BUILD_UI_PREVIEW') == '1'
+channel = 'preview' if local_preview else 'stable'
+version = '2.11.0-beta.2' if local_preview else '2.11.0'
 generated=Path(CONF['workpath'])/'channel';generated.mkdir(parents=True,exist_ok=True)
-(generated/'release.json').write_text(json.dumps(dict(version=version,channel=channel,battery_tests=True)),encoding='utf-8')
+release = dict(version=version, channel=channel, battery_tests=True)
+if local_preview:
+    release['local_preview'] = True
+(generated/'release.json').write_text(json.dumps(release),encoding='utf-8')
 version_text=(root/'version_info.txt').read_text(encoding='utf-8')
-numeric='2,10,0,0'
+numeric = '2,11,0,2' if local_preview else '2,11,0,0'
 version_text=re.sub(r'filevers=\([^)]*\),prodvers=\([^)]*\)',f'filevers=({numeric}),prodvers=({numeric})',version_text)
 version_text=re.sub(r"(StringStruct\('(?:FileVersion|ProductVersion)',')[^']*",lambda m:m[1]+version,version_text)
 (generated/'version_info.txt').write_text(version_text,encoding='utf-8')
@@ -42,6 +46,6 @@ def needed(name):
 a.binaries=[row for row in a.binaries if needed(row[0])]
 a.datas=[row for row in a.datas if '/translations/' not in row[0].replace('\\','/') or row[0].endswith('qtbase_zh_CN.qm')]
 pyz=PYZ(a.pure)
-exe=EXE(pyz,a.scripts,a.binaries,a.datas,[],name='PeripheralBattery',console=False,
+exe=EXE(pyz,a.scripts,a.binaries,a.datas,[],name='PeripheralBattery-v' + version if local_preview else 'PeripheralBattery',console=False,
         debug=False,strip=False,upx=False,icon=str(root/'assets/app.ico'),
         version=str(generated/'version_info.txt'))

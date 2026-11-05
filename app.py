@@ -26,6 +26,10 @@ def main():
     parser.add_argument('--demo',action='store_true',help='明确标注的演示数据，不查询硬件')
     parser.add_argument('--demo-count',type=int,default=3)
     args=parser.parse_args()
+    from settings import LOCAL_PREVIEW
+    if LOCAL_PREVIEW and any((args.configure_updates, args.apply_update, args.autostart,
+                              args.install_startup)):
+        return 2
     if args.configure_updates:
         from update_config import save_config
         try:
@@ -79,7 +83,8 @@ def main():
         elif sys.stdout:print(json.dumps(value,ensure_ascii=False,indent=2))
         return 0
     import ctypes
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LocalTools.PeripheralBattery')
+    app_id = 'LocalTools.PeripheralBattery.Preview' if LOCAL_PREVIEW else 'LocalTools.PeripheralBattery'
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
     from PySide6.QtCore import QTimer,QLockFile
     from PySide6.QtNetwork import QLocalServer,QLocalSocket
     from PySide6.QtWidgets import QApplication,QSystemTrayIcon,QMenu,QFileDialog
@@ -89,6 +94,7 @@ def main():
     from scheduling import RefreshTimer
     from classification import apply_saved_modes
     from icons import tray_icon,font
+    from appearance import panel_dark
     from models import Device,lowest
     from notifications import collect_low_alerts
     from catalog import visible_devices
@@ -97,7 +103,9 @@ def main():
     import windows
     app=QApplication(sys.argv);app.setApplicationName('PeripheralBattery');app.setOrganizationName('LocalTools')
     app.setQuitOnLastWindowClosed(False);app.setFont(font(12))
-    name=server_name()+('.preview.'+str(os.getpid()) if args.capture or args.demo else '')
+    name = server_name() + ('.ui-preview' if LOCAL_PREVIEW else '')
+    if args.capture or args.demo:
+        name += '.demo.' + str(os.getpid())
     socket=QLocalSocket();socket.connectToServer(name)
     if socket.waitForConnected(300):
         socket.write(b'quit\n' if args.quit else b'ping\n' if args.background else b'show\n')
@@ -112,20 +120,36 @@ def main():
         from maintenance import cleanup_cache
         logger.info('owned cache cleanup: %s',cleanup_cache())
         QTimer.singleShot(30000,lambda:logger.info('post-install cache cleanup: %s',cleanup_cache()))
-        try:
-            current=startup.repair_if_requested(preferences)
-            logger.info('startup state enabled=%s valid=%s blocked=%s',current.enabled,current.valid,current.blocked)
-        except OSError as error:logger.warning('startup repair failed: %s',redact(error))
+        if not LOCAL_PREVIEW:
+            try:
+                current=startup.repair_if_requested(preferences)
+                logger.info('startup state enabled=%s valid=%s blocked=%s',current.enabled,current.valid,current.blocked)
+            except OSError as error:logger.warning('startup repair failed: %s',redact(error))
     store=DeviceStore();flyout=Flyout(preferences,store.history);flyout.devices=store.snapshot()
     from desktop_overlay import DesktopOverlay
     desktop=DesktopOverlay(preferences)
-    tray=QSystemTrayIcon(tray_icon(),app);tray.setToolTip('设备电量 · 正在读取')
+    tray_title = '设备电量 · 界面测试版' if LOCAL_PREVIEW else '设备电量'
+    tray=QSystemTrayIcon(tray_icon(style=preferences.get('tray_style')),app)
+    tray.setToolTip(tray_title + ' · 正在读取')
     app.setWindowIcon(tray_icon());menu=QMenu()
     show_action=menu.addAction('打开设备电量');refresh_action=menu.addAction('立即刷新')
     directory_action=menu.addAction('品牌目录与设备管理');menu.addSeparator()
     startup_action=menu.addAction('开机自启');startup_action.setCheckable(True)
     promote_action=menu.addAction('显示到任务栏（无需拖动）')
     automatic_action=menu.addAction('恢复显示最低电量设备')
+    tray_style_menu = menu.addMenu('托盘图标样式')
+    from PySide6.QtGui import QActionGroup
+    tray_styles = QActionGroup(tray_style_menu)
+    tray_styles.setExclusive(True)
+    for style, title in (('meter', '图标＋电量条'), ('number', '数字＋设备标识')):
+        action = tray_style_menu.addAction(title)
+        action.setCheckable(True)
+        action.setChecked(preferences.get('tray_style') == style)
+        tray_styles.addAction(action)
+        action.triggered.connect(lambda checked, value=style: change_tray_style(value) if checked else None)
+    if LOCAL_PREVIEW:
+        startup_action.setEnabled(False)
+        promote_action.setVisible(False)
     export_action=menu.addAction('导出诊断信息…');menu.addAction('任务栏设置',windows.show_tray_settings)
     menu.addSeparator();quit_action=menu.addAction('退出');tray.setContextMenu(menu)
     controller=ScanController(store,preferences,logger,app)
@@ -162,11 +186,17 @@ def main():
         cached=next((d for d in available if d.key==state.get('tray_key') and d.cached),None)
         grade=min((d for d in available if d.fresh_grade),key=lambda d:({'耗尽':0,'低':1,'中':2,'高':3,'满':4}[d.battery_grade],d.key),default=None)
         chosen=pinned or low or grade or cached or max((d for d in available if d.cached),key=lambda d:d.last_observed_at,default=None)
-        state['tray_key']=chosen.key if chosen else '';tray.setIcon(tray_icon(chosen))
+        state['tray_key']=chosen.key if chosen else '';tray.setIcon(tray_icon(chosen, preferences.get('tray_style')))
         ordered=sorted(available,key=lambda d:(d.key!=(chosen.key if chosen else ''),not (d.usable or d.fresh_grade),d.name))
-        tip='设备电量'+(' · 演示数据' if args.demo else '')+'\n'+'\n'.join(
-            d.name+'：'+(d.reading_text if d.power_mode=='wired' or d.usable or d.fresh_grade or d.cached else '不适用' if d.kind=='auxiliary' else '未知')+' · '+d.status for d in ordered)
-        tray.setToolTip(tip[:127]);state['theme']=(windows.is_dark(),windows.is_taskbar_dark())
+        lines = []
+        for d in ordered:
+            reading = '不适用' if d.kind == 'auxiliary' else '电量未知' if d.reading_text == '—' else d.reading_text
+            status = d.status
+            if d.cached and '上次' not in status:
+                status += ' · 上次 ' + d.last_read_time
+            lines.append(f'{d.name[:40]}  {reading} · {status}')
+        tip = tray_title + (' · 演示数据' if args.demo else '') + '\n' + '\n'.join(lines)
+        tray.setToolTip(tip[:127]);state['theme']=(panel_dark(preferences),windows.is_taskbar_dark())
         threshold=preferences.get('low_threshold',20)
         newly_low=collect_low_alerts(available,state['alerts'],threshold,
             not args.demo and not args.capture and preferences.get('low_notifications'))
@@ -189,6 +219,10 @@ def main():
         if args.demo:publish(state['devices'],[])
         else:controller.refresh(True)
 
+    def change_tray_style(style):
+        preferences.set('tray_style', style)
+        publish(state['devices'], state['errors'])
+
     def preferences_changed():
         poll.set_seconds(preferences.get('refresh_seconds',15))
         apply_saved_modes(store,preferences)
@@ -206,12 +240,17 @@ def main():
             flyout.statusline.setText('诊断信息已导出')
 
     def sync_menu():
-        flyout.menu_open=True;startup_action.setChecked(startup.state().enabled)
+        flyout.menu_open = True
+        if not LOCAL_PREVIEW:
+            startup_action.setChecked(startup.state().enabled)
 
     def change_startup(on):
         flyout.change_startup(on);startup_action.setChecked(startup.state().enabled)
 
     def promote():
+        if LOCAL_PREVIEW:
+            windows.show_tray_settings()
+            return
         try:
             count=windows.set_tray_promoted(True)
             logger.info('tray visibility updated owned_records=%s',count)
@@ -256,7 +295,7 @@ def main():
             tray.show();state['tray_ready']=True;logger.info('notification area ready')
             QTimer.singleShot(500,lambda:logger.info('tray position rect=%s',tray.geometry().getRect()))
         elif not available:state['tray_ready']=False
-        theme=(windows.is_dark(),windows.is_taskbar_dark())
+        theme=(panel_dark(preferences),windows.is_taskbar_dark())
         if state['theme']!=theme:publish(state['devices'],state['errors'])
 
     desktop.preferencesChanged.connect(preferences_changed)
@@ -283,7 +322,7 @@ def main():
         publish(devices,[]);QTimer.singleShot(100,lambda:busy(False) if args.capture else show())
     else:
         poll.start();QTimer.singleShot(0,lambda:controller.refresh(True))
-        if not args.capture:
+        if not args.capture and not LOCAL_PREVIEW:
             from scheduling import UpdateTimer
             update_timer=UpdateTimer(lambda:flyout.check_update(automatic=True),app)
         if not args.background and not args.capture:QTimer.singleShot(180,show)

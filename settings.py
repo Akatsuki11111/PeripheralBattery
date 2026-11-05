@@ -17,6 +17,7 @@ _RELEASE=json.loads(Path(__file__).with_name('release.json').read_text(encoding=
 VERSION = _RELEASE['version']
 RELEASE_CHANNEL = _RELEASE['channel']
 EXPERIMENTAL_ENABLED = _RELEASE.get('battery_tests',True)
+LOCAL_PREVIEW = _RELEASE.get('local_preview', False)
 REFRESH_INTERVALS=(5,15,30,60)
 
 
@@ -29,11 +30,14 @@ def data_dir():
     override = os.environ.get('PB_DATA_DIR')
     # AppData writes made by an MSIX host can be private to that host. A normal
     # profile directory remains identical when Task Scheduler starts us at login.
-    return Path(override) if override else Path.home() / '.peripheral-battery'
+    if override:
+        return Path(override)
+    folder = '.peripheral-battery-ui-preview' if LOCAL_PREVIEW else '.peripheral-battery'
+    return Path.home() / folder
 
 
 def migrate_legacy_data():
-    if os.environ.get('PB_DATA_DIR'):return
+    if LOCAL_PREVIEW or os.environ.get('PB_DATA_DIR'):return
     import shutil
     destination=data_dir();destination.mkdir(parents=True,exist_ok=True)
     legacy=Path(os.environ.get('LOCALAPPDATA',Path.home()/'AppData/Local'))/APP_NAME
@@ -95,7 +99,7 @@ def redact(text):
 
 class Settings:
     DEFAULTS = {'show_offline': False, 'show_unreadable':False, 'show_auxiliary':False, 'low_notifications': True, 'low_threshold': 20,
-                'hidden': [], 'brand_overrides': {}, 'device_modes':{},'refresh_seconds':15,'autostart_requested': False,'pinned_key':'','update_prereleases':False,'desktop_mode':'off','desktop_size':'medium','desktop_position':[],'desktop_locked':False}
+                'hidden': [], 'brand_overrides': {}, 'device_modes':{},'refresh_seconds':15,'autostart_requested': False,'pinned_key':'','update_prereleases':False,'desktop_mode':'off','desktop_size':'medium','desktop_position':[],'desktop_locked':False,'tray_style':'meter','theme':'system'}
 
     def __init__(self, path=None):
         self.path = Path(path) if path else data_dir() / 'settings.json'
@@ -113,6 +117,8 @@ class Settings:
 
         if self.value['desktop_mode'] not in ('off','detailed','compact'):self.value['desktop_mode']='off'
         if self.value['desktop_size'] not in ('small','medium','large'):self.value['desktop_size']='medium'
+        if self.value['tray_style'] not in ('meter', 'number'):self.value['tray_style']='meter'
+        if self.value['theme'] not in ('system', 'light', 'dark'):self.value['theme']='system'
         pos=self.value['desktop_position']
         if len(pos)!=2 or any(type(n) is not int or abs(n)>100000 for n in pos):self.value['desktop_position']=[]
 
@@ -125,6 +131,8 @@ class Settings:
         if key=='refresh_seconds' and (type(value) is not int or value not in REFRESH_INTERVALS):raise ValueError('刷新间隔只能为 5、15、30、60 秒')
         if key=='desktop_mode' and value not in ('off','detailed','compact'):raise ValueError('Invalid desktop mode')
         if key=='desktop_size' and value not in ('small','medium','large'):raise ValueError('Invalid desktop size')
+        if key=='tray_style' and value not in ('meter', 'number'):raise ValueError('Invalid tray style')
+        if key=='theme' and value not in ('system', 'light', 'dark'):raise ValueError('Invalid theme')
         if key=='desktop_position' and (type(value) is not list or len(value)!=2 or any(type(n) is not int or abs(n)>100000 for n in value)):raise ValueError('Invalid desktop position')
         self.value[key] = value
         atomic_json(self.path, self.value)

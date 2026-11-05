@@ -5,11 +5,14 @@ from PySide6.QtCore import Qt, QRectF, QSize, QPointF
 from PySide6.QtGui import QColor, QFont, QFontMetricsF, QIcon, QPainter, QPainterPath, QPen, QPixmap
 from PySide6.QtWidgets import QWidget
 import windows
+from appearance import battery_color, palette, paint_meter
 
 ASSETS = Path(__file__).parent / 'assets'
 GLYPHS = {'mouse':'\ue962', 'keyboard':'\ue765', 'headset':'\ue95b', 'gamepad':'\ue7fc', 'battery':'\ue83f',
           'refresh':'\ue72c', 'close':'\ue711', 'back':'\ue72b', 'settings':'\ue713',
-          'chevron':'\ue76c', 'power':'\ue7e8', 'signal':'\ue701', 'info':'\ue946','auxiliary':'\ue946'}
+          'chevron':'\ue76c', 'power':'\ue7e8', 'signal':'\ue701', 'info':'\ue946','auxiliary':'\ue946',
+          'clock':'\ue823','desktop':'\ue7f4','test':'\ue9d9',
+          'update':'\ue896','theme':'\ue793'}
 
 
 def font(size, weight=QFont.Weight.Normal, icons=False):
@@ -97,6 +100,13 @@ def draw_tray_device(painter, kind, area, color, charging=False, dark=None):
             painter.drawPoint(point(left + width * fraction, top + height * .40))
         painter.drawLine(point(left + width * .35, top + height * .73),
                          point(left + width * .65, top + height * .73))
+    elif kind == 'battery':
+        width = max(7, round(height * 1.25))
+        left, right = align(center - width / 2), align(center + width / 2)
+        y1, y2 = align(top + height * .14), align(bottom - height * .14)
+        painter.drawRoundedRect(QRectF(left, y1, right-left, y2-y1), stroke, stroke)
+        painter.drawLine(point(right + stroke, top + height * .39),
+                         point(right + stroke, top + height * .61))
     else:
         width = max(6, round(height * 1.65))
         left = align(center - width / 2)
@@ -127,10 +137,10 @@ def tray_pixmap(device, size, dark=None):
     pm.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pm)
     painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    foreground = '#ffffff' if dark else '#171717'
-    value=device.display_percent if device else None
-    color = ('#aaaaaa' if dark else '#777777') if device and device.cached else ('#ff8080' if dark else '#bc211b') if value is not None and value <= 10 else (
-        '#ffd16a' if dark else '#945e00') if value is not None and value <= 20 else foreground
+    theme = palette(dark)
+    value = device.display_percent if device else None
+    color = battery_color(theme, value, device.display_grade,
+                          device.cached or device.experimental) if device else theme.muted
     painter.setRenderHint(QPainter.RenderHint.TextAntialiasing, True)
     # Full-width number, normal Segoe UI proportions. Integer font size/baseline
     # lets the font rasterizer hint strokes for 16/20/24px rather than resampling.
@@ -152,17 +162,101 @@ def tray_pixmap(device, size, dark=None):
     return pm
 
 
-def tray_icon(device=None):
+def draw_device_mark(painter, kind, area, color):
+    """Draw the same strong silhouette in a compact tray slot or a card."""
+    width = {'mouse': 10, 'headset': 14, 'keyboard': 16, 'gamepad': 16}.get(kind, 14)
+    scale = min(area.width() / (width + 2), area.height() / 12.5)
+    painter.save()
+    painter.translate(area.center())
+    painter.scale(scale, scale)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    painter.setBrush(Qt.BrushStyle.NoBrush)
+    painter.setPen(QPen(QColor(color), 1.8, Qt.PenStyle.SolidLine,
+                        Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
+
+    if kind == 'mouse':
+        painter.drawRoundedRect(QRectF(-4, -5, 8, 10), 3.8, 3.8)
+        painter.drawLine(QPointF(0, -3), QPointF(0, -.5))
+    elif kind == 'headset':
+        painter.drawArc(QRectF(-5.5, -5, 11, 11), 0, 180 * 16)
+        painter.drawLine(QPointF(-5.5, .5), QPointF(-5.5, 4.5))
+        painter.drawLine(QPointF(5.5, .5), QPointF(5.5, 4.5))
+        painter.setBrush(QColor(color))
+        painter.drawRoundedRect(QRectF(-5.3, 1.8, 1.3, 2.8), .5, .5)
+        painter.drawRoundedRect(QRectF(4, 1.8, 1.3, 2.8), .5, .5)
+    elif kind == 'keyboard':
+        painter.drawRoundedRect(QRectF(-7, -4.1, 14, 8.2), 1.8, 1.8)
+        for x in (-4, 0, 4):
+            painter.drawPoint(QPointF(x, -1.2))
+        painter.drawLine(QPointF(-3, 1.7), QPointF(3, 1.7))
+    elif kind == 'gamepad':
+        shape = QPainterPath(QPointF(-3, -3.8))
+        shape.lineTo(3, -3.8)
+        shape.cubicTo(6, -3.8, 6.5, -1.2, 7, 2.5)
+        shape.cubicTo(7.4, 5, 5.6, 5.8, 3.4, 3.3)
+        shape.lineTo(2.1, 2.2)
+        shape.lineTo(-2.1, 2.2)
+        shape.lineTo(-3.4, 3.3)
+        shape.cubicTo(-5.6, 5.8, -7.4, 5, -7, 2.5)
+        shape.cubicTo(-6.5, -1.2, -6, -3.8, -3, -3.8)
+        painter.drawPath(shape)
+        painter.drawLine(QPointF(-4.9, -.7), QPointF(-2.1, -.7))
+        painter.drawLine(QPointF(-3.5, -2.1), QPointF(-3.5, .7))
+        painter.drawPoint(QPointF(2.9, -.6))
+        painter.drawPoint(QPointF(4.8, .7))
+    else:
+        painter.drawRoundedRect(QRectF(-5.7, -3.6, 10, 7.2), 1.5, 1.5)
+        painter.drawLine(QPointF(6.4, -1), QPointF(6.4, 1))
+    painter.restore()
+
+
+def device_outline(kind, size, color, dpr=1.0):
+    pixels = max(1, round(size * dpr))
+    pixmap = QPixmap(pixels, pixels)
+    pixmap.setDevicePixelRatio(dpr)
+    pixmap.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(pixmap)
+    draw_device_mark(painter, kind, QRectF(0, 0, size, size), color)
+    painter.end()
+    return pixmap
+
+
+def tray_meter_pixmap(device, size, dark=None):
+    dark = windows.is_taskbar_dark() if dark is None else dark
+    theme = palette(dark)
+    pixmap = QPixmap(size, size)
+    pixmap.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(pixmap)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    margin = max(.5, round(size * .035))
+    bar_height = max(3, round(size * .19))
+    bar_top = size - max(1, round(margin)) - bar_height
+    stale = bool(device and device.cached)
+    color = theme.history if stale else theme.text
+    kind = device.kind if device else 'battery'
+    # Use the full slot width while preserving a small separation above the bar.
+    outline = QRectF(margin, .35, size - 2 * margin, bar_top - .85)
+    draw_device_mark(painter, kind, outline, color)
+    paint_meter(painter, QRectF(margin, bar_top, size - 2 * margin, bar_height), theme,
+                device.display_percent if device else None, device.display_grade if device else '',
+                bool(device and (device.cached or device.experimental)))
+    painter.end()
+    return pixmap
+
+
+def tray_icon(device=None, style='number'):
+    renderer = tray_meter_pixmap if style == 'meter' else tray_pixmap
     icon = QIcon()
-    for size in (16, 20, 24, 28, 32, 36, 40, 48, 64, 128, 256):
-        icon.addPixmap(tray_pixmap(device, size))
+    # Exact raster sizes across common fractional Windows taskbar scales.
+    for size in (*range(16, 33), 34, 36, 38, 40, 44, 48, 56, 64, 96, 128, 256):
+        icon.addPixmap(renderer(device, size))
     return icon
 
 
 class BrandIcon(QWidget):
-    def __init__(self,brand,kind,parent=None):
+    def __init__(self,brand,kind,parent=None,*,size=44):
         super().__init__(parent)
-        self.setFixedSize(44,44)
+        self.setFixedSize(size,size)
         self.brand='';self.kind=kind;self.icon=QIcon();self.light_logo=False
         self.set_brand(brand,kind)
 
@@ -187,6 +281,13 @@ class BrandIcon(QWidget):
 
     def paintEvent(self,event):
         p=QPainter(self);p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        if self.width() < 44:
+            if not self.icon.isNull():
+                p.setPen(Qt.PenStyle.NoPen)
+                p.setBrush(QColor('#343434' if self.light_logo else '#f8f8f8'))
+                p.drawRoundedRect(QRectF(self.rect()), 4, 4)
+                self.icon.paint(p, 2, 2, self.width() - 4, self.height() - 4)
+            return
         p.setPen(Qt.PenStyle.NoPen)
         p.setBrush(QColor('#343434' if self.light_logo else '#f8f8f8'))
         p.drawRoundedRect(QRectF(.5,.5,43,43),9,9)
@@ -204,23 +305,18 @@ class BrandIcon(QWidget):
 
 
 class BatteryBar(QWidget):
-    def __init__(self,parent=None):
-        super().__init__(parent);self.value=None;self.grade='';self.charging=False;self.stale=False
-        self.setFixedHeight(8)
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.value = None
+        self.grade = ''
+        self.charging = False
+        self.stale = False
+        self.dark = None
+        self.setFixedHeight(20)
 
-    def paintEvent(self,event):
-        p=QPainter(self);p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        p.setPen(Qt.PenStyle.NoPen)
-        if self.grade and self.value is None:
-            filled={'耗尽':0,'低':1,'中':2,'高':3,'满':4}.get(self.grade,0)
-            width=max(1,(self.width()-9)/4)
-            for i in range(4):
-                color=('#858585' if self.stale else '#c42b1c' if filled<=1 else windows.accent()) if i<filled else ('#525252' if windows.is_dark() else '#d6d6d6')
-                p.setBrush(QColor(color));p.drawRoundedRect(QRectF(i*(width+3),2,width,4),2,2)
-            return
-        p.setBrush(QColor('#525252' if windows.is_dark() else '#d6d6d6'))
-        p.drawRoundedRect(QRectF(0,2,self.width(),4),2,2)
-        if self.value is not None:
-            color='#858585' if self.stale else '#c42b1c' if self.value<=10 else '#b77900' if self.value<=20 else windows.accent()
-            p.setBrush(QColor(color))
-            p.drawRoundedRect(QRectF(0,2,max(2,self.width()*self.value/100),4),2,2)
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        dark = windows.is_dark() if self.dark is None else self.dark
+        paint_meter(painter, QRectF(self.rect()), palette(dark),
+                    self.value, self.grade, self.stale)

@@ -1,15 +1,21 @@
 import datetime as dt
 import time
-from PySide6.QtCore import Qt, QTimer, Signal, QRectF, QEasingCurve, QPropertyAnimation, Property
-from PySide6.QtGui import QColor,QPainter,QPen,QFont,QCursor
+from PySide6.QtCore import Qt, QTimer, Signal, QRectF, QSize
+from PySide6.QtGui import QColor,QPainter,QPen,QFont,QCursor,QPalette
 from PySide6.QtWidgets import (QWidget,QLabel,QPushButton,QToolButton,QVBoxLayout,QHBoxLayout,
-    QFrame,QScrollArea,QStackedWidget,QAbstractButton,QSizePolicy,QApplication,QGridLayout,QComboBox,QProgressBar)
-from icons import font,glyph_icon,BrandIcon,BatteryBar,GLYPHS
+    QFrame,QScrollArea,QStackedWidget,QSizePolicy,QApplication,QGridLayout,QComboBox,QProgressBar,
+    QStyle,QStyleOptionToolButton,QStylePainter,QMenu)
+from icons import font,glyph_icon,BrandIcon,BatteryBar,device_outline
+from appearance import CARD_RADIUS, panel_dark, palette
 from models import lowest
 from catalog import visible_devices
-from settings import Settings,REFRESH_INTERVALS,VERSION,RELEASE_CHANNEL,EXPERIMENTAL_ENABLED
+from settings import Settings,REFRESH_INTERVALS,VERSION,RELEASE_CHANNEL,EXPERIMENTAL_ENABLED,LOCAL_PREVIEW
 import startup
 import windows
+
+PANEL_WIDTH = 350
+CARD_HEIGHT = 92
+CARD_SPACING = 8
 
 
 def label(text='',size=12,muted=False,bold=False):
@@ -26,37 +32,90 @@ def tool(kind,tip,callback):
     b.clicked.connect(callback);return b
 
 
-class Toggle(QAbstractButton):
-    """Vector switch; no bitmap resources, keyboard and screen reader enabled."""
-    def __init__(self,checked,parent=None):
-        super().__init__(parent);self.setCheckable(True);self.setChecked(checked)
-        self.setFixedSize(48,30);self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setAccessibleName('开机自启');self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self._pos=1.0 if checked else 0.0
-        self.anim=QPropertyAnimation(self,b'position',self);self.anim.setDuration(130)
-        self.anim.setEasingCurve(QEasingCurve.Type.OutCubic);self.toggled.connect(self.animate)
+def footer_style(widget):
+    widget.setObjectName('footerAction')
+    widget.setMinimumSize(0, 47)
+    widget.setMaximumHeight(47)
+    widget.setFont(font(10, QFont.Weight.Medium))
+    widget.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
 
-    def getPosition(self):return self._pos
-    def setPosition(self,p):self._pos=p;self.update()
-    position=Property(float,getPosition,setPosition)
 
-    def animate(self,on):
-        self.anim.stop();self.anim.setStartValue(self._pos);self.anim.setEndValue(1.0 if on else 0.0);self.anim.start()
+class FooterButton(QToolButton):
+    def __init__(self, kind, text, caption=None):
+        super().__init__()
+        footer_style(self)
+        self.caption = caption
+        self.setText(text)
+        self.setToolTip(text)
+        self.setAccessibleName(text)
+        self.setProperty('glyphKind', kind)
+        self.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+        self.setIconSize(QSize(19, 19))
 
-    def set_checked_silent(self,on):
-        self.anim.stop();previous=self.blockSignals(True)
-        self.setChecked(bool(on));self.setPosition(float(on));self.blockSignals(previous)
+    def paintEvent(self, event):
+        option = QStyleOptionToolButton()
+        self.initStyleOption(option)
+        option.text = self.caption or {
+            '检查更新': '更新', '下载并更新': '下载', '正在检查…': '检查中',
+            '导入更新配置': '导入', '安装并重启': '安装',
+        }.get(self.text(), self.text())
+        option.text = self.fontMetrics().elidedText(
+            option.text, Qt.TextElideMode.ElideRight, max(0, self.width() - 4))
+        painter = QStylePainter(self)
+        painter.drawComplexControl(QStyle.ComplexControl.CC_ToolButton, option)
 
-    def paintEvent(self,event):
-        p=QPainter(self);p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        dark=windows.is_dark()
-        p.setPen(QPen(QColor(windows.accent() if self.isChecked() else '#969696'),1))
-        p.setBrush(QColor(windows.accent() if self.isChecked() else '#292929' if dark else '#fafafa'))
-        p.drawRoundedRect(QRectF(3.5,5.5,40,20),10,10)
-        p.setPen(Qt.PenStyle.NoPen);p.setBrush(QColor('#151515' if self.isChecked() and dark else '#ffffff' if self.isChecked() else '#bcbcbc' if dark else '#606060'))
-        p.drawEllipse(QRectF(7.5+20*self._pos,9.5,12,12))
-        if self.hasFocus():
-            p.setBrush(Qt.BrushStyle.NoBrush);p.setPen(QPen(QColor(windows.accent()),1,Qt.PenStyle.DotLine));p.drawRoundedRect(QRectF(1,2,45,26),12,12)
+
+class Toggle(FooterButton):
+    def __init__(self, checked):
+        super().__init__('power', '开机自启', '自启')
+        self.setCheckable(True)
+        self.setChecked(checked)
+
+    @property
+    def position(self):
+        return int(self.isChecked())
+
+    def set_checked_silent(self, on):
+        previous = self.blockSignals(True)
+        self.setChecked(bool(on))
+        self.blockSignals(previous)
+
+
+class RefreshChoice(QComboBox):
+    popupChanged = Signal(bool)
+
+    def __init__(self):
+        super().__init__()
+        footer_style(self)
+        self.dark = False
+        self.glyph = glyph_icon('clock', palette(False).text)
+
+    def showPopup(self):
+        self.popupChanged.emit(True)
+        super().showPopup()
+
+    def hidePopup(self):
+        super().hidePopup()
+        self.popupChanged.emit(False)
+
+    def apply_theme(self, dark):
+        self.dark = dark
+        self.glyph = glyph_icon('clock', palette(dark).text, 36)
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        theme = palette(self.dark)
+        if self.underMouse() or self.hasFocus():
+            painter.setPen(QPen(QColor(theme.accent), 1) if self.hasFocus() else Qt.PenStyle.NoPen)
+            painter.setBrush(QColor(theme.tile))
+            painter.drawRoundedRect(QRectF(self.rect()).adjusted(.5, .5, -.5, -.5), 8, 8)
+        self.glyph.paint(painter, (self.width() - 19) // 2, 5, 19, 19)
+        painter.setFont(self.font())
+        painter.setPen(QColor(theme.text))
+        painter.drawText(QRectF(0, 27, self.width(), 16), Qt.AlignmentFlag.AlignCenter,
+                         self.currentText())
 
 
 def display_name(device):
@@ -71,63 +130,140 @@ def needs_power_choice(d):
             and not d.usable and not d.fresh_grade and (d.usb_keyboard or 'USB' in d.transport))
 
 
-class DeviceCard(QFrame):
-    clicked=Signal(str)
-    powerModeRequested=Signal(str,str)
-    def __init__(self,d,compact=False,show_power_choice=False):
-        super().__init__();self.d=d;self.setObjectName('card');self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus);self.setAccessibleName(d.name+'，'+d.status+'，'+d.reading_text)
-        self.setFixedHeight(70 if compact else 82)
-        row=QHBoxLayout(self);row.setContentsMargins(12,8,10,8);row.setSpacing(12)
-        self.brand_icon=BrandIcon(d.brand,d.kind);row.addWidget(self.brand_icon)
-        self.show_power_choice=show_power_choice
-        center=QVBoxLayout();center.setSpacing(3);center.setContentsMargins(0,0,0,0)
-        name=label(display_name(d),13,bold=True)
-        name.setToolTip(d.name);name.setSizePolicy(QSizePolicy.Policy.Ignored,QSizePolicy.Policy.Preferred)
-        self.name_label=name;center.addWidget(name)
-        status=QHBoxLayout();status.setSpacing(5)
-        kind=label(GLYPHS[d.kind],12,True);kind.setObjectName('glyph');kind.setFont(font(12,icons=True));status.addWidget(kind)
-        type_name=d.type_name
-        self.kind_label=kind;self.status_label=label(type_name+' · '+d.status,11,True)
-        status.addWidget(self.status_label);status.addStretch();center.addLayout(status)
-        self.power_row=QWidget();power=QHBoxLayout(self.power_row);power.setContentsMargins(0,0,0,0);power.setSpacing(4)
-        power.addWidget(label('供电状态',10,True));self.power_buttons={}
-        from PySide6.QtWidgets import QButtonGroup
-        self.power_group=QButtonGroup(self)
-        for text,mode in (('有线','wired'),('电池','battery')):
-            button=QPushButton(text);button.setObjectName('powerChoice');button.setCheckable(True);button.setFont(font(10));button.setFixedSize(38,22)
-            button.setAccessibleName('供电状态：'+text);button.setChecked(d.power_mode==mode);self.power_group.addButton(button)
-            button.clicked.connect(lambda checked,m=mode:self.powerModeRequested.emit(self.d.key,m));power.addWidget(button);self.power_buttons[mode]=button
-        power.addStretch();center.addWidget(self.power_row);self.power_row.setVisible(show_power_choice)
-        if show_power_choice:
-            self.setFixedHeight(92);self.status_label.setText(d.type_name+' · USB 已接入' if needs_power_choice(d) else d.type_name+' · '+d.status)
-        bar=BatteryBar();bar.value=d.display_percent;bar.grade=d.display_grade;bar.stale=not (d.usable or d.fresh_grade);bar.charging=d.charging if d.usable or d.fresh_grade else False
-        self.bar=bar;bar.setVisible(d.power_mode!='wired' and d.kind!='auxiliary' and not needs_power_choice(d));center.addWidget(bar);row.addLayout(center,1)
-        pct=QVBoxLayout();pct.setSpacing(0)
-        value=label(d.reading_text,20 if d.kind!='auxiliary' else 13,bold=True)
-        value.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else '分档电量，非百分比' if d.battery_grade else d.approximate or '实时电量')
-        if not (d.usable or d.fresh_grade):value.setObjectName('muted')
-        value.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter);pct.addWidget(value)
-        self.value_label=value;self.brand_label=label(d.brand if d.brand!='Unknown' else '品牌待指定',10,True);pct.addWidget(self.brand_label);row.addLayout(pct)
-        arrow=label(GLYPHS['chevron'],11,True);arrow.setObjectName('glyph');arrow.setFont(font(11,icons=True));row.addWidget(arrow)
+class ElidedLabel(QLabel):
+    """Keep the full label available to accessibility and the tooltip."""
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setFont(self.font())
+        painter.setPen(self.palette().color(QPalette.ColorRole.WindowText))
+        rect = self.contentsRect()
+        text = self.fontMetrics().elidedText(self.text(), Qt.TextElideMode.ElideRight, rect.width())
+        painter.drawText(rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, text)
 
-    def update_device(self,d,show_power_choice=False):
-        if self.d==d and self.show_power_choice==show_power_choice:return
-        self.show_power_choice=show_power_choice;self.power_row.setVisible(show_power_choice);self.setFixedHeight(92 if show_power_choice else 70)
-        for mode,button in self.power_buttons.items():button.setChecked(d.power_mode==mode)
-        self.d=d;self.brand_icon.set_brand(d.brand,d.kind)
-        self.name_label.setText(display_name(d));self.name_label.setToolTip(d.name)
-        self.kind_label.setText(GLYPHS.get(d.kind,GLYPHS['mouse']))
-        self.status_label.setText(d.type_name+' · USB 已接入' if needs_power_choice(d) else d.type_name+' · '+d.status)
-        self.status_label.setToolTip(d.note);self.value_label.setText(d.reading_text)
-        self.value_label.setToolTip(('上次有效电量 · '+dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')) if d.cached else '实验推测' if d.experimental else '分档电量，非百分比' if d.battery_grade else d.approximate or '实时电量')
-        tone='' if d.usable or d.fresh_grade else 'muted'
-        if self.value_label.objectName()!=tone:
-            self.value_label.setObjectName(tone);self.value_label.style().unpolish(self.value_label);self.value_label.style().polish(self.value_label)
-        self.brand_label.setText(d.brand if d.brand!='Unknown' else '品牌待指定')
-        self.bar.value=d.display_percent;self.bar.grade=d.display_grade;self.bar.stale=not (d.usable or d.fresh_grade);self.bar.charging=d.charging if d.usable or d.fresh_grade else False;self.bar.update()
-        self.bar.setVisible(d.power_mode!='wired' and d.kind!='auxiliary' and not needs_power_choice(d))
-        self.setAccessibleName(d.name+'，'+d.status+'，'+self.value_label.text())
+
+class DeviceCard(QFrame):
+    clicked = Signal(str)
+    powerModeRequested = Signal(str, str)
+
+    def __init__(self, d, compact=False, show_power_choice=False, *, dark=None):
+        super().__init__()
+        self.setObjectName('card')
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.theme = None
+        self.d = None
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 9, 12, 9)
+        layout.setSpacing(5)
+        header = QHBoxLayout()
+        header.setSpacing(10)
+
+        self.brand_icon = BrandIcon(d.brand, d.kind)
+        header.addWidget(self.brand_icon)
+
+        text = QVBoxLayout()
+        text.setSpacing(1)
+        self.name_label = ElidedLabel()
+        self.name_label.setTextFormat(Qt.TextFormat.PlainText)
+        self.name_label.setFont(font(14, QFont.Weight.DemiBold))
+        self.name_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        text.addWidget(self.name_label)
+
+        status = QHBoxLayout()
+        status.setSpacing(5)
+        self.kind_label = QLabel()
+        self.kind_label.setFixedSize(16, 16)
+        self.kind_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.kind_label.setToolTip(d.type_name)
+        status.addWidget(self.kind_label)
+        self.status_label = ElidedLabel()
+        self.status_label.setObjectName('muted')
+        self.status_label.setFont(font(11, QFont.Weight.Medium))
+        self.status_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        status.addWidget(self.status_label, 1)
+        text.addLayout(status)
+        header.addLayout(text, 1)
+
+        self.value_label = label()
+        self.value_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        self.value_label.setFixedWidth(86)
+        header.addWidget(self.value_label)
+        layout.addLayout(header)
+
+        self.bar = BatteryBar()
+        layout.addWidget(self.bar)
+        self.power_row = QWidget()
+        power = QHBoxLayout(self.power_row)
+        power.setContentsMargins(0, 0, 0, 0)
+        power.setSpacing(6)
+        power.addWidget(label('供电状态', 11, True))
+        from PySide6.QtWidgets import QButtonGroup
+        self.power_group = QButtonGroup(self)
+        self.power_buttons = {}
+        for text, mode in (('有线', 'wired'), ('电池', 'battery')):
+            button = QPushButton(text)
+            button.setObjectName('powerChoice')
+            button.setCheckable(True)
+            button.setFont(font(11, QFont.Weight.Medium))
+            button.setFixedSize(44, 23)
+            button.setAccessibleName('供电状态：' + text)
+            self.power_group.addButton(button)
+            button.clicked.connect(lambda checked, m=mode: self.powerModeRequested.emit(self.d.key, m))
+            power.addWidget(button)
+            self.power_buttons[mode] = button
+        power.addStretch()
+        layout.addWidget(self.power_row)
+        self.update_device(d, show_power_choice, dark)
+
+    def update_device(self, d, show_power_choice=False, dark=None):
+        dark = windows.is_dark() if dark is None else dark
+        dpr = self.devicePixelRatioF()
+        if self.d == d and self.show_power_choice == show_power_choice and self.theme == (dark, dpr):
+            return
+        if self.d is None or self.d.kind != d.kind or self.theme != (dark, dpr):
+            self.kind_label.setPixmap(device_outline(d.kind, 15, palette(dark).text, dpr))
+            self.kind_label.setToolTip(d.type_name)
+        self.theme = (dark, dpr)
+        self.bar.dark = dark
+        self.d = d
+        self.show_power_choice = show_power_choice
+        self.power_row.setVisible(show_power_choice)
+        show_bar = d.power_mode != 'wired' and d.kind != 'auxiliary' and not needs_power_choice(d)
+        self.setFixedHeight(68 + (24 if show_bar else 0) + (28 if show_power_choice else 0))
+        for mode, button in self.power_buttons.items():
+            button.setChecked(d.power_mode == mode)
+        self.brand_icon.set_brand(d.brand, d.kind)
+        self.name_label.setText(display_name(d))
+        self.name_label.setToolTip(d.name)
+        status = 'USB 已接入' if needs_power_choice(d) else d.status
+        if d.cached and '上次' not in status:
+            status += ' · 上次 ' + d.last_read_time
+        if d.power_mode == 'wired' and d.connected is True:
+            status = '已连接'
+        elif status == '已连接' and '2.4' in d.transport:
+            status = '2.4 GHz · 已连接'
+        self.status_label.setText('上次 ' + d.last_read_time if d.cached else status)
+        self.status_label.setToolTip(status + ('\n' + d.note if d.note else ''))
+        self.value_label.setText(d.reading_text)
+        self.value_label.setFont(font(14 if d.kind == 'auxiliary' else 22,
+                                      QFont.Weight.Bold))
+        self.value_label.setToolTip(
+            '上次有效电量 · ' + dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')
+            if d.cached else '实验推测' if d.experimental else '分档电量，非百分比'
+            if d.display_grade else d.approximate or status)
+        tone = '' if d.usable or d.fresh_grade or d.power_mode == 'wired' else 'muted'
+        if self.value_label.objectName() != tone:
+            self.value_label.setObjectName(tone)
+            self.value_label.style().unpolish(self.value_label)
+            self.value_label.style().polish(self.value_label)
+        self.bar.value = d.display_percent
+        self.bar.grade = d.display_grade
+        self.bar.stale = not (d.usable or d.fresh_grade)
+        self.bar.charging = bool(d.charging and not self.bar.stale)
+        self.bar.setVisible(show_bar)
+        self.bar.update()
+        self.setAccessibleName(d.name + '，' + status + '，' + d.reading_text)
 
     def mouseReleaseEvent(self,e):
         if e.button()==Qt.MouseButton.LeftButton:self.clicked.emit(self.d.key)
@@ -152,14 +288,19 @@ class Flyout(QWidget):
         from history import HistoryStore
         self.history=history or HistoryStore(self.preferences.path.with_name('history.json'))
         self.catalog_dialog=None;self.research_dialog=None;self.research_controller=None;self.learning=None;self.learning_dialog=None
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground,True)
-        self.root=QVBoxLayout(self);self.root.setContentsMargins(18,14,18,12);self.root.setSpacing(8)
-        head=QHBoxLayout();head.setSpacing(10)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+        self.root=QVBoxLayout(self);self.root.setContentsMargins(13,12,13,10);self.root.setSpacing(8)
+        head=QHBoxLayout();head.setSpacing(5)
         self.back=tool('back','返回设备列表',self.go_back);self.back.hide();head.addWidget(self.back)
         titlecol=QVBoxLayout();titlecol.setSpacing(1);title_row=QHBoxLayout();title_row.setSpacing(6)
-        title_row.addWidget(label('设备电量',18,bold=True));self.version_label=label('v'+VERSION,10,True)
-        self.version_label.setToolTip('当前版本：'+VERSION+' · 统一版');title_row.addWidget(self.version_label);title_row.addStretch()
-        titlecol.addLayout(title_row);titlecol.addWidget(label('外设状态 · 有线 / 无线',11,True));head.addLayout(titlecol,1)
+        title = label('设备电量', 21)
+        title.setFont(font(21, QFont.Weight.Bold))
+        title_row.addWidget(title)
+        self.version_label = label('v' + VERSION, 10, True)
+        self.version_label.setToolTip('本地界面测试版' if LOCAL_PREVIEW else '当前版本：' + VERSION)
+        title_row.addWidget(self.version_label)
+        title_row.addStretch()
+        titlecol.addLayout(title_row);head.addLayout(titlecol,1)
         self.refresh=tool('refresh','立即刷新',self.refreshRequested.emit);head.addWidget(self.refresh)
         self.info_button=tool('info','品牌目录与设备管理',self.open_catalog);head.addWidget(self.info_button);head.addWidget(tool('close','收起到系统托盘',self.hide))
         self.root.addLayout(head)
@@ -173,34 +314,41 @@ class Flyout(QWidget):
         self.stack=QStackedWidget();self.root.addWidget(self.stack,1)
         self.scroll=QScrollArea();self.scroll.setWidgetResizable(True);self.scroll.setFrameShape(QFrame.Shape.NoFrame)
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.list_body=QWidget();self.list_body.setObjectName('transparent');self.list_layout=QVBoxLayout(self.list_body);self.list_layout.setContentsMargins(0,0,0,0);self.list_layout.setSpacing(6)
+        self.list_body=QWidget();self.list_body.setObjectName('transparent');self.list_layout=QVBoxLayout(self.list_body);self.list_layout.setContentsMargins(0,0,0,0);self.list_layout.setSpacing(CARD_SPACING)
         self.scroll.setWidget(self.list_body);self.stack.addWidget(self.scroll)
         self.detail=QScrollArea();self.detail.setWidgetResizable(True);self.detail.setFrameShape(QFrame.Shape.NoFrame);self.stack.addWidget(self.detail)
         line=QFrame();line.setObjectName('separator');line.setFixedHeight(1);self.root.addWidget(line)
-        controls=QGridLayout();controls.setContentsMargins(0,0,0,0);controls.setHorizontalSpacing(12);controls.setVerticalSpacing(6)
-        controls.setColumnStretch(0,1);controls.setColumnStretch(1,1);self.root.addLayout(controls)
-        startup_box=QWidget();startup_row=QHBoxLayout(startup_box);startup_row.setContentsMargins(0,0,0,0);startup_row.setSpacing(6)
-        startup_row.addWidget(label('开机自启',11));startup_row.addStretch()
-        self.auto_state=label('',10,True);self.auto_state.setParent(self);self.auto_state.hide()
-        self.toggle=Toggle(False);self.toggle.toggled.connect(self.change_startup);startup_row.addWidget(self.toggle);first_row=QWidget();first=QHBoxLayout(first_row);first.setContentsMargins(0,0,0,0);first.setSpacing(10)
-        self.test_button=QPushButton('无法适配电量时，点此测试');self.test_button.setObjectName('batteryTest');self.test_button.setFont(font(11));self.test_button.setFixedSize(184,30)
-        self.test_button.setFocusPolicy(Qt.FocusPolicy.TabFocus);self.test_button.clicked.connect(self.open_research)
-        first.addWidget(startup_box,1)
-        refresh_box=QWidget();refresh_row=QHBoxLayout(refresh_box);refresh_row.setContentsMargins(0,0,0,0);refresh_row.setSpacing(6)
-        refresh_row.addWidget(label('刷新间隔',11));refresh_row.addStretch()
-        self.refresh_choice=QComboBox();self.refresh_choice.setObjectName('refreshInterval');self.refresh_choice.setFixedSize(76,28)
-        self.refresh_choice.setFont(font(11));self.refresh_choice.setAccessibleName('自动刷新间隔')
-        for seconds in REFRESH_INTERVALS:self.refresh_choice.addItem(f'{seconds} 秒',seconds)
-        self.refresh_choice.setCurrentIndex(REFRESH_INTERVALS.index(self.preferences.get('refresh_seconds',15)))
-        self.refresh_choice.setToolTip('切换后立即保存并生效。查询未结束时不会重复启动。')
-        self.refresh_choice.currentIndexChanged.connect(lambda:self.change_interval(self.refresh_choice.currentData()))
-        refresh_row.addWidget(self.refresh_choice);first.addWidget(refresh_box,1)
-        self.desktop_button=QPushButton('桌面显示');self.desktop_button.setFont(font(11));self.desktop_button.setFixedSize(84,30)
-        self.desktop_button.clicked.connect(self.open_desktop_menu);first.addWidget(self.desktop_button);controls.addWidget(first_row,0,0,1,2)
-        version_box=QWidget();self.version_box=version_box;version_row=QHBoxLayout(version_box);version_row.setContentsMargins(0,12,0,0);version_row.setSpacing(6)
-        version_row.addWidget(self.test_button)
-        version_row.addStretch()
-        self.update_button=QPushButton('检查更新');self.update_button.setFont(font(10));self.update_button.setMinimumSize(106,28);version_row.addWidget(self.update_button);controls.addWidget(version_box,1,0,1,2)
+        version_box = QWidget()
+        self.version_box = version_box
+        self.footer = QHBoxLayout(version_box)
+        self.footer.setContentsMargins(0, 0, 0, 0)
+        self.footer.setSpacing(4)
+        self.root.addWidget(version_box)
+
+        self.auto_state = label('', 10, True)
+        self.auto_state.setParent(self)
+        self.auto_state.hide()
+        self.toggle = Toggle(False)
+        self.toggle.toggled.connect(self.change_startup)
+        self.refresh_choice = RefreshChoice()
+        self.refresh_choice.popupChanged.connect(self.set_footer_popup)
+        self.refresh_choice.setAccessibleName('自动刷新间隔')
+        self.refresh_choice.setToolTip('自动刷新间隔')
+        for seconds in REFRESH_INTERVALS:
+            self.refresh_choice.addItem(f'{seconds} 秒', seconds)
+        self.refresh_choice.setCurrentIndex(REFRESH_INTERVALS.index(self.preferences.get('refresh_seconds', 15)))
+        self.refresh_choice.currentIndexChanged.connect(lambda: self.change_interval(self.refresh_choice.currentData()))
+
+        self.desktop_button = FooterButton('desktop', '桌面显示', '桌面')
+        self.desktop_button.clicked.connect(self.open_desktop_menu)
+        self.test_button = FooterButton('test', '无法适配电量时，点此测试', '电量测试')
+        self.test_button.clicked.connect(self.open_research)
+        self.update_button = FooterButton('update', '检查更新')
+        self.theme_button = FooterButton('theme', '界面主题', '主题')
+        self.theme_button.clicked.connect(self.open_theme_menu)
+        for control in (self.toggle, self.refresh_choice, self.desktop_button,
+                        self.test_button, self.update_button, self.theme_button):
+            self.footer.addWidget(control, 1)
         self.update_badge=QLabel('新版本可更新',version_box);self.update_badge.setFont(font(9));self.update_badge.setFixedSize(88,18)
         self.update_badge.setAlignment(Qt.AlignmentFlag.AlignCenter);self.update_badge.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents,True)
         self.update_badge.setStyleSheet('QLabel {background:#0067c0;color:white;border-radius:4px;padding:1px 3px;}');self.update_badge.hide()
@@ -216,11 +364,15 @@ class Flyout(QWidget):
         if previous_update.get('ok') is False and 0<=time.time()-previous_update.get('at',0)<86400:
             self.update_button.setText('上次更新失败');self.update_button.setToolTip(previous_update.get('message','请重新检查更新'))
         self.load_release_notice(previous_update)
+        if LOCAL_PREVIEW:
+            self.update_button.setEnabled(False)
+            self.update_button.setToolTip('本地测试版独立运行，正式版可检查更新。')
+            self.toggle.setEnabled(False)
         self.apply_theme()
         self.refresh_startup()
 
     def check_update(self,automatic=False):
-        if self.update_job:return
+        if LOCAL_PREVIEW or self.update_job:return
         if automatic and (self.download_ready or self.needs_update_config):return
         if self.needs_update_config:
             from PySide6.QtWidgets import QFileDialog
@@ -253,8 +405,19 @@ class Flyout(QWidget):
         info=result.get('update',{});status=info.get('status');self.update_button.setToolTip(info.get('message',''))
         self.version_label.setToolTip(info.get('message',''))
         if status=='available':
-            self.update_candidate=info;self.update_badge.show();self.position_update_badge();self.update_button.setText('下载并更新');return
-        self.update_badge.hide();self.update_candidate=None
+            self.update_candidate = info
+            self.update_badge.show()
+            self.footer.setContentsMargins(0, 18, 0, 0)
+            self.footer.activate()
+            self.update_button.setText('下载并更新')
+            if self.isVisible():self.resize_for_content()
+            self.position_update_badge()
+            return
+        self.update_badge.hide()
+        self.footer.setContentsMargins(0, 0, 0, 0)
+        self.footer.activate()
+        if self.isVisible():self.resize_for_content()
+        self.update_candidate=None
         if status=='unconfigured':
             self.needs_update_config=True;self.update_button.setText('导入更新配置');return
         if status=='no_release':self.update_button.setText('暂无新版');return
@@ -262,7 +425,8 @@ class Flyout(QWidget):
 
     def position_update_badge(self):
         if hasattr(self,'update_badge'):
-            self.update_badge.move(max(0,self.update_button.x()+self.update_button.width()-self.update_badge.width()),max(0,self.update_button.y()-12))
+            self.update_badge.move(max(0, self.update_button.x() + self.update_button.width()
+                                       - self.update_badge.width()), 0)
             self.update_badge.raise_()
 
     def load_release_notice(self,last_update):
@@ -328,30 +492,51 @@ class Flyout(QWidget):
         self.download_progress.hide();self.cancel_download.hide();self.update_button.setEnabled(True)
         self.update_button.setText('下载并更新' if self.update_candidate else '检查更新')
 
+    def paintEvent(self, event):
+        theme = palette(self.theme)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(QPen(QColor(theme.border), 1))
+        painter.setBrush(QColor(theme.background))
+        painter.drawRoundedRect(QRectF(self.rect()).adjusted(.5, .5, -.5, -.5), 16, 16)
+
     def apply_theme(self):
-        dark=windows.is_dark();self.theme=dark
+        dark = panel_dark(self.preferences)
+        self.theme = dark
+        theme = palette(dark)
+        self.refresh_choice.apply_theme(dark)
+        self.update()
         for b in self.findChildren(QToolButton):
             kind=b.property('glyphKind')
-            if kind:b.setIcon(glyph_icon(kind,'#efefef' if dark else '#343434',24))
-        bg,card,fg,muted,border,hover=('#242424','#2e2e2e','#f4f4f4','#b5b5b5','#454545','#393939') if dark else ('#f3f3f3','#fafafa','#1a1a1a','#626262','#dddddd','#ffffff')
+            if kind:b.setIcon(glyph_icon(kind, theme.text, 36))
+        bg, card, fg, muted, border, hover = theme[:6]
+        accent = theme.accent
         self.setStyleSheet(f'''
         QWidget {{ color:{fg}; font-family:'Segoe UI Variable Text','Segoe UI','Microsoft YaHei UI'; }}
-        QWidget#flyout {{background:{bg};border:1px solid {border};border-radius:10px;}}
         QDialog#catalogWindow {{background:{bg};}}
         QLabel {{background:transparent;border:0;}}
         QLabel#muted {{color:{muted};}}
-        QLabel#glyph {{font-family:'Segoe Fluent Icons';color:{muted};}}
-        QFrame#card {{background:{card};border:1px solid {border};border-radius:7px;}}
-        QFrame#card:hover,QFrame#card:focus {{background:{hover};border-color:{windows.accent()};}}
-        QPushButton#powerChoice {{background:{card};border:1px solid {border};border-radius:4px;padding:0;}}
-        QPushButton#powerChoice:checked {{background:{windows.accent()};color:white;border-color:{windows.accent()};}}
-        QPushButton#batteryTest {{background:transparent;border:0;color:{windows.accent()};padding:0;text-align:left;}}
-        QPushButton#batteryTest:hover {{text-decoration:underline;}}
+        QFrame#card {{background:{card};border:1px solid {border};border-radius:{CARD_RADIUS}px;}}
+        QFrame#card:hover {{background:{hover};}}
+        QFrame#card:focus {{border-color:{accent};}}
+        QPushButton {{background:{card};border:1px solid {border};border-radius:8px;padding:4px 8px;}}
+        QPushButton:hover {{background:{hover};}}
+        QPushButton:focus {{border-color:{accent};}}
+        QPushButton:disabled {{color:{muted};background:{bg};}}
+        QPushButton#powerChoice {{background:{card};border:1px solid {border};border-radius:6px;padding:0;}}
+        QPushButton#powerChoice:checked {{background:{accent};color:{bg};border-color:{accent};}}
         QFrame#separator {{background:{border};border:0;}}
-        QFrame#releaseNotice {{background:{card};border:1px solid {border};border-radius:7px;}}
+        QFrame#releaseNotice {{background:{card};border:1px solid {border};border-radius:{CARD_RADIUS}px;}}
         QToolButton {{background:transparent;border:0;border-radius:4px;}}
         QToolButton:hover {{background:{border};}}
-        QToolButton:focus {{border:1px solid {windows.accent()};}}
+        QToolButton:focus {{border:1px solid {accent};}}
+        QToolButton#footerAction {{border:1px solid transparent;border-radius:8px;padding:0;}}
+        QToolButton#footerAction:hover {{background:{theme.tile};}}
+        QToolButton#footerAction:checked {{background:{theme.tile};color:{accent};}}
+        QToolButton#footerAction:focus {{border-color:{accent};}}
+        QToolButton#footerAction:disabled {{color:{muted};}}
+        QMenu,QAbstractItemView {{background:{card};color:{fg};border:1px solid {border};}}
+        QMenu::item:selected,QAbstractItemView::item:selected {{background:{theme.tile};color:{fg};}}
         QScrollArea,QWidget#transparent,QStackedWidget {{background:transparent;border:0;}}
         QScrollBar:vertical {{background:transparent;width:5px;}}
         QScrollBar::handle:vertical {{background:{border};border-radius:2px;min-height:20px;}}
@@ -360,6 +545,7 @@ class Flyout(QWidget):
         if self.catalog_dialog:self.catalog_dialog.setStyleSheet(self.styleSheet())
 
     def change_startup(self,on):
+        if LOCAL_PREVIEW:return
         try:
             current=startup.set_enabled(on);self.preferences.set('autostart_requested',on)
             self.toggle.set_checked_silent(current.enabled);self.auto_state.setText(current.message)
@@ -368,13 +554,16 @@ class Flyout(QWidget):
             self.statusline.setText('开机自启设置失败');self.statusline.setToolTip(str(e))
 
     def refresh_startup(self):
+        if LOCAL_PREVIEW:
+            self.toggle.setToolTip('本地测试版，请从正式版管理开机自启。')
+            return
         current=startup.state();self.toggle.set_checked_silent(current.enabled)
         self.auto_state.setText(current.message);self.auto_state.setToolTip(current.command or '登录 Windows 后自动运行');self.toggle.setToolTip(current.message+'；登录 Windows 后自动运行')
 
     def rebuild(self,devices,errors):
         self.devices=devices;self.errors=errors
         if self.research_dialog is not None and self.research_dialog.stage==0:self.research_dialog.fill_devices()
-        if self.theme!=windows.is_dark():self.apply_theme()
+        if self.theme!=panel_dark(self.preferences):self.apply_theme()
         displayed=visible_devices(devices,self.preferences);keys={d.key for d in displayed}
         for key in list(self.cards):
             if key not in keys:
@@ -382,10 +571,10 @@ class Flyout(QWidget):
         for index,d in enumerate(displayed):
             card=self.cards.get(d.key)
             if card is None:
-                card=DeviceCard(d,True,needs_power_choice(d) or d.key in self.preferences.get('device_modes',{}));card.clicked.connect(self.show_detail);card.powerModeRequested.connect(lambda key,mode:self.assign_mode(next(d for d in self.devices if d.key==key),mode));self.cards[d.key]=card
+                card=DeviceCard(d,True,needs_power_choice(d) or d.key in self.preferences.get('device_modes',{}),dark=self.theme);card.clicked.connect(self.show_detail);card.powerModeRequested.connect(lambda key,mode:self.assign_mode(next(d for d in self.devices if d.key==key),mode));self.cards[d.key]=card
                 self.list_layout.insertWidget(index,card)
             else:
-                card.update_device(d,needs_power_choice(d) or d.key in self.preferences.get('device_modes',{}))
+                card.update_device(d,needs_power_choice(d) or d.key in self.preferences.get('device_modes',{}),self.theme)
                 if self.list_layout.indexOf(card)!=index:
                     self.list_layout.removeWidget(card);self.list_layout.insertWidget(index,card)
         if not hasattr(self,'empty_label'):
@@ -393,11 +582,13 @@ class Flyout(QWidget):
             self.empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter);self.empty_label.setWordWrap(True)
             self.list_layout.addWidget(self.empty_label);self.list_layout.addStretch()
         self.empty_label.setVisible(not displayed)
-        count=sum(d.present and d.connected is True and d.power_mode!='wired' and d.kind!='auxiliary' for d in displayed);low=lowest(displayed)
-        present=sum(d.present for d in devices)
-        wired=sum(d.present and d.power_mode=='wired' and d.kind!='auxiliary' for d in displayed)
-        pending=sum(d.usb_keyboard and d.power_mode=='unknown' and d.connected is None for d in displayed)
-        self.summary.setText(f'{count} 台电池设备在线 · {wired} 台有线'+(f' · {pending} 台 USB 待确认' if pending else '')+' · '+(f'最低 {low.percent}%' if low else '已获取分档电量' if any(d.fresh_grade for d in displayed) else '暂无有效电量'))
+        low = lowest(displayed)
+        summary = f'{len(displayed)} 台设备'
+        if low:
+            summary += f' · 最低 {low.percent}%'
+        elif any(d.fresh_grade for d in displayed):
+            summary += ' · 分档电量'
+        self.summary.setText(summary)
         self.statusline.setText(errors[0] if errors else '托盘显示最低电量');self.statusline.setVisible(bool(errors))
         self.refresh_choice.blockSignals(True);self.refresh_choice.setCurrentIndex(REFRESH_INTERVALS.index(self.preferences.get('refresh_seconds',15)));self.refresh_choice.blockSignals(False)
         self.statusline.setToolTip('\n'.join(errors) if errors else '仅计算已连接且未过期的有效电量。可把托盘图标拖入或拖出 ^ 溢出区。')
@@ -525,13 +716,41 @@ class Flyout(QWidget):
         dialog.show();dialog.raise_();dialog.activateWindow()
 
     def open_desktop_menu(self):
-        from PySide6.QtWidgets import QMenu
         from desktop_overlay import add_desktop_actions
-        menu=QMenu(self);add_desktop_actions(menu,self.preferences,self.set_desktop_option)
-        self.menu_open=True
-        try:menu.exec(self.desktop_button.mapToGlobal(self.desktop_button.rect().topLeft()))
+        menu = QMenu(self)
+        add_desktop_actions(menu, self.preferences, self.set_desktop_option)
+        self.open_footer_menu(menu, self.desktop_button)
+
+    def open_theme_menu(self):
+        from PySide6.QtGui import QActionGroup
+        menu = QMenu(self)
+        group = QActionGroup(menu)
+        current = self.preferences.get('theme', 'system')
+        for value, title in (('system', '跟随系统'), ('light', '浅色'), ('dark', '深色')):
+            action = menu.addAction(title)
+            action.setCheckable(True)
+            action.setChecked(value == current)
+            group.addAction(action)
+            action.triggered.connect(lambda checked, v=value: self.set_theme(v) if checked else None)
+        self.open_footer_menu(menu, self.theme_button)
+
+    def set_theme(self, value):
+        self.preferences.set('theme', value)
+        self.rebuild(self.devices, self.errors)
+        self.preferencesChanged.emit()
+
+    def set_footer_popup(self, active):
+        self.menu_open = active
+        if not active:
+            QTimer.singleShot(160, self.hide_if_inactive)
+
+    def open_footer_menu(self, menu, button):
+        self.set_footer_popup(True)
+        try:
+            menu.exec(button.mapToGlobal(button.rect().topLeft()))
         finally:
-            self.menu_open=False;menu.deleteLater();QTimer.singleShot(160,self.hide_if_inactive)
+            menu.deleteLater()
+            self.set_footer_popup(False)
 
     def set_desktop_option(self,key,value):
         self.preferences.set(key,value);self.preferencesChanged.emit()
@@ -582,18 +801,19 @@ class Flyout(QWidget):
 
     def show_at_tray(self,rect=None):
         self.anchor=rect;self.refresh_startup();self.resize_for_content()
-        if self.theme!=windows.is_dark():self.apply_theme()
+        if self.theme!=panel_dark(self.preferences):self.apply_theme()
         self.rebuild(self.devices,self.errors);self.show();self.raise_();self.activateWindow()
         self.setFocus(Qt.FocusReason.OtherFocusReason)
-        windows.round_window(int(self.winId()))
 
     def resize_for_content(self):
         rect=self.anchor
         screen=QApplication.screenAt(rect.center()) if rect and not rect.isNull() else QApplication.screenAt(QCursor.pos())
         screen=screen or QApplication.primaryScreen();bounds=screen.availableGeometry()
         count=len(visible_devices(self.devices,self.preferences))
-        width=min(400,bounds.width()-24);height=adaptive_height(count,bounds.height(),bool(self.selected))
-        if not self.selected:height=min(bounds.height()-20,height+sum(max(0,card.height()-70) for card in self.cards.values()))
+        width = min(PANEL_WIDTH, bounds.width() - 24)
+        adjustment = 0 if self.selected else sum(card.height()-CARD_HEIGHT for card in self.cards.values())
+        height = adaptive_height(count, bounds.height(), bool(self.selected), adjustment)
+        if not self.update_badge.isHidden():height=min(bounds.height()-20,height+18)
         if not self.release_notice.isHidden():height=min(bounds.height()-20,height+max(95,self.release_notice.sizeHint().height()))
         if not self.download_progress.isHidden():height=min(bounds.height()-20,height+30)
         if self.width()!=width or self.height()!=height:self.setFixedSize(width,height)
@@ -621,7 +841,7 @@ class Flyout(QWidget):
     def closeEvent(self,e):e.ignore();self.hide()
 
 
-def adaptive_height(count,available_height,detail=False):
+def adaptive_height(count,available_height,detail=False,card_adjustment=0):
     maximum=max(160,min(760,round(available_height*.78),available_height-20))
-    desired=max(238,196+max(1,count)*70+max(0,count-1)*6)
+    desired=max(238,142+max(1,count)*CARD_HEIGHT+max(0,count-1)*CARD_SPACING+card_adjustment)
     return min(maximum,max(430,desired) if detail else desired)

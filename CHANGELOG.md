@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.11.0 — 设备电量界面优化
+- 主窗口收窄至 350，底部六项操作排成一行。以透明边缘绘制外框圆角。
+- 恢复大品牌标识和小设备图标。电量条加粗到 20，按电量区间着色。“有线”与百分比同字号。
+- 托盘按多个原生像素尺寸分别绘制，扩大设备轮廓和进度条在图标内的占比。
+- 新增浅色、深色及跟随系统选项，主界面和桌面悬浮窗同步切换。
+
 ## v2.10.0 — desktop display and compact controls
 - Continue from the M3 Lite baseline in v2.9.2; preserve PR #1 and its protocol model gate.
 - Add transparent desktop battery rows, detailed/compact modes, three sizes, drag/lock, and persisted position.

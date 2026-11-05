@@ -1,10 +1,10 @@
 # PeripheralBattery
 
-Windows 外设电量托盘工具，使用 Python / PySide6。当前版本 **v2.10.0 统一版**，后续不再分正式版与实验版。
+Windows 外设电量托盘工具，使用 Python / PySide6。当前版本 **v2.11.0 统一版**，后续不再分正式版与实验版。
 
 ## 下载与使用
 
-从 [GitHub Releases](https://github.com/Akatsuki11111/PeripheralBattery/releases) 下载对应 EXE。支持设备识别、可读电量、充电/连接状态、详情、开机自启和 5/15/30/60 秒刷新。主窗口宽度为 400 逻辑像素，版本号位于标题旁；底部第一行是开机自启、刷新间隔与桌面显示，第二行为电量测试入口及检查更新。
+从 [GitHub Releases](https://github.com/Akatsuki11111/PeripheralBattery/releases) 下载对应 EXE。支持设备识别、可读电量、充电/连接状态、详情、开机自启和 5/15/30/60 秒刷新。主窗口宽度为 350 逻辑像素。开机自启、刷新间隔、桌面显示、电量测试、更新和主题排在底部一行。可选浅色、深色或跟随系统，悬浮窗同步切换。托盘右键可切换图标＋电量条或数字＋设备标识。
 
 ## 桌面显示与供电选择
 
