@@ -110,12 +110,18 @@ class PreferenceTests(unittest.TestCase):
             flyout=Flyout(self.settings);timer=RefreshTimer(lambda:None,15);timer.start()
             flyout.preferencesChanged.connect(lambda:timer.set_seconds(self.settings.get('refresh_seconds')))
             for seconds in REFRESH_INTERVALS:
-                flyout.refresh_choice.setCurrentIndex(flyout.refresh_choice.findData(seconds))
+                def choose(menu, button, callback):
+                    self.assertIs(button, flyout.refresh_choice)
+                    action = next(action for action in menu.actions() if action.data() == seconds)
+                    callback(action.data())
+                    menu.deleteLater()
+                with patch.object(flyout, 'open_footer_menu', side_effect=choose):
+                    flyout.refresh_choice.click()
                 self.assertEqual(timer.interval(),seconds*1000);self.assertEqual(Settings(self.path).get('refresh_seconds'),seconds)
             dialog=CatalogDialog([],self.settings,flyout)
             dialog.preferencesChanged.connect(lambda:flyout.rebuild([],[]))
             choice=dialog.findChild(QComboBox,'refreshInterval');choice.setCurrentIndex(choice.findData(5))
-            self.assertEqual(flyout.refresh_choice.currentData(),5)
+            self.assertEqual(flyout.refresh_choice.text(),'5 秒')
             timer.stop();dialog.deleteLater();flyout.deleteLater();app.processEvents()
     def test_manual_supply_dropdown_saves_and_clears_override(self):
         with patch('startup.state',return_value=StartupState(False,False,False,False)):

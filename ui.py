@@ -81,43 +81,6 @@ class Toggle(FooterButton):
         self.blockSignals(previous)
 
 
-class RefreshChoice(QComboBox):
-    popupChanged = Signal(bool)
-
-    def __init__(self):
-        super().__init__()
-        footer_style(self)
-        self.dark = False
-        self.glyph = glyph_icon('clock', palette(False).text)
-
-    def showPopup(self):
-        self.popupChanged.emit(True)
-        super().showPopup()
-
-    def hidePopup(self):
-        super().hidePopup()
-        self.popupChanged.emit(False)
-
-    def apply_theme(self, dark):
-        self.dark = dark
-        self.glyph = glyph_icon('clock', palette(dark).text, 36)
-        self.update()
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        theme = palette(self.dark)
-        if self.underMouse() or self.hasFocus():
-            painter.setPen(QPen(QColor(theme.accent), 1) if self.hasFocus() else Qt.PenStyle.NoPen)
-            painter.setBrush(QColor(theme.tile))
-            painter.drawRoundedRect(QRectF(self.rect()).adjusted(.5, .5, -.5, -.5), 8, 8)
-        self.glyph.paint(painter, (self.width() - 19) // 2, 5, 19, 19)
-        painter.setFont(self.font())
-        painter.setPen(QColor(theme.text))
-        painter.drawText(QRectF(0, 27, self.width(), 16), Qt.AlignmentFlag.AlignCenter,
-                         self.currentText())
-
-
 def display_name(device):
     name=device.name
     for prefix in ('SteelSeries ','Razer ','SCYROX '):
@@ -330,14 +293,10 @@ class Flyout(QWidget):
         self.auto_state.hide()
         self.toggle = Toggle(False)
         self.toggle.toggled.connect(self.change_startup)
-        self.refresh_choice = RefreshChoice()
-        self.refresh_choice.popupChanged.connect(self.set_footer_popup)
+        self.refresh_choice = FooterButton('clock', f"{self.preferences.get('refresh_seconds')} 秒")
         self.refresh_choice.setAccessibleName('自动刷新间隔')
         self.refresh_choice.setToolTip('自动刷新间隔')
-        for seconds in REFRESH_INTERVALS:
-            self.refresh_choice.addItem(f'{seconds} 秒', seconds)
-        self.refresh_choice.setCurrentIndex(REFRESH_INTERVALS.index(self.preferences.get('refresh_seconds', 15)))
-        self.refresh_choice.currentIndexChanged.connect(lambda: self.change_interval(self.refresh_choice.currentData()))
+        self.refresh_choice.clicked.connect(self.open_refresh_menu)
 
         self.desktop_button = FooterButton('desktop', '桌面显示', '桌面')
         self.desktop_button.clicked.connect(self.open_desktop_menu)
@@ -504,7 +463,6 @@ class Flyout(QWidget):
         dark = panel_dark(self.preferences)
         self.theme = dark
         theme = palette(dark)
-        self.refresh_choice.apply_theme(dark)
         self.update()
         for b in self.findChildren(QToolButton):
             kind=b.property('glyphKind')
@@ -590,7 +548,7 @@ class Flyout(QWidget):
             summary += ' · 分档电量'
         self.summary.setText(summary)
         self.statusline.setText(errors[0] if errors else '托盘显示最低电量');self.statusline.setVisible(bool(errors))
-        self.refresh_choice.blockSignals(True);self.refresh_choice.setCurrentIndex(REFRESH_INTERVALS.index(self.preferences.get('refresh_seconds',15)));self.refresh_choice.blockSignals(False)
+        self.refresh_choice.setText(f"{self.preferences.get('refresh_seconds')} 秒")
         self.statusline.setToolTip('\n'.join(errors) if errors else '仅计算已连接且未过期的有效电量。可把托盘图标拖入或拖出 ^ 溢出区。')
         if self.selected:self.show_detail(self.selected)
         if self.isVisible():self.resize_for_content()
@@ -696,8 +654,12 @@ class Flyout(QWidget):
         else:modes.pop(d.key,None)
         self.preferences.set('device_modes',modes);self.preferencesChanged.emit();self.refreshRequested.emit()
 
-    def change_interval(self,seconds):
-        self.preferences.set('refresh_seconds',seconds);self.preferencesChanged.emit()
+    def change_interval(self, seconds):
+        if seconds not in REFRESH_INTERVALS:
+            return
+        self.preferences.set('refresh_seconds', seconds)
+        self.refresh_choice.setText(f'{seconds} 秒')
+        self.preferencesChanged.emit()
 
     def pin_device(self,key):self.preferences.set('pinned_key',key);self.preferencesChanged.emit()
 
@@ -721,36 +683,42 @@ class Flyout(QWidget):
         add_desktop_actions(menu, self.preferences, self.set_desktop_option)
         self.open_footer_menu(menu, self.desktop_button)
 
+    def open_refresh_menu(self):
+        choices = [(seconds, f'{seconds} 秒') for seconds in REFRESH_INTERVALS]
+        self.open_footer_choice(self.refresh_choice, choices,
+                                self.preferences.get('refresh_seconds'), self.change_interval)
+
     def open_theme_menu(self):
+        choices = (('system', '跟随系统'), ('light', '浅色'), ('dark', '深色'))
+        self.open_footer_choice(self.theme_button, choices, self.preferences.get('theme'), self.set_theme)
+
+    def open_footer_choice(self, button, choices, current, callback):
         from PySide6.QtGui import QActionGroup
         menu = QMenu(self)
         group = QActionGroup(menu)
-        current = self.preferences.get('theme', 'system')
-        for value, title in (('system', '跟随系统'), ('light', '浅色'), ('dark', '深色')):
+        for value, title in choices:
             action = menu.addAction(title)
             action.setCheckable(True)
             action.setChecked(value == current)
+            action.setData(value)
             group.addAction(action)
-            action.triggered.connect(lambda checked, v=value: self.set_theme(v) if checked else None)
-        self.open_footer_menu(menu, self.theme_button)
+        self.open_footer_menu(menu, button, callback)
 
     def set_theme(self, value):
         self.preferences.set('theme', value)
         self.rebuild(self.devices, self.errors)
         self.preferencesChanged.emit()
 
-    def set_footer_popup(self, active):
-        self.menu_open = active
-        if not active:
-            QTimer.singleShot(160, self.hide_if_inactive)
-
-    def open_footer_menu(self, menu, button):
-        self.set_footer_popup(True)
+    def open_footer_menu(self, menu, button, callback=None):
+        self.menu_open = True
         try:
-            menu.exec(button.mapToGlobal(button.rect().topLeft()))
+            chosen = menu.exec(button.mapToGlobal(button.rect().topLeft()))
+            if chosen is not None and callback is not None:
+                callback(chosen.data())
         finally:
             menu.deleteLater()
-            self.set_footer_popup(False)
+            self.menu_open = False
+            QTimer.singleShot(160, self.hide_if_inactive)
 
     def set_desktop_option(self,key,value):
         self.preferences.set(key,value);self.preferencesChanged.emit()
