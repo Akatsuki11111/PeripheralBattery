@@ -79,6 +79,19 @@ class UiTests(unittest.TestCase):
         self.assertEqual(self.flyout.cards['pad'].bar.grade,'中');self.assertFalse(self.flyout.cards['pad'].bar.stale)
         self.assertIn('分档电量',self.flyout.summary.text())
         for size in (16,20,32,64):self.assertFalse(tray_icon(d).pixmap(size,size).isNull())
+    def test_battery_meter_height_and_five_color_boundaries(self):
+        from appearance import battery_color, palette
+        self.flyout.rebuild(self.devices, [])
+        self.assertEqual(self.flyout.cards[self.devices[0].key].bar.height(), 18)
+        for dark in (False, True):
+            theme = palette(dark)
+            for low, high, color in ((0, 20, theme.low), (21, 40, theme.orange),
+                                     (41, 60, theme.yellow), (61, 80, theme.lime),
+                                     (81, 100, theme.good)):
+                self.assertEqual(battery_color(theme, low), color)
+                self.assertEqual(battery_color(theme, high), color)
+            self.assertEqual(battery_color(theme, 90, stale=True), theme.history)
+
     def test_native_icon_sizes_and_all_brand_icons(self):
         from catalog import brands
         for info in brands():

@@ -17,17 +17,19 @@ class Palette(NamedTuple):
     track: str
     accent: str
     good: str
-    amber: str
+    lime: str
+    yellow: str
+    orange: str
     low: str
     history: str
 
 
 LIGHT = Palette('#f3f3f3', '#fafafa', '#1a1a1a', '#575c63', '#dddddd',
                 '#ffffff', '#eceff3', '#e0e4e9', '#005fba',
-                '#19804d', '#986200', '#c4323d', '#65758a')
+                '#19804d', '#64871c', '#a47700', '#bc5518', '#c4323d', '#65758a')
 DARK = Palette('#20262e', '#2a323d', '#f3f6fa', '#aebdd0', '#3d4858',
                '#323d4a', '#364457', '#48576a', '#8bc6ff',
-               '#54d694', '#f1bd62', '#ff828b', '#a2b2c7')
+               '#54d694', '#a6d653', '#f2cd55', '#ffa05f', '#ff828b', '#a2b2c7')
 CARD_RADIUS = 14
 
 
@@ -43,10 +45,19 @@ def panel_dark(preferences):
 def battery_color(theme, percent=None, grade='', stale=False):
     if stale or (percent is None and not grade):
         return theme.history
-    if grade in ('耗尽', '低') or (percent is not None and percent <= 20):
+    if percent is None:
+        return {
+            '耗尽': theme.low, '低': theme.low, '中': theme.yellow,
+            '高': theme.lime, '满': theme.good,
+        }.get(grade, theme.history)
+    if percent <= 20:
         return theme.low
-    if grade == '中' or (percent is not None and percent < 50):
-        return theme.amber
+    if percent <= 40:
+        return theme.orange
+    if percent <= 60:
+        return theme.yellow
+    if percent <= 80:
+        return theme.lime
     return theme.good
 
 

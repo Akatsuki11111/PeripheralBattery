@@ -312,7 +312,7 @@ class BatteryBar(QWidget):
         self.charging = False
         self.stale = False
         self.dark = None
-        self.setFixedHeight(20)
+        self.setFixedHeight(18)
 
     def paintEvent(self, event):
         painter = QPainter(self)
