@@ -30,11 +30,11 @@ LIGHT = Palette('#f3f3f3', '#fafafa', '#1a1a1a', '#575c63', '#dddddd',
 DARK = Palette('#20262e', '#2a323d', '#f3f6fa', '#aebdd0', '#3d4858',
                '#323d4a', '#364457', '#48576a', '#8bc6ff',
                '#54d694', '#a6d653', '#f2cd55', '#ffa05f', '#ff828b', '#a2b2c7')
-# Large meters can use gentler tints. Small tray marks use the higher-contrast colors.
-LIGHT_PANEL_METER = LIGHT._replace(good='#8ebba5', lime='#b1c290', yellow='#d5c790',
-                                  orange='#d7af95', low='#d4a0a9')
-DARK_PANEL_METER = DARK._replace(good='#a6cdb7', lime='#b9ca9a', yellow='#e0d2a0',
-                                orange='#dfbda5', low='#deb0b7')
+# The main panel uses its own five-step palette for the thin battery meters.
+LIGHT_PANEL_METER = LIGHT._replace(good='#43ca84', lime='#a0ca48', yellow='#eec346',
+                                  orange='#f4a05a', low='#f2747c')
+DARK_PANEL_METER = DARK._replace(good='#57e0a1', lime='#b6df62', yellow='#ffda62',
+                                orange='#ffb573', low='#ff8994')
 CARD_RADIUS = 14
 
 

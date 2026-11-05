@@ -10,14 +10,14 @@ root=Path(SPECPATH)
 sys.path.insert(0,str(root))
 local_preview = os.environ.get('PB_BUILD_UI_PREVIEW') == '1'
 channel = 'preview' if local_preview else 'stable'
-version = '2.11.0-beta.2' if local_preview else '2.11.3'
+version = '2.11.4-beta.1' if local_preview else json.loads((root/'release.json').read_text(encoding='utf-8'))['version']
 generated=Path(CONF['workpath'])/'channel';generated.mkdir(parents=True,exist_ok=True)
 release = dict(version=version, channel=channel, battery_tests=True)
 if local_preview:
     release['local_preview'] = True
 (generated/'release.json').write_text(json.dumps(release),encoding='utf-8')
 version_text=(root/'version_info.txt').read_text(encoding='utf-8')
-numeric = '2,11,0,2' if local_preview else '2,11,3,0'
+numeric = '2,11,4,1' if local_preview else version.replace('.', ',') + ',0'
 version_text=re.sub(r'filevers=\([^)]*\),prodvers=\([^)]*\)',f'filevers=({numeric}),prodvers=({numeric})',version_text)
 version_text=re.sub(r"(StringStruct\('(?:FileVersion|ProductVersion)',')[^']*",lambda m:m[1]+version,version_text)
 (generated/'version_info.txt').write_text(version_text,encoding='utf-8')

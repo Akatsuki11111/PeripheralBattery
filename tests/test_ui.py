@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile,time,unittest
 from unittest.mock import patch
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import Qt,QTimer,QRect
+from PySide6.QtCore import Qt,QTimer,QRect,QPoint
 from PySide6.QtTest import QTest
 from models import Device
 from ui import Flyout
@@ -50,7 +50,7 @@ class UiTests(unittest.TestCase):
         with patch.object(QApplication, 'screenAt', return_value=screen):
             flyout.resize_for_content()
             first = flyout.height()
-            devices = [replace(self.devices[0], key=str(i)) for i in range(8)]
+            devices = [replace(self.devices[0], key=str(i)) for i in range(9)]
             flyout.rebuild(devices, ['测试状态消息'])
             app.processEvents()
             self.assertGreater(flyout.height(), 760)
@@ -84,7 +84,7 @@ class UiTests(unittest.TestCase):
         wired=Device.from_dict({**self.devices[0].to_dict(),'key':'wired','brand':'MelGeek','kind':'keyboard','power_mode':'wired'})
         self.flyout.rebuild([wired],[]);card=self.flyout.cards['wired']
         self.assertEqual(card.value_label.text(),'有线');self.assertTrue(card.bar.isHidden())
-        self.assertEqual(card.value_label.font().pixelSize(), 20)
+        self.assertEqual(card.value_label.font().pixelSize(), 17)
         self.flyout.show_detail('wired');self.assertEqual(self.flyout.detail_labels['当前电量'].text(),'不适用（有线供电）')
 
     def test_sleep_time_is_visible_on_card_and_live_reading_clears_it(self):
@@ -105,8 +105,10 @@ class UiTests(unittest.TestCase):
         from appearance import battery_color, panel_meter_palette
         self.flyout.rebuild(self.devices, [])
         card = self.flyout.cards[self.devices[0].key]
-        self.assertEqual(card.bar.height(), 14)
-        self.assertEqual(card.value_label.font().pixelSize(), 20)
+        app.processEvents()
+        self.assertEqual(card.bar.height(), 6)
+        self.assertEqual(card.value_label.font().pixelSize(), 17)
+        self.assertEqual(card.bar.mapTo(card, QPoint()).x(), card.name_label.mapTo(card, QPoint()).x())
         for dark in (False, True):
             theme = panel_meter_palette(dark)
             for low, high, color in ((0, 20, theme.low), (21, 40, theme.orange),

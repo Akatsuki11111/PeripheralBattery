@@ -16,7 +16,7 @@ try {
         $env:PB_BUILD_CHANNEL=$buildChannel
         & $pythonCommand -m PyInstaller --noconfirm --clean --distpath "dist/$buildChannel" --workpath "build/$buildChannel" PeripheralBattery.spec
         if ($LASTEXITCODE -ne 0) { throw 'Build failed.' }
-        $releaseVersion = '2.11.3'
+        $releaseVersion = (Get-Content -LiteralPath release.json -Raw -Encoding UTF8 | ConvertFrom-Json).version
         $releaseName = "PeripheralBattery-v$releaseVersion.exe"
         Copy-Item -LiteralPath "dist/$buildChannel/PeripheralBattery.exe" -Destination "dist/$releaseName" -Force
         Write-Host "Ready: dist\$releaseName"

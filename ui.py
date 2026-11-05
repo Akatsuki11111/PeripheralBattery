@@ -112,6 +112,7 @@ class DeviceCard(QFrame):
         self.setObjectName('card')
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         self.theme = None
         self.d = None
 
@@ -122,7 +123,11 @@ class DeviceCard(QFrame):
         header.setSpacing(10)
 
         self.brand_icon = BrandIcon(d.brand, d.kind)
-        header.addWidget(self.brand_icon)
+        header.addWidget(self.brand_icon, 0, Qt.AlignmentFlag.AlignVCenter)
+        content = QVBoxLayout()
+        content.setSpacing(7)
+        details = QHBoxLayout()
+        details.setSpacing(6)
 
         text = QVBoxLayout()
         text.setSpacing(1)
@@ -141,20 +146,22 @@ class DeviceCard(QFrame):
         status.addWidget(self.kind_label)
         self.status_label = ElidedLabel()
         self.status_label.setObjectName('muted')
-        self.status_label.setFont(font(11, QFont.Weight.Medium))
+        self.status_label.setFont(font(11))
         self.status_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         status.addWidget(self.status_label, 1)
         text.addLayout(status)
-        header.addLayout(text, 1)
+        details.addLayout(text, 1)
 
         self.value_label = label()
         self.value_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-        self.value_label.setFixedWidth(86)
-        header.addWidget(self.value_label)
-        layout.addLayout(header)
+        self.value_label.setFixedWidth(68)
+        details.addWidget(self.value_label, 0, Qt.AlignmentFlag.AlignTop)
+        content.addLayout(details)
 
         self.bar = BatteryBar()
-        layout.addWidget(self.bar)
+        content.addWidget(self.bar)
+        header.addLayout(content, 1)
+        layout.addLayout(header)
         self.power_row = QWidget()
         power = QHBoxLayout(self.power_row)
         power.setContentsMargins(0, 0, 0, 0)
@@ -192,8 +199,6 @@ class DeviceCard(QFrame):
         self.show_power_choice = show_power_choice
         self.power_row.setVisible(show_power_choice)
         show_bar = d.power_mode != 'wired' and d.kind != 'auxiliary' and not needs_power_choice(d)
-        meter_space = self.bar.minimumHeight() + 4 if show_bar else 0
-        self.setFixedHeight(68 + meter_space + (28 if show_power_choice else 0))
         for mode, button in self.power_buttons.items():
             button.setChecked(d.power_mode == mode)
         self.brand_icon.set_brand(d.brand, d.kind)
@@ -209,8 +214,8 @@ class DeviceCard(QFrame):
         self.status_label.setText('上次 ' + d.last_read_time if d.cached else status)
         self.status_label.setToolTip(status + ('\n' + d.note if d.note else ''))
         self.value_label.setText(d.reading_text)
-        self.value_label.setFont(font(14 if d.kind == 'auxiliary' else 20,
-                                      QFont.Weight.Bold))
+        self.value_label.setFont(font(14 if d.kind == 'auxiliary' else 17,
+                                      QFont.Weight.DemiBold))
         self.value_label.setToolTip(
             '上次有效电量 · ' + dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')
             if d.cached else '实验推测' if d.experimental else '分档电量，非百分比'
