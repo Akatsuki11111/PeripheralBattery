@@ -5,10 +5,10 @@ from pathlib import Path
 import tempfile,time,unittest
 from unittest.mock import patch
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import Qt,QTimer
+from PySide6.QtCore import Qt,QTimer,QRect
 from PySide6.QtTest import QTest
 from models import Device
-from ui import Flyout,adaptive_height
+from ui import Flyout
 from icons import tray_icon,BrandIcon
 from settings import Settings
 from startup import StartupState
@@ -45,11 +45,32 @@ class UiTests(unittest.TestCase):
         self.assertIs(card,self.flyout.cards['x']);self.assertIs(value,self.flyout.detail_labels['当前电量'])
         self.assertEqual(value.text(),'42%');self.assertEqual(static.selectedText(),'鼠标')
     def test_height_adapts_to_visible_count_and_caps_for_screen(self):
-        heights=[adaptive_height(n,1100) for n in (2,3,6)]
-        self.assertTrue(heights[0]<heights[1]<heights[2]);self.assertLessEqual(adaptive_height(100,700),680)
-        first=self.flyout.height();self.flyout.rebuild(self.devices+[replace(self.devices[0],key='z')],[])
-        self.assertGreater(self.flyout.height(),first)
-        self.settings.set('hidden',['z']);self.flyout.rebuild(self.flyout.devices,[]);self.assertEqual(self.flyout.height(),first)
+        screen = type('Screen', (), {'availableGeometry': lambda self: QRect(0, 0, 1600, 1080)})()
+        flyout = self.flyout
+        with patch.object(QApplication, 'screenAt', return_value=screen):
+            flyout.resize_for_content()
+            first = flyout.height()
+            devices = [replace(self.devices[0], key=str(i)) for i in range(8)]
+            flyout.rebuild(devices, ['测试状态消息'])
+            app.processEvents()
+            self.assertGreater(flyout.height(), 760)
+            self.assertEqual(flyout.scroll.verticalScrollBar().maximum(), 0)
+
+            flyout.release_notice_text.setText('更新说明 ' * 20)
+            flyout.release_notice.show()
+            app.processEvents()
+            self.assertEqual(flyout.scroll.verticalScrollBar().maximum(), 0)
+
+            flyout.rebuild(devices + [replace(self.devices[0], key='extra' + str(i)) for i in range(7)], [])
+            app.processEvents()
+            self.assertLessEqual(flyout.height(), 1060)
+            self.assertGreater(flyout.scroll.verticalScrollBar().maximum(), 0)
+
+            flyout.release_notice.hide()
+            flyout.rebuild(self.devices, [])
+            app.processEvents()
+            self.assertEqual(flyout.height(), first)
+            self.assertEqual(flyout.scroll.verticalScrollBar().maximum(), 0)
     def test_hide_offline_and_show_offline_preference(self):
         devices=[self.devices[0],replace(self.devices[1],connected=False,percent=None)]
         self.flyout.rebuild(devices,[]);self.assertEqual(len(self.flyout.cards),1)
@@ -63,6 +84,7 @@ class UiTests(unittest.TestCase):
         wired=Device.from_dict({**self.devices[0].to_dict(),'key':'wired','brand':'MelGeek','kind':'keyboard','power_mode':'wired'})
         self.flyout.rebuild([wired],[]);card=self.flyout.cards['wired']
         self.assertEqual(card.value_label.text(),'有线');self.assertTrue(card.bar.isHidden())
+        self.assertEqual(card.value_label.font().pixelSize(), 20)
         self.flyout.show_detail('wired');self.assertEqual(self.flyout.detail_labels['当前电量'].text(),'不适用（有线供电）')
 
     def test_sleep_time_is_visible_on_card_and_live_reading_clears_it(self):
@@ -80,11 +102,13 @@ class UiTests(unittest.TestCase):
         self.assertIn('分档电量',self.flyout.summary.text())
         for size in (16,20,32,64):self.assertFalse(tray_icon(d).pixmap(size,size).isNull())
     def test_battery_meter_height_and_five_color_boundaries(self):
-        from appearance import battery_color, palette
+        from appearance import battery_color, panel_meter_palette
         self.flyout.rebuild(self.devices, [])
-        self.assertEqual(self.flyout.cards[self.devices[0].key].bar.height(), 18)
+        card = self.flyout.cards[self.devices[0].key]
+        self.assertEqual(card.bar.height(), 14)
+        self.assertEqual(card.value_label.font().pixelSize(), 20)
         for dark in (False, True):
-            theme = palette(dark)
+            theme = panel_meter_palette(dark)
             for low, high, color in ((0, 20, theme.low), (21, 40, theme.orange),
                                      (41, 60, theme.yellow), (61, 80, theme.lime),
                                      (81, 100, theme.good)):

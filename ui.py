@@ -1,6 +1,6 @@
 import datetime as dt
 import time
-from PySide6.QtCore import Qt, QTimer, Signal, QRectF, QSize
+from PySide6.QtCore import Qt, QEvent, QTimer, Signal, QRectF, QSize
 from PySide6.QtGui import QColor,QPainter,QPen,QFont,QCursor,QPalette
 from PySide6.QtWidgets import (QWidget,QLabel,QPushButton,QToolButton,QVBoxLayout,QHBoxLayout,
     QFrame,QScrollArea,QStackedWidget,QSizePolicy,QApplication,QGridLayout,QComboBox,QProgressBar,
@@ -14,7 +14,6 @@ import startup
 import windows
 
 PANEL_WIDTH = 350
-CARD_HEIGHT = 92
 CARD_SPACING = 8
 
 
@@ -193,7 +192,8 @@ class DeviceCard(QFrame):
         self.show_power_choice = show_power_choice
         self.power_row.setVisible(show_power_choice)
         show_bar = d.power_mode != 'wired' and d.kind != 'auxiliary' and not needs_power_choice(d)
-        self.setFixedHeight(68 + (24 if show_bar else 0) + (28 if show_power_choice else 0))
+        meter_space = self.bar.minimumHeight() + 4 if show_bar else 0
+        self.setFixedHeight(68 + meter_space + (28 if show_power_choice else 0))
         for mode, button in self.power_buttons.items():
             button.setChecked(d.power_mode == mode)
         self.brand_icon.set_brand(d.brand, d.kind)
@@ -209,7 +209,7 @@ class DeviceCard(QFrame):
         self.status_label.setText('上次 ' + d.last_read_time if d.cached else status)
         self.status_label.setToolTip(status + ('\n' + d.note if d.note else ''))
         self.value_label.setText(d.reading_text)
-        self.value_label.setFont(font(14 if d.kind == 'auxiliary' else 22,
+        self.value_label.setFont(font(14 if d.kind == 'auxiliary' else 20,
                                       QFont.Weight.Bold))
         self.value_label.setToolTip(
             '上次有效电量 · ' + dt.datetime.fromtimestamp(d.last_observed_at).strftime('%m-%d %H:%M:%S')
@@ -274,7 +274,10 @@ class Flyout(QWidget):
         dismiss=QPushButton('知道了');dismiss.setFont(font(10));dismiss.setFocusPolicy(Qt.FocusPolicy.TabFocus);dismiss.clicked.connect(self.dismiss_release_notice);notice_head.addWidget(dismiss)
         notice.addLayout(notice_head);self.release_notice_text=label('',11);self.release_notice_text.setWordWrap(True);notice.addWidget(self.release_notice_text)
         self.release_notice.hide();self.root.addWidget(self.release_notice)
-        self.stack=QStackedWidget();self.root.addWidget(self.stack,1)
+        self.stack = QStackedWidget()
+        # The root hint now measures the header and footer separately from the active page.
+        self.stack.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Ignored)
+        self.root.addWidget(self.stack, 1)
         self.scroll=QScrollArea();self.scroll.setWidgetResizable(True);self.scroll.setFrameShape(QFrame.Shape.NoFrame)
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.list_body=QWidget();self.list_body.setObjectName('transparent');self.list_layout=QVBoxLayout(self.list_body);self.list_layout.setContentsMargins(0,0,0,0);self.list_layout.setSpacing(CARD_SPACING)
@@ -525,12 +528,13 @@ class Flyout(QWidget):
         displayed=visible_devices(devices,self.preferences);keys={d.key for d in displayed}
         for key in list(self.cards):
             if key not in keys:
-                card=self.cards.pop(key);self.list_layout.removeWidget(card);card.deleteLater()
+                card=self.cards.pop(key);self.list_layout.removeWidget(card);card.hide();card.deleteLater()
         for index,d in enumerate(displayed):
             card=self.cards.get(d.key)
             if card is None:
                 card=DeviceCard(d,True,needs_power_choice(d) or d.key in self.preferences.get('device_modes',{}),dark=self.theme);card.clicked.connect(self.show_detail);card.powerModeRequested.connect(lambda key,mode:self.assign_mode(next(d for d in self.devices if d.key==key),mode));self.cards[d.key]=card
                 self.list_layout.insertWidget(index,card)
+                card.show()
             else:
                 card.update_device(d,needs_power_choice(d) or d.key in self.preferences.get('device_modes',{}),self.theme)
                 if self.list_layout.indexOf(card)!=index:
@@ -538,6 +542,7 @@ class Flyout(QWidget):
         if not hasattr(self,'empty_label'):
             self.empty_label=label('暂无可显示的设备\n可在设备管理中查看其他 HID 设备。',12,True)
             self.empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter);self.empty_label.setWordWrap(True)
+            self.empty_label.setMinimumHeight(72)
             self.list_layout.addWidget(self.empty_label);self.list_layout.addStretch()
         self.empty_label.setVisible(not displayed)
         low = lowest(displayed)
@@ -777,13 +782,8 @@ class Flyout(QWidget):
         rect=self.anchor
         screen=QApplication.screenAt(rect.center()) if rect and not rect.isNull() else QApplication.screenAt(QCursor.pos())
         screen=screen or QApplication.primaryScreen();bounds=screen.availableGeometry()
-        count=len(visible_devices(self.devices,self.preferences))
-        width = min(PANEL_WIDTH, bounds.width() - 24)
-        adjustment = 0 if self.selected else sum(card.height()-CARD_HEIGHT for card in self.cards.values())
-        height = adaptive_height(count, bounds.height(), bool(self.selected), adjustment)
-        if not self.update_badge.isHidden():height=min(bounds.height()-20,height+18)
-        if not self.release_notice.isHidden():height=min(bounds.height()-20,height+max(95,self.release_notice.sizeHint().height()))
-        if not self.download_progress.isHidden():height=min(bounds.height()-20,height+30)
+        width = max(1, min(PANEL_WIDTH, bounds.width() - 24))
+        height = min(self.content_height(width), max(1, bounds.height() - 20))
         if self.width()!=width or self.height()!=height:self.setFixedSize(width,height)
         x=rect.center().x()-self.width()//2 if rect and not rect.isNull() else bounds.right()-self.width()-12
         y=bounds.bottom()-self.height()-10
@@ -792,13 +792,43 @@ class Flyout(QWidget):
         if self.x()!=x or self.y()!=y:self.move(x,y)
         self.position_update_badge()
 
+    def content_height(self, width):
+        chrome = self.root.totalHeightForWidth(width)
+        if chrome < 0:
+            chrome = self.root.totalSizeHint().height()
+
+        page = self.stack.currentWidget()
+        body = page.widget()
+        if body is None:
+            return chrome
+
+        outer = self.root.contentsMargins()
+        stack = self.stack.contentsMargins()
+        frame = 2 * page.frameWidth()
+        body_width = max(1, width - outer.left() - outer.right()
+                         - stack.left() - stack.right() - frame)
+        layout = body.layout()
+        body_height = layout.totalHeightForWidth(body_width)
+        if body_height < 0:
+            body_height = layout.totalSizeHint().height()
+        body_height = max(body_height, body.minimumSizeHint().height())
+        if (page.horizontalScrollBarPolicy() != Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+                and body.minimumSizeHint().width() > body_width):
+            body_height += page.horizontalScrollBar().sizeHint().height()
+        return chrome + frame + stack.top() + stack.bottom() + body_height
+
+    def event(self, event):
+        result = super().event(event)
+        if event.type() == QEvent.Type.LayoutRequest and self.isVisible():
+            self.resize_for_content()
+        return result
+
     def keyPressEvent(self,e):
         if e.key()==Qt.Key.Key_Escape:
             self.go_back() if self.selected else self.hide()
         else:super().keyPressEvent(e)
 
     def changeEvent(self,e):
-        from PySide6.QtCore import QEvent
         if e.type()==QEvent.Type.ActivationChange and not self.isActiveWindow() and not self.pinned and not self.menu_open:
             QTimer.singleShot(160,self.hide_if_inactive)
         super().changeEvent(e)
@@ -807,9 +837,3 @@ class Flyout(QWidget):
         if not self.isActiveWindow() and not self.pinned and not self.menu_open:self.hide()
 
     def closeEvent(self,e):e.ignore();self.hide()
-
-
-def adaptive_height(count,available_height,detail=False,card_adjustment=0):
-    maximum=max(160,min(760,round(available_height*.78),available_height-20))
-    desired=max(238,142+max(1,count)*CARD_HEIGHT+max(0,count-1)*CARD_SPACING+card_adjustment)
-    return min(maximum,max(430,desired) if detail else desired)

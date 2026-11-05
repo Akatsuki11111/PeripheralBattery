@@ -5,7 +5,7 @@ from PySide6.QtCore import Qt, QRectF, QSize, QPointF
 from PySide6.QtGui import QColor, QFont, QFontMetricsF, QIcon, QPainter, QPainterPath, QPen, QPixmap
 from PySide6.QtWidgets import QWidget
 import windows
-from appearance import battery_color, palette, paint_meter
+from appearance import battery_color, palette, paint_meter, panel_meter_palette
 
 ASSETS = Path(__file__).parent / 'assets'
 GLYPHS = {'mouse':'\ue962', 'keyboard':'\ue765', 'headset':'\ue95b', 'gamepad':'\ue7fc', 'battery':'\ue83f',
@@ -312,11 +312,11 @@ class BatteryBar(QWidget):
         self.charging = False
         self.stale = False
         self.dark = None
-        self.setFixedHeight(18)
+        self.setFixedHeight(14)
 
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         dark = windows.is_dark() if self.dark is None else self.dark
-        paint_meter(painter, QRectF(self.rect()), palette(dark),
+        paint_meter(painter, QRectF(self.rect()), panel_meter_palette(dark),
                     self.value, self.grade, self.stale)

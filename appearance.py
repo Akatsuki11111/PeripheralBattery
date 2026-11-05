@@ -30,11 +30,20 @@ LIGHT = Palette('#f3f3f3', '#fafafa', '#1a1a1a', '#575c63', '#dddddd',
 DARK = Palette('#20262e', '#2a323d', '#f3f6fa', '#aebdd0', '#3d4858',
                '#323d4a', '#364457', '#48576a', '#8bc6ff',
                '#54d694', '#a6d653', '#f2cd55', '#ffa05f', '#ff828b', '#a2b2c7')
+# Large meters can use gentler tints. Small tray marks use the higher-contrast colors.
+LIGHT_PANEL_METER = LIGHT._replace(good='#8ebba5', lime='#b1c290', yellow='#d5c790',
+                                  orange='#d7af95', low='#d4a0a9')
+DARK_PANEL_METER = DARK._replace(good='#a6cdb7', lime='#b9ca9a', yellow='#e0d2a0',
+                                orange='#dfbda5', low='#deb0b7')
 CARD_RADIUS = 14
 
 
 def palette(dark):
     return DARK if dark else LIGHT
+
+
+def panel_meter_palette(dark):
+    return DARK_PANEL_METER if dark else LIGHT_PANEL_METER
 
 
 def panel_dark(preferences):
