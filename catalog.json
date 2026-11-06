@@ -8513,6 +8513,48 @@
       "kind": "gamepad",
       "backend": "gamepad",
       "source": "https://github.com/libsdl-org/SDL/blob/main/src/joystick/usb_ids.h"
+    },
+    {
+      "vid": "24AE",
+      "pid": "14A7",
+      "brand": "rapoo",
+      "name": "Rapoo VT7 PRO V2",
+      "kind": "mouse",
+      "backend": "rapoo_vt7_pro_v2",
+      "receiver": true,
+      "power_mode": "battery",
+      "source": "https://hub.rapoo.cn/"
+    },
+    {
+      "vid": "24AE",
+      "pid": "46A7",
+      "brand": "rapoo",
+      "name": "Rapoo VT7 PRO V2",
+      "kind": "mouse",
+      "backend": "rapoo_vt7_pro_v2",
+      "power_mode": "battery",
+      "source": "https://hub.rapoo.cn/"
+    },
+    {
+      "vid": "373B",
+      "pid": "124F",
+      "brand": "atk",
+      "name": "ATK 8K 接收器 (L0)",
+      "kind": "mouse",
+      "backend": "atk_zero_plus",
+      "receiver": true,
+      "power_mode": "battery",
+      "source": "https://github.com/cobanov/atkctl/blob/main/Sources/ATKKit/Catalog.swift"
+    },
+    {
+      "vid": "373B",
+      "pid": "129E",
+      "brand": "atk",
+      "name": "ATK ZERO+",
+      "kind": "mouse",
+      "backend": "atk_zero_plus",
+      "power_mode": "battery",
+      "source": "https://github.com/cobanov/atkctl/blob/main/Sources/ATKKit/Catalog.swift"
     }
   ],
   "notes": [

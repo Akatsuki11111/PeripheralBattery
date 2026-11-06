@@ -1,5 +1,6 @@
 """Conservative automatic supply detection and persistent per-device corrections."""
 from dataclasses import replace
+from catalog import device_mode
 import re
 
 DEVICE_MODES=('wired','battery')
@@ -49,19 +50,28 @@ def apply_mode(device,mode,backend=''):
 
 
 def apply_saved_modes(store,preferences):
-    modes=preferences.get('device_modes',{})
-    for key,mode in modes.items():
-        if key in store.devices:store.devices[key]=apply_mode(store.devices[key],mode)
+    devices=store.snapshot()
+    if not preferences.get('device_modes',{}):
+        return
+    for device in devices:
+        mode=device_mode(device,devices,preferences)
+        if mode:
+            updated=apply_mode(device,mode)
+            if updated.power_mode=='wired' and device.power_mode!='wired':
+                store.history.record(updated)
+            store.devices[device.key]=updated
 
 
 def bind_groups(groups,store,preferences):
     """Apply corrections after key migration, so changing USB ports keeps them."""
-    records={d.identity:d for d in store.snapshot() if d.present}
+    devices=store.snapshot()
+    records={d.identity:d for d in devices if d.present}
     bound=[]
     for group in groups:
         group=dict(group);device=records.get(group['device']['identity'])
         if device:
-            device=apply_mode(device,preferences.get('device_modes',{}).get(device.key),group.get('backend',''))
+            mode=device_mode(device,devices,preferences) if preferences.get('device_modes',{}) else None
+            device=apply_mode(device,mode,group.get('backend',''))
             store.devices[device.key]=device;group['device']=device.to_dict()
             if device.power_mode=='wired' or device.kind=='auxiliary':group['backend']=''
         bound.append(group)

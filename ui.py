@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (QWidget,QLabel,QPushButton,QToolButton,QVBoxLayou
 from icons import font,glyph_icon,BrandIcon,BatteryBar,device_outline
 from appearance import CARD_RADIUS, panel_dark, palette
 from models import lowest
-from catalog import visible_devices
+from catalog import visible_devices, related_keys, device_mode, link_candidates
 from settings import Settings,REFRESH_INTERVALS,VERSION,RELEASE_CHANNEL,EXPERIMENTAL_ENABLED,LOCAL_PREVIEW
 import startup
 import windows
@@ -211,7 +211,7 @@ class DeviceCard(QFrame):
             status = '已连接'
         elif status == '已连接' and '2.4' in d.transport:
             status = '2.4 GHz · 已连接'
-        self.status_label.setText('上次 ' + d.last_read_time if d.cached else status)
+        self.status_label.setText(status)
         self.status_label.setToolTip(status + ('\n' + d.note if d.note else ''))
         self.value_label.setText(d.reading_text)
         self.value_label.setFont(font(14 if d.kind == 'auxiliary' else 17,
@@ -244,6 +244,7 @@ class DeviceCard(QFrame):
 class Flyout(QWidget):
     installUpdateRequested=Signal(object)
     refreshRequested=Signal()
+    deviceRefreshRequested=Signal(str)
     preferencesChanged=Signal()
     forgetRequested=Signal(str)
     promoteTrayRequested=Signal()
@@ -443,7 +444,8 @@ class Flyout(QWidget):
         if self.update_job is not job:return
         self.update_job=None;self.update_progress_timer.stop();self.cancel_download.hide();self.update_button.setEnabled(True)
         if not result.get('ok'):
-            self.download_progress.setFormat('下载失败，未安装');self.update_candidate=None;self.update_button.setText('重新检查')
+            self.download_progress.setFormat('下载失败，可重试')
+            self.update_button.setText('重试下载' if self.update_candidate else '重新检查')
             self.update_button.setToolTip(result.get('user_message',result.get('error','下载失败')));return
         self.download_ready=result['download'];self.download_progress.setValue(100);self.download_progress.setFormat('校验完成，正在安装并重启…')
         self.update_button.setText('安装并重启');self.installUpdateRequested.emit(self.download_ready)
@@ -534,14 +536,16 @@ class Flyout(QWidget):
         for key in list(self.cards):
             if key not in keys:
                 card=self.cards.pop(key);self.list_layout.removeWidget(card);card.hide();card.deleteLater()
+        modes = self.preferences.get('device_modes', {})
         for index,d in enumerate(displayed):
+            show_power_choice = needs_power_choice(d) and d.key not in modes
             card=self.cards.get(d.key)
             if card is None:
-                card=DeviceCard(d,True,needs_power_choice(d) or d.key in self.preferences.get('device_modes',{}),dark=self.theme);card.clicked.connect(self.show_detail);card.powerModeRequested.connect(lambda key,mode:self.assign_mode(next(d for d in self.devices if d.key==key),mode));self.cards[d.key]=card
+                card=DeviceCard(d,True,show_power_choice,dark=self.theme);card.clicked.connect(self.show_detail);card.powerModeRequested.connect(lambda key,mode:self.assign_mode(next(d for d in self.devices if d.key==key),mode));self.cards[d.key]=card
                 self.list_layout.insertWidget(index,card)
                 card.show()
             else:
-                card.update_device(d,needs_power_choice(d) or d.key in self.preferences.get('device_modes',{}),self.theme)
+                card.update_device(d,show_power_choice,self.theme)
                 if self.list_layout.indexOf(card)!=index:
                     self.list_layout.removeWidget(card);self.list_layout.insertWidget(index,card)
         if not hasattr(self,'empty_label'):
@@ -560,7 +564,11 @@ class Flyout(QWidget):
         self.statusline.setText(errors[0] if errors else '托盘显示最低电量');self.statusline.setVisible(bool(errors))
         self.refresh_choice.setText(f"{self.preferences.get('refresh_seconds')} 秒")
         self.statusline.setToolTip('\n'.join(errors) if errors else '仅计算已连接且未过期的有效电量。可把托盘图标拖入或拖出 ^ 溢出区。')
-        if self.selected:self.show_detail(self.selected)
+        if self.selected:
+            selected=next((d for d in devices if d.key==self.selected),None)
+            peers=related_keys(selected,devices,self.preferences) if selected else (self.selected,)
+            active=next((d for d in displayed if d.key in peers),None)
+            self.show_detail(active.key if active else self.selected)
         if self.isVisible():self.resize_for_content()
 
     def show_detail(self,key):
@@ -573,7 +581,7 @@ class Flyout(QWidget):
             for field,text in rows:
                 if self.detail_labels[field].text()!=text:self.detail_labels[field].setText(text)
             self.detail_brand.set_brand(d.brand,d.kind)
-            self.history_chart.set_samples(self.history.samples(d.key))
+            self.history_chart.set_samples(self.history_rows(d))
             self.pin_button.setEnabled(d.power_mode!='wired' and d.kind!='auxiliary')
             self.selected=key;self.back.show();self.stack.setCurrentIndex(1)
             if self.isVisible():self.resize_for_content()
@@ -583,7 +591,7 @@ class Flyout(QWidget):
         content=QWidget();content.setObjectName('transparent');layout=QVBoxLayout(content);layout.setContentsMargins(4,5,4,5);layout.setSpacing(8)
         top=QHBoxLayout();self.detail_brand=BrandIcon(d.brand,d.kind);top.addWidget(self.detail_brand);titles=QVBoxLayout();name=label(d.name,14,bold=True);self.detail_title=name;name.setWordWrap(True);titles.addWidget(name);top.addLayout(titles,1);layout.addLayout(top)
         if d.power_mode!='wired' and d.kind!='auxiliary':
-            history_jump=QPushButton('电量历史');history_jump.setToolTip('查看近 24 小时电量与电压趋势')
+            history_jump=QPushButton('电量历史');history_jump.setToolTip('查看近 7 天电量与电压趋势')
             history_jump.clicked.connect(lambda:self.detail.ensureWidgetVisible(self.history_chart,0,6));top.addWidget(history_jump)
         self.detail_labels={}
         grid=QGridLayout();grid.setHorizontalSpacing(18);grid.setVerticalSpacing(7)
@@ -592,13 +600,17 @@ class Flyout(QWidget):
         grid.setColumnStretch(1,1);layout.addLayout(grid)
         note=label(d.note,11,True);self.detail_note=note;note.setWordWrap(True);layout.addWidget(note)
         from history_chart import HistoryChart
-        self.history_chart=HistoryChart();self.history_chart.set_samples(self.history.samples(key));layout.addWidget(self.history_chart)
-        history_note=label('本地保存 24 小时 · 每 5 分钟最多一个点\n续航按连续在线放电趋势估算；电池健康与内阻暂不可测。',10,True)
+        self.history_chart=HistoryChart();self.history_chart.set_samples(self.history_rows(d));layout.addWidget(self.history_chart)
+        history_note=label('本地保存 7 天 · 每 5 分钟最多一个图表点\n使用时长按有效放电在线间隔累计，包含设备在线待机。',10,True)
         history_note.setWordWrap(True);layout.addWidget(history_note)
         history_actions=QHBoxLayout()
         export_history=QPushButton('导出此设备历史');export_history.clicked.connect(lambda:self.export_history(d));history_actions.addWidget(export_history)
         clear_history=QPushButton('清空历史');clear_history.clicked.connect(lambda:self.clear_history(d.key));history_actions.addWidget(clear_history)
         layout.addLayout(history_actions)
+        if d.kind!='auxiliary' and d.power_mode!='wired':
+            recheck=QPushButton('重查此设备')
+            recheck.clicked.connect(lambda:self.deviceRefreshRequested.emit(d.identity))
+            layout.addWidget(recheck)
         from catalog import brands
         brand_choice=QComboBox();brand_choice.addItem('品牌：自动识别','')
         for info in brands():brand_choice.addItem(info['zh']+' / '+info['name'],info['id'])
@@ -606,10 +618,15 @@ class Flyout(QWidget):
         brand_choice.currentIndexChanged.connect(lambda:self.assign_brand(d,brand_choice.currentData()));layout.addWidget(brand_choice)
         mode_choice=QComboBox();mode_choice.setObjectName('deviceMode');mode_choice.setAccessibleName('连接与供电方式')
         for title,value in [('供电：自动识别',''),('有线供电 / 无电池','wired'),('电池设备（有线或无线）','battery')]:mode_choice.addItem(title,value)
-        mode_choice.setCurrentIndex(max(0,mode_choice.findData(self.preferences.get('device_modes',{}).get(d.key,''))))
+        mode_choice.setCurrentIndex(max(0,mode_choice.findData(device_mode(d,self.devices,self.preferences) or '')))
         mode_choice.setEnabled(d.kind!='auxiliary' and ':paired:' not in d.key)
         mode_choice.setToolTip('无法自动确认时，可指定此设备的供电类型。选择自动识别可恢复。')
         mode_choice.currentIndexChanged.connect(lambda:self.assign_mode(d,mode_choice.currentData()));layout.addWidget(mode_choice)
+        links=link_candidates(d,self.devices,self.preferences)
+        if links:
+            link=QPushButton('关联此设备的另一连接');link.clicked.connect(lambda:self.link_device(d));layout.addWidget(link)
+        if d.key in self.preferences.get('device_links',{}):
+            unlink=QPushButton('解除此接口的手动关联');unlink.clicked.connect(lambda:self.link_device(d,unlink=True));layout.addWidget(unlink)
         pin=QPushButton('在托盘固定此设备');pin.clicked.connect(lambda:self.pin_device(d.key));layout.addWidget(pin)
         self.pin_button=pin
         pin.setEnabled(d.power_mode!='wired' and d.kind!='auxiliary')
@@ -621,7 +638,9 @@ class Flyout(QWidget):
         if self.isVisible():self.resize_for_content()
 
     def detail_values(self,d):
-        estimate=self.history.estimate(d)
+        from history import duration_text
+        keys=self.history_keys(d)
+        estimate=self.history.estimate(d,related=tuple(key for key in keys if key!=d.key))
         last=(('约' if d.approximate else '')+f'{d.last_percent}%' if d.last_percent is not None else d.last_battery_grade)
         last_text=(last+' · '+d.last_read_time+' · 非实时') if last and d.last_observed_at else '暂无'
         battery_stamp=d.observed_at if d.usable or d.fresh_grade else d.last_observed_at
@@ -634,11 +653,22 @@ class Flyout(QWidget):
                 ('USB 标识',f'{d.vid:04X}:{d.pid:04X}'),('固件信息',d.firmware or '未提供'),
                 ('电量精度',d.approximate or ('分档电量，非百分比' if d.display_grade else '设备报告值' if d.percent is not None else '未知')),
                 ('当前电压',f'{d.voltage_mv} mV' if d.usable and d.voltage_mv is not None else '设备未提供' if d.usable else '暂无有效读数'),
-                ('放电速率',estimate.rate_text),('预计剩余',estimate.remaining_text),('估算依据',estimate.reason),
+                ('7 天放电在线',duration_text(estimate.active_seconds) if estimate.active_seconds else '暂无有效时长'),
+                ('放电速率',estimate.rate_text),('预计剩余使用',estimate.remaining_text),('估算依据',estimate.reason),
                 ('上次有效值',last_text)]
 
+    def history_keys(self,d):
+        keys=related_keys(d,self.devices,self.preferences)
+        return tuple(key for key in keys if key==d.key or key in self.history.series)
+
+    def history_rows(self,d):
+        return self.history.combined_samples(self.history_keys(d))
+
     def clear_history(self,key):
-        try:self.history.forget(key);self.show_detail(key)
+        device=next((d for d in self.devices if d.key==key),None)
+        try:
+            self.history.forget_many(self.history_keys(device) if device else (key,))
+            self.show_detail(key)
         except OSError as error:self.statusline.setText('历史清理失败');self.statusline.setToolTip(str(error))
 
     def export_history(self,d):
@@ -647,8 +677,8 @@ class Flyout(QWidget):
         path,_=QFileDialog.getSaveFileName(self,'导出设备历史','设备电量历史.json','JSON (*.json)')
         if path:
             try:
-                atomic_json(path,{'version':1,'device':{'name':d.name,'brand':d.brand},'interval_seconds':300,
-                    'samples':self.history.samples(d.key),'note':'仅包含真实采样，不表示电池健康或内阻。'})
+                atomic_json(path,{'version':2,'retention_days':7,'device':{'name':d.name,'brand':d.brand},'interval_seconds':300,
+                    'samples':self.history_rows(d),'note':'usage 按连接和来源汇总，依次为在线放电秒数、净下降百分点、下降次数。'})
                 self.statusline.setText('设备历史已导出')
             except OSError as error:self.statusline.setText('历史导出失败');self.statusline.setToolTip(str(error))
 
@@ -660,8 +690,11 @@ class Flyout(QWidget):
 
     def assign_mode(self,d,mode):
         modes=dict(self.preferences.get('device_modes',{}))
-        if mode:modes[d.key]=mode
-        else:modes.pop(d.key,None)
+        keys=related_keys(d,self.devices,self.preferences)
+        for key in keys:
+            modes.pop(key,None)
+        if mode:
+            modes[keys[0]]=mode
         self.preferences.set('device_modes',modes);self.preferencesChanged.emit();self.refreshRequested.emit()
 
     def change_interval(self, seconds):
@@ -671,7 +704,50 @@ class Flyout(QWidget):
         self.refresh_choice.setText(f'{seconds} 秒')
         self.preferencesChanged.emit()
 
-    def pin_device(self,key):self.preferences.set('pinned_key',key);self.preferencesChanged.emit()
+    def link_device(self,d,unlink=False):
+        from PySide6.QtWidgets import QInputDialog
+        from uuid import uuid4
+        links=dict(self.preferences.get('device_links',{}))
+        changes={'device_links':links}
+        if unlink:
+            links.pop(d.key,None)
+        else:
+            candidates=link_candidates(d,self.devices,self.preferences)
+            choices={f'{item.name} · {item.transport} · {item.vid:04X}:{item.pid:04X} · {item.key[-6:]}':item
+                     for item in candidates}
+            if not choices:
+                return
+            previous=self.menu_open
+            self.menu_open=True
+            try:
+                value,ok=QInputDialog.getItem(self,'关联同一台设备','选择同一台实物的另一连接',list(choices),0,False)
+            finally:
+                self.menu_open=previous
+            if not ok:
+                return
+            other=choices[value]
+            left=related_keys(d,self.devices,self.preferences)
+            right=related_keys(other,self.devices,self.preferences)
+            group=links.get(d.key) or links.get(other.key) or 'linked:'+uuid4().hex[:24]
+            endpoint_keys={item.key for item in self.devices}
+            keys=tuple(dict.fromkeys((*left,*right)))
+            links.update((key,group) for key in keys if key in endpoint_keys or key in links)
+            old_pin=self.preferences.get('pinned_key','')
+            if old_pin in keys:
+                changes['pinned_key']=group
+            modes=dict(self.preferences.get('device_modes',{}))
+            values={modes[key] for key in keys if key in modes}
+            if len(values)==1:
+                modes[group]=values.pop()
+                changes['device_modes']=modes
+        self.preferences.set_many(changes)
+        self.detail_key=''
+        self.preferencesChanged.emit();self.refreshRequested.emit()
+
+    def pin_device(self,key):
+        d=next((d for d in self.devices if d.key==key),None)
+        pinned=related_keys(d,self.devices,self.preferences)[0] if d else key
+        self.preferences.set('pinned_key',pinned);self.preferencesChanged.emit()
 
     def hide_device(self,key):
         self.preferences.set('hidden',sorted(set(self.preferences.get('hidden',[]))|{key}));self.go_back();self.preferencesChanged.emit()

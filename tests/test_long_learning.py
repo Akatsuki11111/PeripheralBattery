@@ -62,8 +62,10 @@ class LongLearningTests(unittest.TestCase):
         nova=Device('nova','SteelSeries','Nova 5',vid=0x1038,pid=0x2232,receiver=True,connected=False,battery_support='supported')
         unknown=Device('unknown','NuPhy','Halo',vid=0x19f5,pid=0x3247,receiver=True)
         self.assertEqual(research_devices([nova,unknown]),[unknown])
-        self.assertEqual(research_devices([replace(nova,connected=True),unknown]),[unknown])
-        self.assertIn(replace(nova,connected=True),research_devices([replace(nova,connected=True)],True))
+        live=replace(nova,connected=True,percent=71,observed_at=self.now)
+        self.assertEqual(research_devices([live,unknown]),[unknown])
+        self.assertIn(live,research_devices([live],True))
+        self.assertIn(replace(nova,connected=True),research_devices([replace(nova,connected=True)]))
         self.assertFalse(research_devices([nova],True))
 
     def test_inactive_mouse_keeps_last_value_and_time_without_live_side_effects(self):

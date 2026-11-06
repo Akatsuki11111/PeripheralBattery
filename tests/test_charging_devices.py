@@ -3,7 +3,7 @@ from dataclasses import replace
 sys.path.insert(0,'outputs/PeripheralBattery')
 from protocols import parse_nova5_usb
 from models import Device
-from catalog import visible_devices,device_profile
+from catalog import visible_devices,device_profile,related_keys,device_mode
 
 class ChargingTests(unittest.TestCase):
  def setUp(self):
@@ -14,6 +14,21 @@ class ChargingTests(unittest.TestCase):
   self.assertEqual(parse_nova5_usb([0xb0,2,2,57,1]+[0]*11),(True,57,True,''))
   for data in ([0xb0,2,2,255,1]+[0]*11,[0xb0,2,2,57,9]+[0]*11,[0]*16):
    with self.assertRaises(ValueError):parse_nova5_usb(data)
+ def test_nova_receiver_stays_hidden_during_enum_and_failed_reads(self):
+  pending=replace(self.radio,connected=None,confidence='unknown')
+  self.assertEqual(visible_devices([pending,self.radio],{}),[])
+  self.assertEqual(visible_devices([pending],{'show_offline':True}),[pending])
+  online=replace(self.radio,connected=True,percent=26)
+  self.assertEqual(visible_devices([online],{}),[online])
+ def test_atk_cable_hides_only_inactive_matching_receiver(self):
+  cable=replace(self.cable,brand='ATK',kind='mouse',vid=0x373b,pid=0x129e,charging=False)
+  radio=replace(cable,key='radio',pid=0x124f,receiver=True,connected=False,percent=None,
+                protocol_model_id=0x129e,last_percent=86,last_observed_at=cable.observed_at)
+  self.assertEqual(visible_devices([radio,cable],{}),[cable])
+  other=replace(radio,protocol_model_id=1)
+  self.assertEqual(len(visible_devices([other,cable],{})),2)
+  active=replace(radio,connected=True,percent=85)
+  self.assertEqual(len(visible_devices([active,cable],{})),2)
  def test_device_profile(self):self.assertEqual(device_profile(0x1038,0x2230)['backend'],'nova5_usb')
  def test_offline_receiver_collapses_even_show_offline(self):
   self.assertEqual(visible_devices([self.radio,self.cable],{'show_offline':True}),[self.cable])
@@ -32,6 +47,27 @@ class ChargingTests(unittest.TestCase):
   self.assertEqual(visible_devices([rx,usb],{'show_offline':True}),[usb])
   self.assertEqual(len(visible_devices([replace(rx,serial_hash=''),usb],{'show_offline':True})),2)
   self.assertEqual(len(visible_devices([replace(rx,serial_hash='different'),usb],{'show_offline':True})),2)
+ def test_viper_charge_hides_cached_or_unconfirmed_receiver(self):
+  usb=replace(self.cable,brand='Razer',name='Razer Viper V3 Pro',kind='mouse',vid=0x1532,pid=0x00C0)
+  rx=replace(self.radio,brand=usb.brand,name=usb.name,kind=usb.kind,vid=0x1532,pid=0x00C1,
+             last_percent=56,last_observed_at=usb.observed_at)
+  for connection in (False,None):
+   self.assertEqual(visible_devices([replace(rx,connected=connection),usb],{}),[usb])
+  self.assertEqual(visible_devices([rx],{}),[rx])
+  other=replace(usb,key='second',charging=False)
+  self.assertEqual(len(visible_devices([rx,usb,other],{})),3)
+  other_rx=replace(rx,key='second-receiver',connected=True,percent=72,charging=False)
+  self.assertEqual(len(visible_devices([rx,usb,other_rx],{})),3)
+ def test_linked_endpoints_share_preference_and_preserve_distinct_same_model_devices(self):
+  cable=replace(self.cable,brand='Rapoo',kind='mouse',vid=0x24ae,pid=0x46a7,serial_hash='mouse-a')
+  radio=replace(cable,key='radio',pid=0x14a7,receiver=True,charging=False)
+  other=replace(radio,key='other',serial_hash='mouse-b',percent=82)
+  self.assertEqual(visible_devices([cable,radio,other],{}),[cable,other])
+  self.assertEqual(set(related_keys(radio,[cable,radio,other],{})[1:]),{'usb','radio'})
+  self.assertEqual(device_mode(radio,[cable,radio,other],{'device_modes':{'usb':'battery'}}),'battery')
+  collision=replace(other,serial_hash='mouse-a')
+  self.assertEqual(set(related_keys(radio,[cable,radio,collision],{})),{'radio'})
+
  def test_unplug_or_noncharging_does_not_merge(self):
   for usb in (replace(self.cable,present=False),replace(self.cable,charging=False),replace(self.cable,observed_at=0)):
    self.assertIn(self.radio,visible_devices([self.radio,usb],{'show_offline':True}))

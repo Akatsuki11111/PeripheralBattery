@@ -2,7 +2,7 @@ from dataclasses import replace
 import json,tempfile,time,unittest
 from pathlib import Path
 from unittest.mock import patch
-from history import HistoryStore,MAX_POINTS
+from history import HistoryStore,MAX_POINTS,RETENTION
 from models import Device
 from protocols import parse_nordic52
 from worker import probe
@@ -16,15 +16,19 @@ class HistoryTests(unittest.TestCase):
     def device(self,at,percent=70,**changes):
         return replace(Device('a','ATK','Mouse',percent=percent,charging=False,connected=True,observed_at=at,
             monotonic_at=time.monotonic(),source='nordic52',voltage_mv=3800),**changes)
-    def fill(self,count=25):
+    def fill(self,count=121):
         for i in range(count):
-            at=self.now-(count-1-i)*300;self.history.record(self.device(at,90-i),at)
-        return self.device(self.now,90-(count-1))
+            at=self.now-(count-1-i)*60
+            self.history.record(self.device(at,90-i//5),at)
+        return self.device(self.now,90-(count-1)//5)
     def test_five_minute_ring_bounds_and_retention(self):
-        for i in range(1000):
-            at=self.now-(999-i)*300;self.history.record(self.device(at),at)
-        rows=self.history.samples('a',self.now);self.assertLessEqual(len(rows),288)
-        self.assertTrue(all(self.now-86400<=r['at']<=self.now for r in rows))
+        for i in range(MAX_POINTS+12):
+            at=self.now-(MAX_POINTS+11-i)*300
+            self.history.record(self.device(at),at)
+        rows=self.history.samples('a',self.now)
+        self.assertEqual(len(rows),MAX_POINTS)
+        self.assertTrue(all(self.now-RETENTION<=r['at']<=self.now for r in rows))
+        self.assertGreater(self.now-rows[0]['at'],6*86400)
     def test_newest_sample_in_bucket_keeps_voltage(self):
         at=int(self.now//300)*300+1
         self.history.record(self.device(at),at);self.history.record(self.device(at+1,69,voltage_mv=3790),at+1)
@@ -41,19 +45,51 @@ class HistoryTests(unittest.TestCase):
         d=self.fill()
         for changes in ({'charging':True},{'charging':None},{'approximate':'分档'},{'connected':False}):
             self.assertIsNone(self.history.estimate(replace(d,**changes)).hours)
-        for r in self.history.series['a']:r['percent']=70
+        self.history.forget('a')
+        for i in range(121):
+            at=self.now-(120-i)*60
+            self.history.record(self.device(at,70),at)
         self.assertIsNone(self.history.estimate(replace(d,percent=70)).hours)
-    def test_disconnect_and_charging_switch_reset_discharge_segment(self):
+    def test_disconnect_preserves_previous_usage_without_bridging_the_gap(self):
         d=self.fill();self.history.record(replace(d,connected=False,percent=None),self.now+1)
-        self.history.record(replace(d,observed_at=self.now+2),self.now+2)
-        self.assertIsNone(self.history.estimate(replace(d,observed_at=self.now+2),self.now+2).hours)
+        later=replace(d,observed_at=self.now+2)
+        self.history.record(later,self.now+2)
+        self.assertEqual(self.history.estimate(later,self.now+2).active_seconds,7200)
         self.assertTrue(self.history.samples('a',self.now+2)[-1]['break'])
+
+    def test_multiple_days_estimate_uses_online_time_and_same_transport(self):
+        start=self.now-2*86400
+        for day in range(3):
+            for minute in range(21):
+                at=start+day*86400-(20-minute)*60
+                device=self.device(at,96-day-minute//20)
+                self.history.record(device,at)
+        estimate=self.history.estimate(device,self.now)
+        self.assertEqual(estimate.active_seconds,3600)
+        self.assertEqual(estimate.rate,3)
+        self.assertEqual(estimate.hours,31)
+        self.assertIsNone(self.history.estimate(replace(device,transport='Bluetooth'),self.now).hours)
+
+    def test_legacy_rows_remain_visible_and_restart_does_not_bridge_usage(self):
+        legacy={'version':1,'devices':{'a':[{'at':self.now-600,'percent':75,'charging':False}]}}
+        self.history.path.write_text(json.dumps(legacy),encoding='utf-8')
+        restored=HistoryStore(self.history.path)
+        self.assertEqual(restored.samples('a',self.now)[0]['percent'],75)
+        device=self.device(self.now,70)
+        restored.record(device,self.now)
+        self.assertEqual(restored.estimate(device,self.now).active_seconds,0)
+        restored.end_session()
+        restored.record(replace(device,observed_at=self.now+60),self.now+60)
+        self.assertEqual(restored.estimate(device,self.now+60).active_seconds,0)
     def test_long_gap_source_change_and_large_increase_reset(self):
         d=self.fill()
         for changes in ({'observed_at':self.now+1800},{'source':'different'},{'percent':100}):
             h=HistoryStore(Path(self.tmp.name)/'new.json');h.series={'a':self.history.samples('a')}
             at=changes.get('observed_at',self.now+1);h.record(replace(d,observed_at=at,**{k:v for k,v in changes.items() if k!='observed_at'}),at)
-            self.assertIsNone(h.estimate(replace(d,observed_at=at,**{k:v for k,v in changes.items() if k!='observed_at'}),at).hours)
+            current=replace(d,observed_at=at,**{k:v for k,v in changes.items() if k!='observed_at'})
+            self.assertEqual(h.estimate(current,at).active_seconds,7200)
+            if 'source' in changes:
+                self.assertIsNone(h.estimate(current,at).hours)
     def test_roundtrip_corrupt_future_and_backwards_clock(self):
         self.fill();self.history.save(True);loaded=HistoryStore(self.history.path)
         self.assertEqual(loaded.samples('a'),self.history.samples('a'))

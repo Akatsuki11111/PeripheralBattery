@@ -35,7 +35,7 @@ class BatteryTestPanel(ResearchDrawer):
         self.heading=QLabel();self.heading.setFont(font(14));self.heading.setWordWrap(True);layout.addWidget(self.heading)
         self.text=QLabel();self.text.setWordWrap(True);layout.addWidget(self.text)
         self.choices=QComboBox();self.choices.setMinimumHeight(30);layout.addWidget(self.choices)
-        self.include_supported=QCheckBox('也验证已适配且在线的设备');layout.addWidget(self.include_supported)
+        self.include_supported=QCheckBox('也验证已有有效电量的设备');layout.addWidget(self.include_supported)
         self.include_supported.toggled.connect(self.fill_devices)
         self.disable_existing=QPushButton('停用所选设备的推测值');self.disable_existing.clicked.connect(self.disable_existing_mapping);layout.addWidget(self.disable_existing)
         self.unplug_ack=QCheckBox('已拔掉充电线，设备已开机且能正常使用');layout.addWidget(self.unplug_ack)
@@ -101,7 +101,7 @@ class BatteryTestPanel(ResearchDrawer):
     def render(self,message=''):
         if not hasattr(self,'pages'):return
         titles=['选择一台设备','先检查设备是否应答','拔线状态 · 采样三次','现在插上充电线','插线状态 · 采样三次','采样结果','已获取有效电量']
-        descriptions=['默认列出尚无有效电量的设备；有线无电池设备不参与测试。',
+        descriptions=['默认列出尚无有效电量的设备，包括连接待确认的接收器。',
           '先拔掉充电线并唤醒设备。预检无应答会停止，不进入长时间等待。',
           '锁定同一接口，间隔采样；不稳定字段会单独排除。',
           '已知充电标志会自动检测。未知报告只能记录你的插线操作，不能据此证明充电。',
@@ -125,7 +125,7 @@ class BatteryTestPanel(ResearchDrawer):
             self.summary.setText(f'插拔变化：{len(self.result["stable_changed"])} 项 · 不稳定偏移：{len(self.result["unstable_offsets"])} 项\n'
                 '短时线索不会自动变成电量。观察满 1 小时且数值实际下降，才可能得到候选。')
         self.details.setVisible(self.technical.isChecked())
-        if self.stage==0 and not self.choices.count():self.text.setText('暂无待测试设备。可验证已适配且在线的设备；休眠设备请先唤醒。')
+        if self.stage==0 and not self.choices.count():self.text.setText('暂无待测试设备。可勾选验证已有有效电量的设备，或唤醒休眠的设备后刷新。')
         self.cancel.setText('取消并关闭' if self.job else '收起')
 
     def advance(self):
@@ -154,6 +154,8 @@ class BatteryTestPanel(ResearchDrawer):
                 and (s.get('percent') is not None or s.get('battery_grade'))):
             self.job=None;self.release_scanner();self.stage=6
             reading=f'{s["percent"]}%' if s.get('percent') is not None else s['battery_grade']+'（分档）'
+            if s.get('hex'):
+                self.details.setPlainText(f"{s['length']} 字节 · {s.get('backend','已验证状态报告')}\n{s['hex']}")
             self.render(f'已读取 {s.get("name","设备")}：{reading}。'+s.get('protocol_note',''))
             self.flyout.refreshRequested.emit();return
         super().completed(job,result,generation,stage)

@@ -30,8 +30,8 @@ def prepare_update(info):
     subprocess.Popen([str(stage),'--apply-update',str(request)],creationflags=subprocess.CREATE_NO_WINDOW)
 
 
-def replace_targets(stage,targets):
-    backups=[];changed=[];nonce=uuid.uuid4().hex;success=False
+def replace_targets(stage,targets,verify_startup=None):
+    backups=[];changed=[];nonce=uuid.uuid4().hex;restored=False
     try:
         for target in targets:
             backup=target.with_name(target.name+'.'+nonce+'.bak')
@@ -46,14 +46,74 @@ def replace_targets(stage,targets):
                         if time.monotonic()>=deadline:raise
                         time.sleep(.2)
             finally:temporary.unlink(missing_ok=True)
-        success=True
+        if verify_startup is not None:
+            verify_startup()
+        restored=True
     except Exception:
         for target,backup in reversed(backups):
-            if target in changed:os.replace(backup,target)
+            if target in changed:
+                deadline=time.monotonic()+15
+                while True:
+                    try:
+                        os.replace(backup,target)
+                        break
+                    except OSError:
+                        if time.monotonic()>=deadline:
+                            raise
+                        time.sleep(.2)
+        restored=True
         raise
     finally:
-        if success:
-            for _,backup in backups:backup.unlink(missing_ok=True)
+        if restored:
+            for _,backup in backups:
+                try:backup.unlink(missing_ok=True)
+                except OSError:pass
+
+
+def ready_marker(nonce):
+    if not re.fullmatch(r'[a-f0-9]{32}',nonce):
+        raise ValueError('更新启动确认标识无效')
+    return data_dir()/'updates'/(nonce+'.ready.json')
+
+
+def mark_ready(nonce,version):
+    marker=ready_marker(nonce)
+    request=read_json(marker.with_name(nonce+'.install.json'),{},20000)
+    if (not getattr(sys,'frozen',False) or request.get('download',{}).get('version')!='v'+version
+            or Path(request.get('origin','')).resolve()!=Path(sys.executable).resolve()):
+        return False
+    atomic_json(marker,{'nonce':nonce,'version':'v'+version,'pid':os.getpid()})
+    return True
+
+
+def launch_for_verification(origin,nonce,version):
+    from process_tree import ProcessTree
+    marker=ready_marker(nonce);marker.unlink(missing_ok=True)
+    tree=ProcessTree(nonce,kill_on_close=False)
+    child=None
+    try:
+        env={**os.environ,'PB_WORKER_JOB':tree.name,'PYINSTALLER_RESET_ENVIRONMENT':'1'}
+        child=subprocess.Popen([str(origin),'--update-ready',nonce],env=env,
+                               creationflags=subprocess.CREATE_NO_WINDOW)
+        tree.attach_pid(child.pid)
+        deadline=time.monotonic()+45
+        while time.monotonic()<deadline:
+            if child.poll() is not None:
+                raise OSError('新版在托盘就绪前退出，已尝试恢复旧版')
+            reply=read_json(marker,{},4096)
+            if reply.get('nonce')==nonce and reply.get('version')==version:
+                return
+            time.sleep(.15)
+        raise TimeoutError('新版启动确认超时，已尝试恢复旧版')
+    except Exception:
+        if child is not None:
+            try:tree.terminate()
+            finally:child.wait(timeout=12)
+        raise
+    finally:
+        tree.close()
+        try:marker.unlink(missing_ok=True)
+        except OSError:pass
 
 
 def apply_update(request_file):
@@ -74,11 +134,15 @@ def apply_update(request_file):
             finally:kernel.CloseHandle(handle)
         targets=[origin];installed=(data_dir()/'bin/PeripheralBattery.exe').resolve()
         if installed!=origin and installed.is_file():targets.append(installed)
-        replace_targets(stage,targets)
-        atomic_json(root/'last-result.json',{'ok':True,'version':info['download'].get('version'),'at':time.time()})
-        subprocess.Popen([str(origin)],creationflags=subprocess.CREATE_NO_WINDOW);return 0
+        version=info['download']['version']
+        nonce=request.name.split('.')[0]
+        replace_targets(stage,targets,lambda:launch_for_verification(origin,nonce,version))
+        atomic_json(root/'last-result.json',{'ok':True,'version':version,'at':time.time()})
+        return 0
     except Exception as error:
         atomic_json(root/'last-result.json',{'ok':False,'message':str(error)[:500],'at':time.time()})
-        if origin and origin.is_file():subprocess.Popen([str(origin)],creationflags=subprocess.CREATE_NO_WINDOW)
+        if origin and origin.is_file():
+            subprocess.Popen([str(origin)],creationflags=subprocess.CREATE_NO_WINDOW,
+                             env={**os.environ,'PYINSTALLER_RESET_ENVIRONMENT':'1'})
         return 1
     finally:request.unlink(missing_ok=True)

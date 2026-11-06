@@ -80,42 +80,112 @@ def backend_for(vid, pid, name=''):
     return ''
 
 
-def coalesce_charging_devices(devices, preferences):
-    """Hide a confirmed duplicate endpoint without combining its battery data.
+# Exact cable/receiver identities whose two USB nodes can represent one device.
+_CHARGING_ENDPOINTS = {
+    (0x1038, 0x2230): (0x1038, 0x2232),  # Arctis Nova 5
+    (0x1532, 0x00C0): (0x1532, 0x00C1),  # Viper V3 Pro
+    (0x24AE, 0x46A7): (0x24AE, 0x14A7),  # Rapoo VT7 PRO V2
+}
 
-    Identical names alone do not identify a physical device. Allow the locally
-    verified Nova 5 pair only when there is exactly one of each and the cable
-    reports charging; an online receiver must agree with its battery status.
-    Other devices require the same reliable hardware serial and agreement.
-    """
-    hidden=set(preferences.get('hidden',[]))
-    items=list(devices)
-    receivers=[d for d in items if d.present and d.receiver and d.key not in hidden]
-    cables=[d for d in items if d.present and not d.receiver and d.key not in hidden and d.usable and d.charging is True]
-    drop=set()
+
+def _charging_pair(cable, receiver):
+    if (cable.brand, cable.kind) != (receiver.brand, receiver.kind):
+        return False
+    if (cable.vid,cable.pid,receiver.vid,receiver.pid)==(0x373b,0x129e,0x373b,0x124f):
+        return (receiver.protocol_model_id == 0x129e or
+                receiver.protocol_model_id is None and receiver.connected is not True and not receiver.cached)
+    return (bool(cable.serial_hash and cable.serial_hash == receiver.serial_hash) or
+            _CHARGING_ENDPOINTS.get((cable.vid, cable.pid)) == (receiver.vid, receiver.pid))
+
+
+def coalesce_charging_devices(devices, preferences):
+    """Prefer a verified USB reading over an inactive duplicate receiver."""
+    hidden = set(preferences.get('hidden', []))
+    items = list(devices)
+    present = [d for d in items if d.present and d.key not in hidden]
+    receivers = [d for d in present if d.receiver]
+    cables = [d for d in present if not d.receiver]
+    drop = set()
     for cable in cables:
-        candidates=[]
-        for receiver in receivers:
-            if receiver.brand!=cable.brand or receiver.kind!=cable.kind:continue
-            serial_match=bool(cable.serial_hash and cable.serial_hash==receiver.serial_hash)
-            nova_pair=(cable.vid,cable.pid,receiver.vid,receiver.pid)==(0x1038,0x2230,0x1038,0x2232)
-            if not (serial_match or nova_pair):continue
-            if receiver.connected is not False and not (receiver.usable and receiver.charging is True and receiver.percent==cable.percent):continue
-            candidates.append(receiver)
-        if len(candidates)!=1:continue
-        receiver=candidates[0]
-        matching_cables=[d for d in cables if d.brand==cable.brand and d.kind==cable.kind and
-                         ((d.serial_hash and d.serial_hash==receiver.serial_hash) or
-                          (d.vid,d.pid,receiver.vid,receiver.pid)==(0x1038,0x2230,0x1038,0x2232))]
-        if len(matching_cables)==1:drop.add(receiver.key)
+        if not cable.usable or cable.charging is not True and (cable.vid,cable.pid)!=(0x373b,0x129e):
+            continue
+        candidates = [r for r in receivers if _charging_pair(cable, r)]
+        if len(candidates) != 1:
+            continue
+        receiver = candidates[0]
+        if receiver.connected is True and not (receiver.usable and receiver.charging is True
+                                               and receiver.percent == cable.percent):
+            continue
+        if sum(_charging_pair(d, receiver) for d in cables) == 1:
+            drop.add(receiver.key)
     return [d for d in items if d.key not in drop]
+
+
+def endpoint_type(device):
+    if 'bluetooth' in device.transport.casefold():
+        return 'bluetooth'
+    return 'radio' if device.receiver else 'usb'
+
+
+def physical_key(device, devices, preferences):
+    explicit=preferences.get('device_links',{}).get(device.key)
+    if explicit:
+        return explicit
+    if device.brand=='Unknown' or not device.serial_hash or ':paired:' in device.key:
+        return device.key
+    match=lambda other: (other.brand,other.kind,other.serial_hash)==(device.brand,device.kind,device.serial_hash)
+    routes=[endpoint_type(other) for other in devices if match(other)]
+    if len(set(routes)) != len(routes):
+        return device.key
+    return 'serial:'+device.brand+':'+device.kind+':'+device.serial_hash
+
+
+def related_keys(device, devices, preferences):
+    logical=physical_key(device,devices,preferences)
+    keys=[logical,device.key]
+    keys.extend(other.key for other in devices if physical_key(other,devices,preferences)==logical)
+    keys.extend(key for key,group in preferences.get('device_links',{}).items() if group==logical)
+    return tuple(dict.fromkeys(keys))
+
+
+def link_candidates(device, devices, preferences):
+    keys=set(related_keys(device,devices,preferences))
+    routes={endpoint_type(d) for d in devices if d.key in keys}
+    routes.add(endpoint_type(device))
+    return [d for d in devices if d.key not in keys and d.brand==device.brand and d.kind==device.kind
+            and d.brand!='Unknown' and ':paired:' not in d.key and endpoint_type(d) not in routes
+            and (d.name.casefold()==device.name.casefold() or _charging_pair(device,d) or _charging_pair(d,device))
+            and not any(endpoint_type(member) in routes for member in devices
+                        if member.key in related_keys(d,devices,preferences))]
+
+
+def device_mode(device, devices, preferences):
+    modes=preferences.get('device_modes',{})
+    keys=related_keys(device,devices,preferences)
+    explicit=modes.get(keys[0]) or modes.get(device.key)
+    if explicit:
+        return explicit
+    values={modes[k] for k in keys if k in modes}
+    return next(iter(values)) if len(values)==1 else None
 
 
 def visible_devices(devices, preferences):
     hidden = set(preferences.get('hidden',[]))
     show_offline = preferences.get('show_offline',False)
-    return [d for d in coalesce_charging_devices(devices,preferences) if d.key not in hidden and
+    devices=list(devices)
+    visible=[d for d in coalesce_charging_devices(devices,preferences) if d.key not in hidden and
             d.present and
             (d.kind!='auxiliary' or preferences.get('show_auxiliary',False)) and
             (d.kind in ('auxiliary','gamepad') or d.power_mode in ('wired','battery') or d.battery_support=='supported' or d.receiver or d.usb_keyboard or d.usable or d.experimental or preferences.get('show_unreadable',False)) and
+            (show_offline or not (d.receiver and (d.vid,d.pid) in ((0x1038,0x2232),(0x1038,0x2253))
+                                  and d.connected is not True)) and
             (show_offline or d.connected is not False or d.kind in ('mouse','gamepad') and d.cached)]
+    selected={}
+    def priority(device):
+        return (device.usable or device.fresh_grade,device.charging is True,
+                device.connected is True,device.cached,device.observed_at)
+    for device in visible:
+        key=physical_key(device,devices,preferences)
+        if key not in selected or priority(device)>priority(selected[key]):
+            selected[key]=device
+    return list(selected.values())

@@ -1,4 +1,5 @@
 import os,time,tempfile,unittest
+from dataclasses import replace
 os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
 from pathlib import Path
 from types import SimpleNamespace
@@ -40,6 +41,27 @@ class BatteryPanelTests(unittest.TestCase):
         b=self.flyout.update_button.mapTo(self.flyout,self.flyout.update_button.rect().topLeft())
         self.assertLess(a.x(),b.x());self.assertLess(abs(a.y()-b.y()),12)
 
+    def test_rapoo_pending_connection_is_selectable_and_survives_refresh(self):
+        radio=Device('rapoo','Rapoo','VT7 PRO V2',identity='b'*24,vid=0x24ae,pid=0x14a7,
+                     receiver=True,battery_support='supported',connected=None,confidence='unknown',
+                     last_percent=84,last_observed_at=time.time())
+        self.flyout.devices.append(radio)
+        self.scanner.inventory.append(dict(device=radio.to_dict(),infos=[],backend='rapoo_vt7_pro_v2'))
+        self.panel.fill_devices()
+        self.panel.choices.setCurrentIndex(self.panel.choices.findData(radio.identity))
+        self.scanner.inventory.reverse()
+        self.panel.fill_devices()
+        self.assertEqual(self.panel.choices.currentData(),radio.identity)
+        self.assertTrue(self.panel.next.isEnabled())
+        self.flyout.devices[-1]=replace(radio,connected=True,percent=84,confidence='confirmed',observed_at=time.time())
+        self.panel.fill_devices()
+        self.assertEqual(self.panel.choices.currentData(),radio.identity)
+        self.panel.choices.setCurrentIndex(self.panel.choices.findData(self.device.identity))
+        self.panel.fill_devices()
+        self.assertEqual(self.panel.choices.findData(radio.identity),-1)
+        self.panel.include_supported.setChecked(True)
+        self.assertNotEqual(self.panel.choices.findData(radio.identity),-1)
+
     def test_precheck_requires_explicit_awake_unplugged_ack(self):
         self.panel.advance();self.assertEqual(self.panel.stage,1);self.assertFalse(self.panel.next.isEnabled())
         self.panel.unplug_ack.setChecked(True);self.assertTrue(self.panel.next.isEnabled())
@@ -49,6 +71,13 @@ class BatteryPanelTests(unittest.TestCase):
             self.panel.stage=1;self.scanner.research_active=True;job=object();self.panel.job=job;self.panel.owns_scanner=True
             self.panel.completed(job,dict(ok=True,sample=dict(name='Known',remote_confirmed=True,**reading)),self.panel.generation,1)
             self.assertEqual(self.panel.stage,6);self.assertFalse(self.scanner.research_active);self.assertTrue(self.panel.long_box.isHidden())
+
+    def test_verified_atk_sample_keeps_raw_evidence(self):
+        self.panel.stage=1;job=object();self.panel.job=job
+        sample=dict(packet(),name='ATK ZERO+',backend='atk_zero_plus',percent=86,remote_confirmed=True,protocol_verified=True)
+        self.panel.completed(job,dict(ok=True,sample=sample),self.panel.generation,1)
+        self.assertEqual(self.panel.stage,6)
+        self.assertIn(sample['hex'],self.panel.details.toPlainText())
 
     def test_no_response_stops_precheck_and_does_not_start_observing(self):
         self.panel.stage=1;job=object();self.panel.job=job

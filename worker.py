@@ -111,7 +111,32 @@ def probe(group,diagnostics=None):
                  'evidence':'用户确认的长期相关性候选；不证明远端在线','observed_at':time.time(),
                  'monotonic_at':time.monotonic(),'battery_support':'experimental',
                  'note':'实验推测，可能是慢速计数器等字段；不参与最低电量和提醒，可在观察面板停用。'}]
-    if backend=='rog_omni_mini':
+    if backend=='atk_zero_plus':
+        from atk_zero_plus import NAME, RECEIVER_NAME, USB_PID, read_status
+        status = read_status(infos, base['pid'])
+        is_zero = status.model == USB_PID or not status.online and base.get('protocol_model_id') == USB_PID
+        reading = {
+            'name': NAME if is_zero or not base['receiver'] else RECEIVER_NAME,
+            'connected': status.online, 'percent': status.percent, 'charging': status.charging,
+            'confidence': 'confirmed' if status.percent is not None else 'unknown',
+            'source': 'ATK BitMouse · 只读 HID 状态',
+            'transport': '2.4 GHz 接收器' if base['receiver'] else 'USB 有线（含电池）',
+            'evidence': '型号码 8:1 与电池应答匹配' if status.percent is not None
+                        else '接收器报告鼠标离线' if not status.online else '当前鼠标型号未适配',
+            'note': '当前接入方式下由鼠标固件报告的电量。' if status.percent is not None
+                    else '鼠标未通过接收器在线。' if not status.online else '接收器在线，但尚未验证此鼠标的电量。',
+            'observed_at': time.time(), 'monotonic_at': time.monotonic(),
+        }
+        if status.model is not None:
+            reading['protocol_model_id'] = status.model
+        return [reading]
+    if backend=='rapoo_vt7_pro_v2':
+        from rapoo_vt7_pro_v2 import read_status
+        status = read_status(infos, base['pid'])
+        records = [{'level': status.percent if status else None,
+                    'charging': status.charging if status else None,
+                    'online': status.online if status else None}]
+    elif backend=='rog_omni_mini':
         from rog_omni import query
         records=query(infos)
     elif backend in ('scyrox','nova5','nova5_usb','nordic52'):
@@ -213,7 +238,7 @@ def run(request_file):
     try:
         result={'nonce':request['nonce'],'ok':True,**execute(request)}
     except Exception as error:
-        result={'nonce':request['nonce'],'ok':False,'error':redact(f'{type(error).__name__}: {error}'),
+        result={'nonce':request['nonce'],'ok':False,'error_type':type(error).__name__,'error':redact(f'{type(error).__name__}: {error}'),
                 'user_message':redact(str(error))}
         if getattr(error,'code',None):result['error_code']=error.code
         if getattr(error,'details',None):result['feature_diagnostics']=error.details

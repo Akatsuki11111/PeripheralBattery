@@ -8,6 +8,9 @@ def server_name():
     session=ctypes.c_uint()
     ctypes.windll.kernel32.ProcessIdToSessionId(os.getpid(),ctypes.byref(session))
     identity=os.environ.get('USERDOMAIN','')+'\\'+os.environ.get('USERNAME','')
+    isolated=os.environ.get('PB_DATA_DIR')
+    if isolated:
+        identity+='|'+os.path.normcase(os.path.abspath(isolated))
     return 'PeripheralBattery.v2.'+hashlib.sha256(identity.encode()).hexdigest()[:20]+'.'+str(session.value)
 
 

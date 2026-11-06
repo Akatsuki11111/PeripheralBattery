@@ -41,6 +41,7 @@ class Device:
     last_battery_grade: str = ''
     battery_cache: bool = True
     protocol_model_id: int | None = None
+    query_state: str = ''
 
     @property
     def type_name(self):
@@ -105,6 +106,10 @@ class Device:
         if (self.percent is not None or self.battery_grade) and self.stale:
             return '读数已过期'
         if self.connected is None:
+            if self.query_state=='timeout':
+                return '查询超时' + (' · 上次 '+self.last_read_time if self.cached else '')
+            if self.query_state=='unavailable':
+                return '暂无状态应答' + (' · 上次 '+self.last_read_time if self.cached else '')
             if self.cached:return '连接待确认 · 上次 '+self.last_read_time
             if self.kind=='gamepad':return '已接入 · 电量待适配'
             if self.usb_keyboard and self.power_mode=='unknown' and not self.receiver:
@@ -131,6 +136,7 @@ class Device:
         data['battery_grade']=data.get('battery_grade') if data.get('battery_grade') in ('耗尽','低','中','高','满') and data.get('connected') is True else ''
         data['last_battery_grade']=data.get('last_battery_grade') if data.get('last_battery_grade') in ('耗尽','低','中','高','满') else ''
         data['battery_cache']=data.get('battery_cache') is not False
+        data['query_state']=data.get('query_state') if data.get('query_state') in ('timeout','unavailable') else ''
         model_id=data.get('protocol_model_id')
         data['protocol_model_id']=model_id if type(model_id) is int and 0<model_id<0xffffffff else None
         data['power_mode']=data.get('power_mode') if data.get('power_mode') in ('unknown','wired','battery') else 'unknown'

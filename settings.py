@@ -23,7 +23,7 @@ REFRESH_INTERVALS=(5,15,30,60)
 
 def probe_timeout_ms(backend):
     # Some receivers need several seconds for their read-only status exchange.
-    return {'corsair':13_000,'logitech':12_000,'razer':11_000,'lofree':9_000,'gamepad':13_000}.get(backend,6500)
+    return {'corsair':13_000,'logitech':12_000,'razer':11_000,'lofree':9_000,'gamepad':13_000,'rapoo_vt7_pro_v2':10_000}.get(backend,6500)
 
 
 def data_dir():
@@ -99,7 +99,7 @@ def redact(text):
 
 class Settings:
     DEFAULTS = {'show_offline': False, 'show_unreadable':False, 'show_auxiliary':False, 'low_notifications': True, 'low_threshold': 20,
-                'hidden': [], 'brand_overrides': {}, 'device_modes':{},'refresh_seconds':15,'autostart_requested': False,'pinned_key':'','update_prereleases':False,'desktop_mode':'off','desktop_size':'medium','desktop_position':[],'desktop_locked':False,'tray_style':'meter','theme':'system'}
+                'hidden': [], 'brand_overrides': {}, 'device_modes':{},'device_links':{},'refresh_seconds':15,'autostart_requested': False,'pinned_key':'','update_prereleases':False,'desktop_mode':'off','desktop_size':'medium','desktop_position':[],'desktop_locked':False,'tray_style':'meter','theme':'system'}
 
     def __init__(self, path=None):
         self.path = Path(path) if path else data_dir() / 'settings.json'
@@ -113,6 +113,8 @@ class Settings:
         self.value['hidden'] = [str(key)[:240] for key in self.value['hidden'][:200]]
         self.value['brand_overrides'] = {str(k)[:120]: str(v)[:80] for k, v in list(self.value['brand_overrides'].items())[:200]}
         self.value['device_modes']={str(k)[:240]:v for k,v in list(self.value['device_modes'].items())[:200] if v in ('wired','battery')}
+        self.value['device_links']={k:v for k,v in list(self.value['device_links'].items())[:200]
+                                    if 0<len(k)<=240 and isinstance(v,str) and re.fullmatch(r'linked:[0-9a-f]{24}',v)}
         if type(self.value['refresh_seconds']) is not int or self.value['refresh_seconds'] not in REFRESH_INTERVALS:self.value['refresh_seconds']=15
 
         if self.value['desktop_mode'] not in ('off','detailed','compact'):self.value['desktop_mode']='off'
@@ -126,16 +128,21 @@ class Settings:
         return self.value.get(key, default)
 
     def set(self, key, value):
-        if key not in self.DEFAULTS:
-            raise KeyError(key)
-        if key=='refresh_seconds' and (type(value) is not int or value not in REFRESH_INTERVALS):raise ValueError('刷新间隔只能为 5、15、30、60 秒')
-        if key=='desktop_mode' and value not in ('off','detailed','compact'):raise ValueError('Invalid desktop mode')
-        if key=='desktop_size' and value not in ('small','medium','large'):raise ValueError('Invalid desktop size')
-        if key=='tray_style' and value not in ('meter', 'number'):raise ValueError('Invalid tray style')
-        if key=='theme' and value not in ('system', 'light', 'dark'):raise ValueError('Invalid theme')
-        if key=='desktop_position' and (type(value) is not list or len(value)!=2 or any(type(n) is not int or abs(n)>100000 for n in value)):raise ValueError('Invalid desktop position')
-        self.value[key] = value
-        atomic_json(self.path, self.value)
+        self.set_many({key:value})
+
+    def set_many(self, updates):
+        for key,value in updates.items():
+            if key not in self.DEFAULTS:
+                raise KeyError(key)
+            if key=='refresh_seconds' and (type(value) is not int or value not in REFRESH_INTERVALS):raise ValueError('刷新间隔只能为 5、15、30、60 秒')
+            if key=='desktop_mode' and value not in ('off','detailed','compact'):raise ValueError('Invalid desktop mode')
+            if key=='desktop_size' and value not in ('small','medium','large'):raise ValueError('Invalid desktop size')
+            if key=='tray_style' and value not in ('meter', 'number'):raise ValueError('Invalid tray style')
+            if key=='theme' and value not in ('system', 'light', 'dark'):raise ValueError('Invalid theme')
+            if key=='desktop_position' and (type(value) is not list or len(value)!=2 or any(type(n) is not int or abs(n)>100000 for n in value)):raise ValueError('Invalid desktop position')
+        updated={**self.value,**updates}
+        atomic_json(self.path,updated)
+        self.value=updated
 
 
 class DeviceStore:
@@ -202,6 +209,10 @@ class DeviceStore:
             if previous:
                 if (device.vid,device.pid)==(0x3151,0x5045):
                     device=replace(device,protocol_model_id=previous.protocol_model_id)
+                if (device.vid,device.pid)==(0x373b,0x124f) and previous.present:
+                    device=replace(device,protocol_model_id=previous.protocol_model_id)
+                    if previous.protocol_model_id==0x129e:
+                        device=replace(device,name=previous.name)
                 if ((device.vid,device.pid)==(0x3151,0x5045) and previous.present and
                         previous.source.startswith('RY F7') and previous.brand=='VALKYRIE'):
                     device=replace(device,brand=previous.brand,name=previous.name)
@@ -210,6 +221,9 @@ class DeviceStore:
                                  last_battery_grade=previous.last_battery_grade,
                                  last_observed_at=previous.last_observed_at,
                                  approximate=previous.approximate if device.percent is None else device.approximate)
+                if device.connected is None and previous.present and (previous.connected is False or previous.query_state):
+                    device=replace(device,connected=previous.connected,query_state=previous.query_state,
+                                   note=previous.note,source=previous.source)
                 if (device.percent is None and device.connected is None and previous.present and device.battery_cache and previous.battery_cache and
                         (previous.usable or previous.fresh_grade or EXPERIMENTAL_ENABLED and previous.experimental) and time.time()-previous.observed_at<90):
                     device=replace(device,percent=previous.percent,connected=previous.connected,charging=previous.charging,

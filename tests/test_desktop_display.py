@@ -3,7 +3,7 @@ os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
 from pathlib import Path
 from dataclasses import replace
 from unittest.mock import patch
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication,QComboBox
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
 from settings import Settings
@@ -64,8 +64,17 @@ class FooterTests(unittest.TestCase):
    card=f.cards['usb'];self.assertFalse(card.power_row.isHidden())
    QTest.mouseClick(card.power_buttons['wired'],Qt.MouseButton.LeftButton);app.processEvents()
    self.assertEqual(prefs.get('device_modes')['usb'],'wired');self.assertIsNone(f.selected);self.assertEqual(f.cards['usb'].d.reading_text,'有线')
+   self.assertTrue(card.power_row.isHidden());self.assertTrue(card.bar.isHidden())
+   f.show_detail('usb')
+   mode=f.detail.widget().findChild(QComboBox,'deviceMode')
+   self.assertEqual(mode.currentData(),'wired')
+   mode.setCurrentIndex(mode.findData(''))
+   f.go_back();app.processEvents()
+   self.assertFalse(card.power_row.isHidden())
    QTest.mouseClick(card.power_buttons['battery'],Qt.MouseButton.LeftButton);app.processEvents()
-   self.assertEqual(prefs.get('device_modes')['usb'],'battery');self.assertFalse(card.power_row.isHidden());self.assertIsNone(f.selected)
+   self.assertEqual(prefs.get('device_modes')['usb'],'battery');self.assertIsNone(f.selected)
+   self.assertTrue(card.power_row.isHidden());self.assertFalse(card.bar.isHidden())
+   self.assertEqual(card.value_label.text(),'—');self.assertIn('电量未知',card.status_label.text())
    actions = (f.toggle, f.refresh_choice, f.desktop_button, f.test_button, f.update_button, f.theme_button)
    self.assertEqual(len({button.geometry().center().y() for button in actions}), 1)
    self.assertTrue(all(left.geometry().right() < right.geometry().left() for left, right in zip(actions, actions[1:])))

@@ -1,10 +1,10 @@
 """Nonmodal, bounded guided research for verified status channels."""
 import time
-from PySide6.QtCore import Qt,QTimer
+from PySide6.QtCore import Qt,QTimer,QSignalBlocker
 from PySide6.QtWidgets import (QDialog,QVBoxLayout,QHBoxLayout,QLabel,QPushButton,QComboBox,QProgressBar,QPlainTextEdit,QCheckBox,QFileDialog)
 from jobs import WorkerJob
 from research import compare,research_devices
-from settings import atomic_json,data_dir,read_json,VERSION
+from settings import atomic_json,data_dir,read_json,VERSION,probe_timeout_ms
 import json
 
 class ResearchDrawer(QDialog):
@@ -17,7 +17,7 @@ class ResearchDrawer(QDialog):
   layout=QVBoxLayout(self);self.heading=QLabel();self.heading.setWordWrap(True);layout.addWidget(self.heading)
   self.text=QLabel();self.text.setWordWrap(True);layout.addWidget(self.text)
   self.choices=QComboBox();layout.addWidget(self.choices)
-  self.include_supported=QCheckBox('显示在线的已适配设备（仅用于验证实验）');layout.addWidget(self.include_supported)
+  self.include_supported=QCheckBox('也验证已有有效电量的设备');layout.addWidget(self.include_supported)
   self.include_supported.toggled.connect(lambda:self.fill_devices())
   self.progress=QProgressBar();self.progress.setRange(0,3);layout.addWidget(self.progress)
   self.details=QPlainTextEdit();self.details.setReadOnly(True);layout.addWidget(self.details,1)
@@ -29,10 +29,20 @@ class ResearchDrawer(QDialog):
   layout.addLayout(row);self.back.clicked.connect(self.previous);self.next.clicked.connect(self.advance);self.reject_button.clicked.connect(self.next_candidate);self.cancel.clicked.connect(self.close)
   self.fill_devices();self.choices.currentIndexChanged.connect(self.show_topology);self.render();self.show_topology()
  def fill_devices(self):
-  self.choices.clear();snapshot={d.identity:d for d in research_devices(self.flyout.devices,self.include_supported.isChecked())}
-  for group in self.controller.inventory:
-   d=snapshot.get(group['device'].get('identity'))
-   if d:self.choices.addItem(f'{d.brand if d.brand!="Unknown" else "品牌待识别"} · {d.name}  {d.vid:04X}:{d.pid:04X}',d.identity)
+  selected=self.choices.currentData()
+  devices=self.flyout.devices
+  eligible=research_devices(devices,self.include_supported.isChecked())
+  snapshot={d.identity:d for d in eligible}
+  if selected and selected not in snapshot:
+   snapshot.update((d.identity,d) for d in research_devices(
+       [d for d in devices if d.identity==selected],include_supported=True))
+  with QSignalBlocker(self.choices):
+   self.choices.clear()
+   for group in self.controller.inventory:
+    d=snapshot.get(group['device'].get('identity'))
+    if d:self.choices.addItem(f'{d.brand if d.brand!="Unknown" else "品牌待识别"} · {d.name}  {d.vid:04X}:{d.pid:04X}',d.identity)
+   index=self.choices.findData(selected)
+   if index>=0:self.choices.setCurrentIndex(index)
   if hasattr(self,'next'):self.render();self.show_topology()
  def show_topology(self):
   if self.stage!=0:return
@@ -54,7 +64,7 @@ class ResearchDrawer(QDialog):
  def render(self,message=''):
   titles=['选择设备','拔电前置检查','拔电采样','插电并等待','插电采样','差分结果']
   descriptions=[
-   '列出尚未适配的设备；已适配但关机或休眠的设备不属于待适配。未知报告仅使用描述符声明的 Feature GET。',
+   '列出尚无有效电量的设备，包括连接待确认的接收器。未知报告仅使用描述符声明的 Feature GET。',
    '拔掉设备充电线并保持设备开机。先检查状态接口；未知报告有应答也不代表远端在线，需你确认设备正在使用。',
    '按同一接口采集 3 份状态报告，用于排查数据抖动。',
    '现在插上充电线；程序会等待已知协议中的充电标志翻转，最多约 45 秒。',
@@ -72,7 +82,7 @@ class ResearchDrawer(QDialog):
   self.next.setText('再次查询' if self.stage==6 else '保存证据' if self.stage==5 else '开始检查' if self.stage==1 else '开始采样' if self.stage in (2,4) else '开始等待' if self.stage==3 else '继续')
   if self.stage==3 and manual:self.next.setText('我已插线')
   self.reject_button.setVisible(self.stage==5);self.reject_button.setEnabled(bool(self.result and self.result['stable_changed']))
-  if self.stage==0 and not self.choices.count():self.text.setText('目前没有待适配设备。已适配设备休眠或关闭不会进入这个清单。')
+  if self.stage==0 and not self.choices.count():self.text.setText('暂无待测试设备。可勾选验证已有有效电量的设备，或唤醒休眠的设备后刷新。')
  def release_scanner(self):
   if self.owns_scanner:self.controller.research_active=False;self.owns_scanner=False
  def halt(self):
@@ -107,7 +117,9 @@ class ResearchDrawer(QDialog):
   self.next.setEnabled(False);self.back.setEnabled(False)
   self.diagnostic_button.setEnabled(False)
   self.text.setText('正在检查可读取的状态报告，超时会自动停止；可以随时取消。')
-  job=WorkerJob({'operation':'research-sample','identity':self.identity,'channel':self.channel},6500,self);self.job=job
+  backend=next((g.get('backend') for g in self.controller.inventory
+                if g['device'].get('identity')==self.identity),None)
+  job=WorkerJob({'operation':'research-sample','identity':self.identity,'channel':self.channel},probe_timeout_ms(backend),self);self.job=job
   job.finished.connect(lambda result:self.completed(job,result,generation,stage));job.start()
  def completed(self,job,result,generation,stage):
   if self.job is job:self.job=None
@@ -171,9 +183,13 @@ class ResearchDrawer(QDialog):
   if self.job is job:self.job=None
   if generation!=self.generation:return
   self.release_scanner();self.render()
-  if not result.get('ok'):self.render('诊断失败：'+str(result.get('user_message',result.get('error','未知错误'))));return
-  payload={k:result[k] for k in ('device','backend','interfaces','feature_diagnostics','valkyrie_candidates','scope')}
-  payload.update(version=VERSION,precheck_failure=self.last_failure)
+  payload={k:result[k] for k in ('device','backend','interfaces','feature_diagnostics','channel_summary','valkyrie_candidates','scope') if k in result}
+  if not result.get('ok'):
+   payload['inspection_error']=result.get('user_message',result.get('error','未知错误'))
+  fields=('timestamp','length','vid','pid','interface','usage_page','usage','backend','remote_confirmed','protocol_verified')
+  payload.update(version=VERSION,precheck_failure=self.last_failure,
+                 samples={phase:[{key:item[key] for key in fields if key in item} for item in samples]
+                          for phase,samples in (('before',self.before),('after',self.after))})
   self.flyout.menu_open=True
   try:path,_=QFileDialog.getSaveFileName(self,'导出设备诊断','Peripheral-HID-diagnostic.json','JSON (*.json)')
   finally:self.flyout.menu_open=False

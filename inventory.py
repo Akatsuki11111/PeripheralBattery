@@ -18,7 +18,7 @@ def classify_auxiliary(vid,pid,name,companions):
 def model_name(profile,product):
     generic=str(product).strip().casefold().replace('_','-').replace(' ','-')
     if profile and (profile.get('kind')=='gamepad' and generic.startswith('controller-(') or generic in ('wireless-receiver','wirelessreceiver','usb-keyboard','usb-mouse','wireless-mouse',
-                               '2.4g-wireless-device','2.4g-wireless-mouse','gaming-mouse','wireless-gaming-mouse','controller','wireless-controller','wireless-gamepad','gamepad','usb-gamepad','xbox-360-for-windows','xinput-controller','kp50b-dongle','hid-zkm')):
+                               '2.4g-wireless-device','2.4g-wireless-mouse','gaming-mouse','wireless-gaming-mouse','controller','wireless-controller','wireless-gamepad','gamepad','usb-gamepad','xbox-360-for-windows','xinput-controller','kp50b-dongle','hid-zkm','rapoo-gaming-device','wireless-mouse-8k-dongle-l0')):
         return profile['name']
     return product or (profile or {}).get('name','')
 
@@ -127,6 +127,7 @@ def enumerate_groups(overrides=None):
         transport = 'Bluetooth' if any(i.get('bus_type') == 2 for i in infos) else '2.4 GHz 接收器' if receiver else 'USB / 有线或接收器'
         device = Device('device:' + identifier, brand_name, str(name)[:240], kind,
                         receiver=receiver, transport=transport, source='本机 USB / HID 枚举',
+                        power_mode=(profile or {}).get('power_mode','unknown'),
                         note='电量协议尚未适配，可识别设备；不会猜测电量。' if not backend else '正在查询设备状态…',
                         vid=vid,pid=pid,present=True,confidence='unknown',battery_support='supported' if backend else 'identify-only',
                         evidence=evidence+'；未据此确认无线链路', identity=identifier,

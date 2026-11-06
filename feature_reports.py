@@ -107,9 +107,13 @@ def get_feature(infos,expected=None,reject_blank=False):
     attempts=[a for d in details for a in d.get('attempts',[])]
     if not candidates:code='no_vendor_collection';message='没有找到可供此实验使用的厂商或电池集合；普通鼠标输入接口不提供这种采样。'
     elif attempts and all(item['status']=='uninitialized_report' for item in attempts):code='uninitialized_report';message='已尝试的 Feature 报告均只返回全零/填充数据，未证实是设备状态。可能需要专用查询初始化；已停止，延长观察不能补足缺失的状态通道。'
+    elif attempts and all(item['status']=='unexpected_report_id' for item in attempts):
+        code='feature_read_failed';message='设备返回的报告 ID 与描述符不符，未取得可比较的状态包。延长观察无法补足；请导出诊断以核对厂商状态通道。'
     elif attempts:code='feature_read_failed';message='系统没有返回可用的 Feature 报告。该设备可能需要专用电量查询，也可能存在接口访问问题，请导出诊断。'
     elif expected is not None and 'channel_changed' in statuses:code='channel_changed';message='原采样通道已改变或报告描述不符，请重新选择设备。'
     elif 'feature_length_limit' in statuses:code='feature_length_limit';message='设备的 Feature 报告长度超过当前实验支持范围，已停止采样。'
     elif 'descriptor_unavailable' in statuses:code='descriptor_unavailable';message='无法读取一个或多个接口的报告描述；请导出诊断检查系统错误码。'
     else:code='no_feature_report';message='已检查接口描述，没有找到可用于此实验的 Feature 报告。延长等待不能补足缺失的报告，需适配专用查询。'
+    if any(item.get('input_length') and item.get('output_length') for item in details):
+        message+=' 描述符还声明了厂商输入/输出接口，可随诊断一并核对。'
     raise FeatureReadError(code,message,details)

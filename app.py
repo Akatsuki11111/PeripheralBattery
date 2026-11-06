@@ -14,6 +14,7 @@ def main():
     parser.add_argument('--autostart',action='store_true',help='由当前用户登录启动任务调用')
     parser.add_argument('--worker',metavar='REQUEST')
     parser.add_argument('--apply-update',metavar='REQUEST')
+    parser.add_argument('--update-ready',metavar='NONCE',help=argparse.SUPPRESS)
     parser.add_argument('--diagnose',action='store_true')
     parser.add_argument('--diagnose-mchose',action='store_true',help='仅诊断迈从状态接口，结果不含设备路径或序列号')
     parser.add_argument('--diagnose-hid',action='store_true',help='导出外设身份和 Feature 描述诊断，不读取键鼠输入')
@@ -46,11 +47,15 @@ def main():
         join_worker_job()
         from worker import run
         return run(args.worker)
+    if args.update_ready:
+        from process_tree import join_worker_job
+        join_worker_job()
+        os.environ.pop('PB_WORKER_JOB',None)
     from settings import VERSION,EXPERIMENTAL_ENABLED,Settings,DeviceStore,configure_logging,atomic_json,data_dir,redact,cleanup_workers,migrate_legacy_data
     import startup
     migrate_legacy_data()
     logger=configure_logging();preferences=Settings()
-    if args.autostart:
+    if args.autostart and not os.environ.get('PB_DATA_DIR'):
         try:startup.cleanup_legacy()
         except OSError as error:logger.warning('legacy startup cleanup: %s',redact(error))
     cleanup_workers()
@@ -85,7 +90,7 @@ def main():
     import ctypes
     app_id = 'LocalTools.PeripheralBattery.Preview' if LOCAL_PREVIEW else 'LocalTools.PeripheralBattery'
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
-    from PySide6.QtCore import QTimer,QLockFile
+    from PySide6.QtCore import QTimer,QLockFile,QAbstractNativeEventFilter
     from PySide6.QtNetwork import QLocalServer,QLocalSocket
     from PySide6.QtWidgets import QApplication,QSystemTrayIcon,QMenu,QFileDialog
     # Explicit import ensures the SVG engine is bundled for official vector logos.
@@ -97,7 +102,7 @@ def main():
     from appearance import panel_dark
     from models import Device,lowest
     from notifications import collect_low_alerts
-    from catalog import visible_devices
+    from catalog import visible_devices,related_keys
     from ui import Flyout
     from ipc import server_name,command
     import windows
@@ -120,7 +125,7 @@ def main():
         from maintenance import cleanup_cache
         logger.info('owned cache cleanup: %s',cleanup_cache())
         QTimer.singleShot(30000,lambda:logger.info('post-install cache cleanup: %s',cleanup_cache()))
-        if not LOCAL_PREVIEW:
+        if not LOCAL_PREVIEW and not os.environ.get('PB_DATA_DIR'):
             try:
                 current=startup.repair_if_requested(preferences)
                 logger.info('startup state enabled=%s valid=%s blocked=%s',current.enabled,current.valid,current.blocked)
@@ -170,6 +175,7 @@ def main():
     state={'quitting':False,'captured':False,'devices':store.snapshot(),'errors':[],
            'alerts':set(),'tray_ready':False,'theme':None,'clients':set()}
     update_timer=None
+    ready_token=args.update_ready
 
     def show():
         if flyout.raise_catalog():return
@@ -182,7 +188,9 @@ def main():
         if args.demo:flyout.summary.setText('演示数据 · 不代表真实设备')
         desktop.sync(devices)
         available=visible_devices(devices,preferences)
-        low=lowest(available);pinned=next((d for d in available if d.key==preferences.get('pinned_key') and (d.usable or d.fresh_grade or d.cached)),None)
+        pinned_key=preferences.get('pinned_key')
+        low=lowest(available);pinned=next((d for d in available if pinned_key and
+            (d.usable or d.fresh_grade or d.cached) and pinned_key in related_keys(d,devices,preferences)),None)
         cached=next((d for d in available if d.key==state.get('tray_key') and d.cached),None)
         grade=min((d for d in available if d.fresh_grade),key=lambda d:({'耗尽':0,'低':1,'中':2,'高':3,'满':4}[d.battery_grade],d.key),default=None)
         chosen=pinned or low or grade or cached or max((d for d in available if d.cached),key=lambda d:d.last_observed_at,default=None)
@@ -290,17 +298,45 @@ def main():
             if client.bytesAvailable():read()
 
     def ensure_tray():
+        nonlocal ready_token
         available=QSystemTrayIcon.isSystemTrayAvailable()
         if available and not state['tray_ready']:
             tray.show();state['tray_ready']=True;logger.info('notification area ready')
             QTimer.singleShot(500,lambda:logger.info('tray position rect=%s',tray.geometry().getRect()))
         elif not available:state['tray_ready']=False
+        if ready_token and state['tray_ready']:
+            token=ready_token;ready_token=None
+            def confirm_update():
+                nonlocal ready_token
+                if not QSystemTrayIcon.isSystemTrayAvailable():
+                    ready_token=token
+                    return
+                from installer import mark_ready
+                from settings import read_json
+                try:
+                    if mark_ready(token,VERSION):
+                        def show_update_result(attempt=0):
+                            value=read_json(data_dir()/'updates/last-result.json',{},4096)
+                            if value.get('ok') and value.get('version')=='v'+VERSION:
+                                flyout.load_release_notice(value)
+                                if flyout.isVisible():flyout.resize_for_content()
+                            elif attempt<20:
+                                QTimer.singleShot(250,lambda:show_update_result(attempt+1))
+                        QTimer.singleShot(250,show_update_result)
+                except (ValueError,OSError) as error:
+                    logger.warning('update readiness: %s',redact(error))
+            QTimer.singleShot(750,confirm_update)
         theme=(panel_dark(preferences),windows.is_taskbar_dark())
         if state['theme']!=theme:publish(state['devices'],state['errors'])
 
     desktop.preferencesChanged.connect(preferences_changed)
     controller.updated.connect(publish);controller.busyChanged.connect(busy)
     flyout.refreshRequested.connect(refresh);flyout.preferencesChanged.connect(preferences_changed)
+    def refresh_device(identity):
+        if args.demo or not controller.refresh_device(identity):
+            flyout.statusline.setText('当前连接无法单独查询，请检查设备是否接入。')
+            flyout.statusline.show()
+    flyout.deviceRefreshRequested.connect(refresh_device)
     flyout.forgetRequested.connect(forget);show_action.triggered.connect(show)
     flyout.promoteTrayRequested.connect(promote)
     refresh_action.triggered.connect(refresh);directory_action.triggered.connect(flyout.open_catalog)
@@ -321,6 +357,23 @@ def main():
                         observed_at=time.time(),last_seen=time.time()) for i in range(max(1,min(20,args.demo_count)))]
         publish(devices,[]);QTimer.singleShot(100,lambda:busy(False) if args.capture else show())
     else:
+        from ctypes import wintypes
+        topology_timer=QTimer(app);topology_timer.setSingleShot(True)
+        topology_timer.timeout.connect(lambda:controller.refresh(force=True))
+        class PowerAndDeviceEvents(QAbstractNativeEventFilter):
+            def nativeEventFilter(self,event_type,message):
+                if event_type in (b'windows_generic_MSG',b'windows_dispatcher_MSG'):
+                    event=wintypes.MSG.from_address(int(message))
+                    if event.message==0x0219 and event.wParam in (7,0x8000,0x8004):
+                        topology_timer.start(650)
+                    elif event.message==0x0218:
+                        if event.wParam==4:
+                            store.history.end_session()
+                        elif event.wParam in (7,0x12):
+                            topology_timer.start(1200)
+                return False,0
+        device_events=PowerAndDeviceEvents()
+        app.installNativeEventFilter(device_events)
         poll.start();QTimer.singleShot(0,lambda:controller.refresh(True))
         if not args.capture and not LOCAL_PREVIEW:
             from scheduling import UpdateTimer

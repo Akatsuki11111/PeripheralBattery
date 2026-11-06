@@ -101,7 +101,7 @@ class ScanController(QObject):
         self.store=store;self.preferences=preferences;self.logger=logger
         self.inventory=[];self.jobs=set();self.queue=[];self.busy=False;self.stopping=False
         self.last_inventory=0;self.paths=None;self.failures={};self.errors=[];self.last_attempt={}
-        self.pending_force=False;self.research_active=False
+        self.pending_force=False;self.research_active=False;self.pending_devices=set()
         self.total_timer=QTimer(self);self.total_timer.setSingleShot(True);self.total_timer.timeout.connect(self._total_expired)
 
     def refresh(self,force=False):
@@ -123,6 +123,22 @@ class ScanController(QObject):
             self.jobs.add(job);job.finished.connect(lambda result:self._inventory_done(job,result));job.start()
         else:self._start_queries()
 
+    def refresh_device(self,identity):
+        if self.stopping or self.research_active or not any(g.get('backend') and g['device']['identity']==identity for g in self.inventory):
+            return False
+        self.failures.pop(identity,None)
+        self.pending_devices.add(identity)
+        if not self.busy:
+            self._refresh_pending()
+        return True
+
+    def _refresh_pending(self):
+        if self.busy or self.stopping or self.research_active or not self.pending_devices:
+            return
+        targets,self.pending_devices=self.pending_devices,set()
+        self.busy=True;self.errors=[];self.busyChanged.emit(True)
+        self._start_queries(targets)
+
     def _inventory_done(self,job,result):
         self.jobs.discard(job)
         if self.stopping:return
@@ -131,11 +147,15 @@ class ScanController(QObject):
             try:
                 groups=result['groups'][:120]
                 records=[Device.from_dict(group['device']) for group in groups]
+                previous_ids={group['device']['identity'] for group in self.inventory}
                 self.store.reconcile(records);self.last_inventory=time.monotonic()
                 self.inventory=bind_groups(groups,self.store,self.preferences)
                 active_ids={group['device']['identity'] for group in self.inventory}
                 self.last_attempt={key:value for key,value in self.last_attempt.items() if key in active_ids}
-                self.failures={key:value for key,value in self.failures.items() if key in active_ids}
+                # Removing a charging cable can wake a receiver that was
+                # legitimately silent during earlier polling rounds.
+                if active_ids != previous_ids:
+                    self.failures.clear()
                 self.updated.emit(self.store.snapshot(),list(self.errors))
             except (KeyError,TypeError,ValueError) as error:
                 self.errors.append('设备枚举数据无效：'+str(error))
@@ -149,7 +169,7 @@ class ScanController(QObject):
             self._finish();return
         self._start_queries()
 
-    def _start_queries(self):
+    def _start_queries(self,targets=None):
         from catalog import device_profile
         saved={}
         if EXPERIMENTAL_ENABLED:
@@ -163,6 +183,7 @@ class ScanController(QObject):
                 group['backend']=group.get('original_backend','')
         now=time.monotonic()
         available=[g for g in self.inventory if g.get('backend') and
+                   (targets is None or g['device']['identity'] in targets) and
                    self.failures.get(g['device']['identity'],(0,0))[1]<=now]
         # Devices not actually started in a timed-out round get priority next time.
         available.sort(key=lambda g:(self.last_attempt.get(g['device']['identity'],0),g['device']['identity']))
@@ -185,6 +206,7 @@ class ScanController(QObject):
         readings=result.get('readings')
         if result.get('ok') and isinstance(readings,list) and readings:
             try:
+                readings=[{**item,'query_state':'unavailable' if item.get('connected') is None else ''} for item in readings]
                 self.store.apply_readings(identity,readings)
                 if any(item.get('connected') is True or item.get('confidence')=='experimental' for item in readings):self.failures.pop(identity,None)
                 elif all(item.get('connected') is None for item in readings):self._backoff(identity)
@@ -195,7 +217,8 @@ class ScanController(QObject):
             self.errors.append(group['device']['name']+'：'+message)
             self.logger.warning('%s query: %s',group['device']['brand'],message)
             self.store.apply_readings(identity,[{'percent':None,'connected':None,'charging':None,
-                                                'confidence':'unknown','note':message}])
+                                                'confidence':'unknown','note':message,
+                                                'query_state':'timeout' if result.get('timed_out') or result.get('error_type')=='TimeoutError' else 'unavailable'}])
             self._backoff(identity)
         apply_saved_modes(self.store,self.preferences)
         self.updated.emit(self.store.snapshot(),list(self.errors))
@@ -218,7 +241,9 @@ class ScanController(QObject):
         except OSError as error:self.logger.warning('Cannot save cache: %s',redact(error))
         self.updated.emit(self.store.snapshot(),list(self.errors));self.busyChanged.emit(False)
         if self.pending_force and not self.stopping:
-            self.pending_force=False;QTimer.singleShot(0,lambda:self.refresh(True))
+            self.pending_force=False;self.pending_devices.clear();QTimer.singleShot(0,lambda:self.refresh(True))
+        elif self.pending_devices:
+            QTimer.singleShot(0,self._refresh_pending)
 
     def shutdown(self):
         self.stopping=True;self.pending_force=False;self.total_timer.stop();self.queue=[]

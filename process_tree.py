@@ -23,6 +23,7 @@ def api():
     kernel.AssignProcessToJobObject.argtypes=[wintypes.HANDLE,wintypes.HANDLE]
     kernel.IsProcessInJob.argtypes=[wintypes.HANDLE,wintypes.HANDLE,ctypes.POINTER(wintypes.BOOL)]
     kernel.OpenProcess.argtypes=[wintypes.DWORD,wintypes.BOOL,wintypes.DWORD];kernel.OpenProcess.restype=wintypes.HANDLE
+    kernel.TerminateJobObject.argtypes=[wintypes.HANDLE,wintypes.UINT]
     kernel.CloseHandle.argtypes=[wintypes.HANDLE]
     kernel.GetCurrentProcess.restype=wintypes.HANDLE
     return kernel
@@ -35,11 +36,12 @@ def attach(kernel,job,process):
 
 
 class ProcessTree:
-    def __init__(self,nonce):
+    def __init__(self,nonce,*,kill_on_close=True):
         self.kernel=api();self.name='Local\\PeripheralBattery.worker.'+nonce
         self.handle=self.kernel.CreateJobObjectW(None,self.name)
         if not self.handle:raise ctypes.WinError(ctypes.get_last_error())
-        limits=ExtendedLimits();limits.basic.flags=0x2000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+        limits=ExtendedLimits()
+        limits.basic.flags=0x2000 if kill_on_close else 0
         if not self.kernel.SetInformationJobObject(self.handle,9,ctypes.byref(limits),ctypes.sizeof(limits)):
             self.close();raise ctypes.WinError(ctypes.get_last_error())
 
@@ -48,6 +50,10 @@ class ProcessTree:
         if not process:return  # It may have exited already; the worker also joins before I/O.
         try:attach(self.kernel,self.handle,process)
         finally:self.kernel.CloseHandle(process)
+
+    def terminate(self):
+        if self.handle and not self.kernel.TerminateJobObject(self.handle,1):
+            raise ctypes.WinError(ctypes.get_last_error())
 
     def close(self):
         if self.handle:self.kernel.CloseHandle(self.handle);self.handle=None

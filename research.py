@@ -16,9 +16,8 @@ def research_devices(devices,include_supported=False):
     for d in devices:
         if not d.present or d.kind=='auxiliary' or d.power_mode=='wired' or d.connected is False:continue
         if d.brand=='Unknown' and not d.receiver:continue
-        profile=device_profile(d.vid,d.pid)
-        known=bool((profile or {}).get('backend')) or d.usable or d.last_observed_at>0
-        if not known or include_supported and d.connected is True:result.append(d)
+        if include_supported or not (d.usable or d.fresh_grade):
+            result.append(d)
     return result
 
 
@@ -31,7 +30,7 @@ def sample(identity,channel=None):
         if isinstance(saved,list) and any(isinstance(d,dict) and d.get('identity')==identity and d.get('kind')=='gamepad' for d in saved):
             from gamepads import augment_inventory
             groups=[g for g in augment_inventory(inventory) if g['device'].get('identity')==identity]
-    if len(groups)!=1:raise ValueError('设备已经断开、重新枚举或身份不唯一，请重新选择。')
+    if len(groups)!=1:raise ValueError('原采样连接已消失或身份改变。插线切换到另一个接口时，请分别验证两个连接；原有采样仍可导出。')
     group=groups[0];d=group['device'];backend=group['backend'];profile=device_profile(d['vid'],d['pid'])
     infos=[decode_info(x) for x in group['infos']]
     if backend=='valkyrie_ry_usb':
@@ -47,6 +46,26 @@ def sample(identity,channel=None):
                 'interface':2,'usage_page':0xffff,'usage':2,'backend':backend,'vid':d['vid'],'pid':d['pid'],
                 'name':result['model'][1],'remote_confirmed':True,'protocol_verified':True,
                 'protocol_note':'已找到官方 F7 电池字段与 8F 型号应答；无需插拔差分或等待 1–2 小时。充电标志仍未知。'}
+    if backend=='atk_zero_plus':
+        from atk_zero_plus import NAME, read_status
+        status = read_status(infos, d['pid'])
+        if status.percent is None:
+            raise ValueError('未取得已验证的 ATK ZERO+ 电量，请确认鼠标唤醒并使用所选连接。')
+        return dict(timestamp=time.time(),hex=status.packet.hex(' '),length=len(status.packet),
+                    charging=status.charging,percent=status.percent,interface=3,usage_page=0xff05,
+                    usage=1,backend=backend,vid=d['vid'],pid=d['pid'],name=NAME,
+                    remote_confirmed=True,protocol_verified=True,
+                    protocol_note='已核对 BitMouse 型号、链路与电量应答，可直接完成预检。')
+    if backend=='rapoo_vt7_pro_v2':
+        from rapoo_vt7_pro_v2 import read_status
+        status = read_status(infos, d['pid'])
+        if status is None or not status.online:
+            raise ValueError('未收到雷柏鼠标的在线状态。请唤醒鼠标并确认当前 USB 或 2.4G 通道。')
+        return dict(timestamp=time.time(),hex=status.packet.hex(' '),length=len(status.packet),
+                    charging=status.charging,percent=status.percent,interface=1,usage_page=0xff00,
+                    usage=2,backend=backend,vid=d['vid'],pid=d['pid'],name=d['name'],
+                    remote_confirmed=True,protocol_verified=True,
+                    protocol_note='已从雷柏官方定义的 07 号状态报告确认型号、电量和充电状态，无需长期观察。')
     if backend and backend not in ('nova5','nova5_usb','scyrox'):
         from worker import probe
         readings=probe(group)
@@ -96,8 +115,10 @@ def compare(before,after):
         groups.append(packets)
     b,a=groups
     if len({len(p) for p in b+a})!=1:raise ValueError('应答长度发生变化，不能直接按偏移比较。')
-    if len({(x.get('vid'),x.get('pid'),x.get('interface'),x.get('usage_page'),x.get('usage'),x.get('backend')) for x in before+after})!=1:
-        raise ValueError('采样接口或设备身份不一致，不能比较。')
+    samples=before+after
+    if (len({(x.get('vid'),x.get('pid'),x.get('interface'),x.get('usage_page'),x.get('usage'),x.get('backend')) for x in samples})!=1
+            or any(x.get('channel')!=samples[0].get('channel') for x in samples)):
+        raise ValueError('采样连接、报告 ID 或描述符发生变化，两组读数需分开验证。')
     changed=[];noise=[];battery=[]
     for i in range(len(b[0])):
         bv=[p[i] for p in b];av=[p[i] for p in a]

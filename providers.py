@@ -77,7 +77,7 @@ def diagnose_hid():
         if remaining<1:errors.append('达到诊断总时限，部分设备尚未检查');break
         response=bounded_operation({'operation':'inspect-device','identity':group['device']['identity']},min(7,remaining))
         if response.get('ok'):
-            devices.append({k:response[k] for k in ('device','backend','interfaces','feature_diagnostics','valkyrie_candidates','scope')})
+            devices.append({k:response[k] for k in ('device','backend','interfaces','feature_diagnostics','channel_summary','valkyrie_candidates','scope')})
         else:devices.append({'device':{k:group['device'].get(k) for k in ('name','brand','vid','pid')},'error':response.get('user_message',response.get('error'))})
     if len(groups)>16:errors.append('最多检查16个设备；可在程序内导出单台设备诊断')
     return {'devices':devices,'errors':errors,'scope':'仅身份与描述信息；不含设备路径、序列号或输入报告，不修改设备'}

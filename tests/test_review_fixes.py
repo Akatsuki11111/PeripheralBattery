@@ -56,6 +56,23 @@ class ReviewFixTests(unittest.TestCase):
         self.assertEqual([g['device']['identity'] for g in controller.queue],['c','a','b'])
         controller.shutdown()
 
+    def test_cable_removal_clears_receiver_backoff_but_periodic_enumeration_preserves_it(self):
+        store=DeviceStore(self.path/'devices.json')
+        controller=ScanController(store,Settings(self.path/'settings.json'),logging.getLogger('test'))
+        receiver=Device('radio','Rapoo','VT7 PRO V2',identity='radio',vid=0x24ae,pid=0x14a7,receiver=True)
+        cable=replace(receiver,key='cable',identity='cable',pid=0x46a7,receiver=False)
+        radio,usb=[{'backend':'rapoo_vt7_pro_v2','device':d.to_dict()} for d in (receiver,cable)]
+        controller.inventory=[radio,usb]
+        controller.failures={'radio':(3,time.monotonic()+120)}
+        with patch.object(controller,'_pump'):
+            controller._inventory_done(Mock(),{'ok':True,'groups':[radio,usb]})
+            self.assertIn('radio',controller.failures)
+            self.assertNotIn(radio,controller.queue)
+            controller._inventory_done(Mock(),{'ok':True,'groups':[radio]})
+            self.assertNotIn('radio',controller.failures)
+            self.assertEqual([g['device']['identity'] for g in controller.queue],['radio'])
+        controller.shutdown()
+
     def test_alerts_are_grouped_and_removed_devices_do_not_leak(self):
         alerts=set();devices=[battery('a'),battery('b',20)]
         self.assertEqual([d.key for d in collect_low_alerts(devices,alerts,20)],['a','b'])

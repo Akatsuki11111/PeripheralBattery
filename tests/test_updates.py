@@ -35,7 +35,7 @@ class UpdatesTests(unittest.TestCase):
             def fail(src,target):
                 if Path(target)==b and str(src).endswith('.new'):raise OSError('locked')
                 return real(src,target)
-            with patch('installer.os.replace',side_effect=fail),patch('installer.time.monotonic',side_effect=[0,0,31]):
+            with patch('installer.os.replace',side_effect=fail),patch('installer.time.monotonic',side_effect=[0,0,31,31]):
                 with self.assertRaises(OSError):replace_targets(stage,[a,b])
             self.assertEqual(a.read_bytes(),b'old');self.assertEqual(b.read_bytes(),b'old')
 
@@ -48,6 +48,21 @@ class UpdatesTests(unittest.TestCase):
             config=root/'settings.json';config.write_text('preserve')
             request=stage.parent/('b'*32+'.install.json')
             request.write_text(json.dumps({'download':{'path':str(stage),'sha256':hashlib.sha256(b'new').hexdigest(),'version':'v2.5.0'},'origin':str(origin),'pid':0}))
-            with patch('installer.subprocess.Popen') as launch:self.assertEqual(apply_update(request),0)
+            def ready(path,nonce,version):
+                self.assertEqual((path,nonce,version),(origin,'b'*32,'v2.5.0'))
+                self.assertEqual(origin.read_bytes(),b'new')
+                self.assertTrue(list(root.glob('PeripheralBattery.exe.*.bak')))
+            with patch('installer.launch_for_verification',side_effect=ready) as launch:
+                self.assertEqual(apply_update(request),0)
             self.assertEqual(origin.read_bytes(),b'new');self.assertEqual(fixed.read_bytes(),b'new');self.assertEqual(config.read_text(),'preserve')
-            self.assertEqual(launch.call_args.args[0],[str(origin)]);self.assertFalse(request.exists())
+            self.assertFalse(list(root.glob('PeripheralBattery.exe.*.bak')))
+            launch.assert_called_once()
+            self.assertFalse(request.exists())
+            origin.write_bytes(b'old');fixed.write_bytes(b'old')
+            request.write_text(json.dumps({'download':{'path':str(stage),'sha256':hashlib.sha256(b'new').hexdigest(),'version':'v2.5.0'},'origin':str(origin),'pid':0}))
+            with patch('installer.launch_for_verification',side_effect=TimeoutError('not ready')),patch('installer.subprocess.Popen') as fallback:
+                self.assertEqual(apply_update(request),1)
+                self.assertEqual(fallback.call_args.args[0],[str(origin)])
+            self.assertEqual(origin.read_bytes(),b'old');self.assertEqual(fixed.read_bytes(),b'old')
+            self.assertEqual(config.read_text(),'preserve')
+            self.assertFalse(json.loads((stage.parent/'last-result.json').read_text())['ok'])
