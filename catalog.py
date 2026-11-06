@@ -107,14 +107,16 @@ def coalesce_charging_devices(devices, preferences):
     cables = [d for d in present if not d.receiver]
     drop = set()
     for cable in cables:
-        if not cable.usable or cable.charging is not True and (cable.vid,cable.pid)!=(0x373b,0x129e):
+        nova_full=(cable.vid,cable.pid)==(0x1038,0x2230) and cable.charge_complete
+        if not cable.usable or not (cable.charging is True or nova_full or (cable.vid,cable.pid)==(0x373b,0x129e)):
             continue
         candidates = [r for r in receivers if _charging_pair(cable, r)]
         if len(candidates) != 1:
             continue
         receiver = candidates[0]
-        if receiver.connected is True and not (receiver.usable and receiver.charging is True
-                                               and receiver.percent == cable.percent):
+        same_charging_reading=(receiver.usable and receiver.charging is True and receiver.percent==cable.percent)
+        stale_full_peer=nova_full and not receiver.usable
+        if receiver.connected is True and not (same_charging_reading or stale_full_peer):
             continue
         if sum(_charging_pair(d, receiver) for d in cables) == 1:
             drop.add(receiver.key)

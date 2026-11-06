@@ -30,7 +30,7 @@ def wired_evidence(profile,name,interfaces,backend='',receiver=False):
 
 def as_wired(device,evidence):
     return replace(device,power_mode='wired',connected=True if device.present else False,
-        percent=None,last_percent=None,charging=None,voltage_mv=None,observed_at=0,monotonic_at=0,
+        percent=None,last_percent=None,charging=None,charge_complete=False,voltage_mv=None,observed_at=0,monotonic_at=0,
         transport='有线 USB',confidence='confirmed',battery_support='not-applicable',evidence=evidence,
         note='有线供电、无电池；电量与充电状态不适用，不参与最低电量计算。')
 

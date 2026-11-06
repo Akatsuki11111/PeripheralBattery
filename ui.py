@@ -647,7 +647,7 @@ class Flyout(QWidget):
         return [('设备类型',d.type_name),
                 ('当前电量','不适用（有线供电）' if d.power_mode=='wired' else '不适用（辅助设备）' if d.kind=='auxiliary' else ('约' if d.approximate else '')+f'{d.percent}%'+(' · 已过期' if d.stale else '') if d.percent is not None else d.battery_grade+'（分档电量，非百分比）' if d.battery_grade else '未知'),
                 ('连接情况',d.status),('USB 接口','已接入' if d.present else '未接入'),('连接方式',d.transport),
-                ('充电状态','不适用' if d.power_mode=='wired' or d.kind=='auxiliary' else '正在充电' if d.charging is True else '未充电' if d.charging is False and d.connected else '未知'),
+                ('充电状态','不适用' if d.power_mode=='wired' or d.kind=='auxiliary' else '已充满' if d.charge_complete and d.usable else '正在充电' if d.charging is True else '未充电' if d.charging is False and d.connected else '未知'),
                 ('连接依据',d.evidence or '未知'),('数据来源',d.source or '暂无'),
                 ('电量更新时间',dt.datetime.fromtimestamp(battery_stamp).strftime('%m-%d %H:%M:%S') if battery_stamp else '暂无有效读数'),
                 ('USB 标识',f'{d.vid:04X}:{d.pid:04X}'),('固件信息',d.firmware or '未提供'),

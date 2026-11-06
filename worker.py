@@ -140,10 +140,11 @@ def probe(group,diagnostics=None):
         from rog_omni import query
         records=query(infos)
     elif backend in ('scyrox','nova5','nova5_usb','nordic52'):
-        online,level,charging,firmware=read_local(backend,infos)
+        online,level,charging,detail=read_local(backend,infos)
         records=[{'name':base['name'],'kind':base['kind'],'level':level,'charging':charging,
-                  'online':online,'source':backend,'firmware':firmware if backend!='nordic52' else '',
-                  'voltage_mv':firmware if backend=='nordic52' else None}]
+                  'online':online,'source':backend,'firmware':detail if backend=='scyrox' else '',
+                  'charge_complete':backend=='nova5_usb' and detail is True,
+                  'voltage_mv':detail if backend=='nordic52' else None}]
     elif backend in PROVIDERS:
         from battery_backends import hidlist
         # Never open unrelated hardware or enumerate all devices again per provider.
@@ -170,6 +171,7 @@ def probe(group,diagnostics=None):
         reading={'key':str(record.get('key',''))[:240], 'name':str(record.get('name') or base['name'])[:240],
                  'kind':record.get('kind') or base['kind'],'percent':level,'charging':record.get('charging') if connected else None,
                  'connected':connected,'source':backend+' · 只读 HID 状态',
+                 'charge_complete':connected is True and record.get('charge_complete') is True,
                  'evidence':'设备状态应答' if connected is not None else 'USB 接口存在，未确认远端',
                  'confidence':'confirmed' if connected is True and level is not None else 'unknown',
                  'observed_at':time.time(),'monotonic_at':time.monotonic(),'battery_support':'supported',

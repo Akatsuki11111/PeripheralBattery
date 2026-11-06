@@ -56,11 +56,15 @@ def parse_nova5_usb(data):
     # On the directly attached Nova 5, byte 1 describes the radio link, not
     # whether the USB headset is present. The battery and charge bytes still
     # report the headset's live status when that radio link is off.
-    if len(data)<16 or data[0]!=0xb0 or data[4] not in (0,1):
+    if len(data)<16 or data[0]!=0xb0 or data[4] not in (0,1,2):
         raise ValueError('Nova 5 USB 状态应答不匹配')
     level=valid_percent(data[3])
     if level is None:raise ValueError('Nova 5 USB 电量超出有效范围')
-    return True,level,data[4]==1,''
+    charge_code=data[4]
+    # USB status 2 was captured at 100% with the cable still attached.
+    full=charge_code==2 and level==100
+    charging=None if charge_code==2 and not full else charge_code==1
+    return True,level,charging,full
 
 
 def scyrox_packet():

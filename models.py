@@ -42,6 +42,7 @@ class Device:
     battery_cache: bool = True
     protocol_model_id: int | None = None
     query_state: str = ''
+    charge_complete: bool = False
 
     @property
     def type_name(self):
@@ -115,6 +116,8 @@ class Device:
             if self.usb_keyboard and self.power_mode=='unknown' and not self.receiver:
                 return 'USB 已接入 · 供电待确认'
             return '已识别 · 电量未知' if self.battery_support == 'identify-only' else '连接待确认'
+        if self.charge_complete and self.usable:
+            return '已充满'
         if self.charging:
             return '正在充电'
         if self.fresh_grade:return '已连接 · 分档电量'
@@ -151,6 +154,9 @@ class Device:
         for key in ('connected', 'charging'):
             if data.get(key) is not True and data.get(key) is not False:
                 data[key] = None
+        data['charge_complete']=(data.get('charge_complete') is True and data.get('present') is not False
+                                 and data.get('connected') is True and data.get('charging') is False
+                                 and data.get('percent')==100)
         for key in ('note', 'source', 'evidence', 'firmware', 'approximate'):
             if key in data:
                 data[key] = str(data[key])[:1000]

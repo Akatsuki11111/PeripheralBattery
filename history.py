@@ -76,6 +76,8 @@ class HistoryStore:
         sample = {'at':float(at),'percent':percent,'charging':charging if percent is not None else None,
                   'voltage_mv':voltage if percent is not None else None,'source':source,
                   'break':row.get('break') is True}
+        if row.get('charge_complete') is True and percent==100:
+            sample['charge_complete']=True
         if row.get('gap_after') is True:
             sample['gap_after'] = True
         usage = row.get('usage')
@@ -139,7 +141,7 @@ class HistoryStore:
         if good:
             self.last_observed[key]=at
         prior=self.last_online.pop(key,None)
-        if good and device.charging is False and not device.approximate:
+        if good and device.charging is False and not device.charge_complete and not device.approximate:
             profile=usage_profile(device)
             self.last_online[key]=(at,device.percent,profile)
             if prior and prior[2]==profile:
@@ -158,10 +160,13 @@ class HistoryStore:
                 'voltage_mv':device.voltage_mv if good else None,'source':device.source[:160],'break':False}
         if usage:
             sample['usage']=usage
+        if good and device.charge_complete:
+            sample['charge_complete']=True
         if previous:
             sample['break']=(same_bucket and previous['break']) or (
                 previous['percent'] is None or previous.get('gap_after',False) or not good or at-previous['at']>MAX_GAP
                 or sample['charging']!=previous['charging'] or sample['source']!=previous['source']
+                or bool(sample.get('charge_complete'))!=bool(previous.get('charge_complete'))
                 or good and previous['percent'] is not None and device.percent>previous['percent']+2)
         if same_bucket:
             rows[-1]=sample
@@ -192,8 +197,8 @@ class HistoryStore:
                       for entry in row.get('usage',{}).values())
         if not device.usable:
             return Estimate(reason='设备当前没有有效在线读数',active_seconds=total)
-        if device.charging is not False:
-            return Estimate(reason='正在充电或充电状态未知，暂不预测',active_seconds=total)
+        if device.charging is not False or device.charge_complete:
+            return Estimate(reason='当前为充电、已充满或充电状态未知，暂不预测',active_seconds=total)
         if device.approximate:
             return Estimate(reason='设备只提供近似电量档位，暂不预测',active_seconds=total)
         if seconds<3600 or drop<3 or falls<2:

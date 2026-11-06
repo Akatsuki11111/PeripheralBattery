@@ -70,6 +70,16 @@ class HistoryTests(unittest.TestCase):
         self.assertEqual(estimate.hours,31)
         self.assertIsNone(self.history.estimate(replace(device,transport='Bluetooth'),self.now).hours)
 
+    def test_full_charge_connected_time_is_not_counted_as_discharge(self):
+        first=self.device(self.now-60,100,charge_complete=True)
+        self.history.record(first,self.now-60)
+        full=replace(first,observed_at=self.now)
+        self.history.record(full,self.now)
+        estimate=self.history.estimate(full,self.now)
+        self.assertEqual(estimate.active_seconds,0)
+        self.assertIsNone(estimate.hours)
+        self.assertTrue(self.history.samples(full.key,self.now)[-1]['charge_complete'])
+
     def test_legacy_rows_remain_visible_and_restart_does_not_bridge_usage(self):
         legacy={'version':1,'devices':{'a':[{'at':self.now-600,'percent':75,'charging':False}]}}
         self.history.path.write_text(json.dumps(legacy),encoding='utf-8')

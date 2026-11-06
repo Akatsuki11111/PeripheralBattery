@@ -2,6 +2,8 @@ import sys,time,unittest
 from dataclasses import replace
 sys.path.insert(0,'outputs/PeripheralBattery')
 from protocols import parse_nova5_usb
+from unittest.mock import patch
+from worker import probe
 from models import Device
 from catalog import visible_devices,device_profile,related_keys,device_mode
 
@@ -11,9 +13,27 @@ class ChargingTests(unittest.TestCase):
   self.cable=Device('usb','SteelSeries','Arctis Nova 5',kind='headset',vid=0x1038,pid=0x2230,percent=57,charging=True,connected=True,observed_at=now,battery_support='supported')
   self.radio=replace(self.cable,key='radio',pid=0x2232,receiver=True,connected=False,percent=None,charging=None)
  def test_usb_reads_offline_radio_battery(self):
-  self.assertEqual(parse_nova5_usb([0xb0,2,2,57,1]+[0]*11),(True,57,True,''))
+  self.assertEqual(parse_nova5_usb([0xb0,2,2,57,1]+[0]*11),(True,57,True,False))
+  self.assertEqual(parse_nova5_usb([0xb0,2,2,99,2]+[0]*11),(True,99,None,False))
+  self.assertEqual(parse_nova5_usb([0xb0,2,2,100,0]+[0]*11),(True,100,False,False))
   for data in ([0xb0,2,2,255,1]+[0]*11,[0xb0,2,2,57,9]+[0]*11,[0]*16):
    with self.assertRaises(ValueError):parse_nova5_usb(data)
+ def test_nova_full_usb_status_survives_worker_and_hides_offline_receiver(self):
+  captured=bytes.fromhex('b0 02 02 64 02')+bytes(59)
+  group={'device':self.cable.to_dict(),'infos':[],'backend':'nova5_usb'}
+  with patch('worker.read_local',return_value=parse_nova5_usb(captured)):
+   reading=probe(group)[0]
+  full=Device.from_dict({**self.cable.to_dict(),**reading,'key':'usb'})
+  self.assertTrue(full.usable)
+  self.assertEqual((full.percent,full.charging,full.charge_complete,full.status),(100,False,True,'已充满'))
+  for rx in (self.radio,replace(self.radio,connected=None),
+             replace(self.radio,connected=True,percent=26,observed_at=0)):
+   self.assertEqual(visible_devices([rx,full],{'show_offline':True}),[full])
+  other=replace(self.radio,connected=True,percent=100)
+  self.assertEqual(len(visible_devices([other,full],{})),2)
+  restored=Device.from_dict({**full.to_dict(),'connected':None})
+  self.assertFalse(restored.charge_complete)
+
  def test_nova_receiver_stays_hidden_during_enum_and_failed_reads(self):
   pending=replace(self.radio,connected=None,confidence='unknown')
   self.assertEqual(visible_devices([pending,self.radio],{}),[])

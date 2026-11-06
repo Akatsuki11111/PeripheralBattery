@@ -227,7 +227,7 @@ class DeviceStore:
                 if (device.percent is None and device.connected is None and previous.present and device.battery_cache and previous.battery_cache and
                         (previous.usable or previous.fresh_grade or EXPERIMENTAL_ENABLED and previous.experimental) and time.time()-previous.observed_at<90):
                     device=replace(device,percent=previous.percent,connected=previous.connected,charging=previous.charging,
-                                   battery_grade=previous.battery_grade,
+                                   charge_complete=previous.charge_complete,battery_grade=previous.battery_grade,
                                    confidence=previous.confidence,observed_at=previous.observed_at,monotonic_at=previous.monotonic_at,
                                    source=previous.source,voltage_mv=previous.voltage_mv,approximate=previous.approximate,note='正在刷新，暂显示最近一次有效应答。')
             device=self._with_last(device,device)
@@ -235,7 +235,7 @@ class DeviceStore:
         for key, previous in old.items():
             if key not in result and key not in migrated and now - previous.last_seen < self.RETENTION:
                 result[key] = replace(previous, present=False, connected=False, percent=None,
-                                      charging=None,voltage_mv=None,monotonic_at=0, note='设备已移除；可在设备管理中忘记。')
+                                      charging=None,charge_complete=False,voltage_mv=None,monotonic_at=0, note='设备已移除；可在设备管理中忘记。')
                 self.history.record(result[key])
         self.devices = dict(sorted(result.items(), key=lambda item: item[1].last_seen, reverse=True)[:200])
         return self.snapshot()
