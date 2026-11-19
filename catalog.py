@@ -3,6 +3,7 @@ from functools import lru_cache
 import json
 from pathlib import Path
 import re
+import time
 
 
 @lru_cache(maxsize=1)
@@ -88,8 +89,17 @@ _CHARGING_ENDPOINTS = {
 }
 
 
+# Reads arrive independently, up to one 60-second refresh apart.
+_PAIR_SAMPLE_SKEW = 90
+_PAIR_LEVEL_DIFFERENCE = 2
+
+
 def _charging_pair(cable, receiver):
-    if (cable.brand, cable.kind) != (receiver.brand, receiver.kind):
+    if (cable.brand, cable.kind) != (receiver.brand, receiver.kind) or cable.brand=='Unknown':
+        return False
+    if cable.serial_hash and receiver.serial_hash and cable.serial_hash!=receiver.serial_hash:
+        return False
+    if ':paired:' in cable.key or ':paired:' in receiver.key:
         return False
     if (cable.vid,cable.pid,receiver.vid,receiver.pid)==(0x373b,0x129e,0x373b,0x124f):
         return (receiver.protocol_model_id == 0x129e or
@@ -98,28 +108,53 @@ def _charging_pair(cable, receiver):
             _CHARGING_ENDPOINTS.get((cable.vid, cable.pid)) == (receiver.vid, receiver.pid))
 
 
+def _matching_battery_samples(cable, receiver):
+    if cable.usable:
+        level,at=cable.percent,cable.observed_at
+    elif cable.cached:
+        level,at=cable.last_percent,cable.last_observed_at
+    else:
+        return False
+    return (level is not None and receiver.usable
+            and 0<=time.time()-at<=_PAIR_SAMPLE_SKEW
+            and abs(at-receiver.observed_at)<=_PAIR_SAMPLE_SKEW
+            and abs(level-receiver.percent)<=_PAIR_LEVEL_DIFFERENCE)
+
+
 def coalesce_charging_devices(devices, preferences):
-    """Prefer a verified USB reading over an inactive duplicate receiver."""
+    """Choose one live route for an unambiguous USB/receiver pair."""
     hidden = set(preferences.get('hidden', []))
     items = list(devices)
     present = [d for d in items if d.present and d.key not in hidden]
     receivers = [d for d in present if d.receiver]
-    cables = [d for d in present if not d.receiver]
+    cables = [d for d in present if endpoint_type(d)=='usb']
+    links=preferences.get('device_links',{})
+    def matches(cable, receiver):
+        # A user's chosen association takes precedence over model heuristics.
+        if links.get(cable.key) or links.get(receiver.key):
+            return bool(links.get(cable.key) and links.get(cable.key)==links.get(receiver.key))
+        return _charging_pair(cable,receiver)
     drop = set()
     for cable in cables:
-        nova_full=(cable.vid,cable.pid)==(0x1038,0x2230) and cable.charge_complete
-        if not cable.usable or not (cable.charging is True or nova_full or (cable.vid,cable.pid)==(0x373b,0x129e)):
+        candidates = [r for r in receivers if matches(cable,r)]
+        if len(candidates)!=1:
             continue
-        candidates = [r for r in receivers if _charging_pair(cable, r)]
-        if len(candidates) != 1:
+        receiver=candidates[0]
+        if sum(matches(d,receiver) for d in cables)!=1:
             continue
-        receiver = candidates[0]
-        same_charging_reading=(receiver.usable and receiver.charging is True and receiver.percent==cable.percent)
-        stale_full_peer=nova_full and not receiver.usable
-        if receiver.connected is True and not (same_charging_reading or stale_full_peer):
-            continue
-        if sum(_charging_pair(d, receiver) for d in cables) == 1:
-            drop.add(receiver.key)
+        same_identity=bool(links.get(cable.key) or
+                           cable.serial_hash and cable.serial_hash==receiver.serial_hash)
+        close_samples=_matching_battery_samples(cable,receiver)
+        if cable.usable:
+            # USB is authoritative for charging. Some radios report "not
+            # charging" even while the same peripheral is charging over USB.
+            if same_identity or not receiver.usable or close_samples:
+                drop.add(receiver.key)
+        elif receiver.usable:
+            pending=(cable.connected is None and not cable.query_state
+                     and not cable.observed_at and not cable.last_observed_at)
+            if same_identity or close_samples or pending:
+                drop.add(cable.key)
     return [d for d in items if d.key not in drop]
 
 

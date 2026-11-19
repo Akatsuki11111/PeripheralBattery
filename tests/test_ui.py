@@ -25,6 +25,31 @@ class UiTests(unittest.TestCase):
         self.flyout.rebuild(self.devices,[]);self.flyout.show_at_tray();app.processEvents()
     def tearDown(self):
         self.flyout.hide();self.flyout.deleteLater();app.processEvents();self.startup.stop();self.tmp.cleanup()
+    def test_remaining_time_uses_history_and_aligns_to_battery(self):
+        from history import usage_profile
+        d=self.devices[0]
+        self.flyout.history.series[d.key]=[
+            {'at':d.observed_at-600,'percent':59,'charging':False,
+             'usage':{usage_profile(d):(3600,3,2)}},
+        ]
+        self.flyout.rebuild(self.devices,[])
+        app.processEvents()
+        card=self.flyout.cards[d.key]
+        expected=self.flyout.history.estimate(d).remaining_text
+        self.assertEqual(card.remaining_label.text(),'预计剩余 · '+expected)
+        self.assertIn('近 7 天',card.remaining_label.toolTip())
+        right=lambda widget:widget.mapTo(card,QPoint(widget.width(),0)).x()
+        self.assertEqual(right(card.remaining_label),right(card.value_label))
+        self.assertEqual(card.remaining_label.mapTo(card,QPoint()).y(),
+                         card.status_label.mapTo(card,QPoint()).y())
+        self.flyout.history.series.clear()
+        self.flyout.rebuild(self.devices,[])
+        self.assertEqual(card.remaining_label.text(),'预计剩余 · 暂无估算')
+        self.flyout.rebuild([replace(d,charging=True)],[])
+        self.assertEqual(card.remaining_label.text(),'预计剩余 · 充电中')
+        self.flyout.rebuild([replace(d,power_mode='wired')],[])
+        self.assertTrue(card.remaining_label.isHidden())
+
     def test_card_opens_detail_and_escape_returns(self):
         QTest.mouseClick(self.flyout.cards['x'],Qt.MouseButton.LeftButton);self.assertEqual(self.flyout.selected,'x')
         QTest.keyClick(self.flyout,Qt.Key.Key_Escape);self.assertEqual(self.flyout.stack.currentIndex(),0)

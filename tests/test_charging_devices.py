@@ -1,10 +1,12 @@
-import sys,time,unittest
+import sys,time,unittest,tempfile
+from pathlib import Path
 from dataclasses import replace
 sys.path.insert(0,'outputs/PeripheralBattery')
-from protocols import parse_nova5_usb
+from protocols import parse_nova5_usb,parse_nova5
 from unittest.mock import patch
 from worker import probe
 from models import Device
+from settings import DeviceStore
 from catalog import visible_devices,device_profile,related_keys,device_mode
 
 class ChargingTests(unittest.TestCase):
@@ -29,7 +31,7 @@ class ChargingTests(unittest.TestCase):
   for rx in (self.radio,replace(self.radio,connected=None),
              replace(self.radio,connected=True,percent=26,observed_at=0)):
    self.assertEqual(visible_devices([rx,full],{'show_offline':True}),[full])
-  other=replace(self.radio,connected=True,percent=100)
+  other=replace(self.radio,connected=True,percent=70)
   self.assertEqual(len(visible_devices([other,full],{})),2)
   restored=Device.from_dict({**full.to_dict(),'connected':None})
   self.assertFalse(restored.charge_complete)
@@ -52,11 +54,73 @@ class ChargingTests(unittest.TestCase):
  def test_device_profile(self):self.assertEqual(device_profile(0x1038,0x2230)['backend'],'nova5_usb')
  def test_offline_receiver_collapses_even_show_offline(self):
   self.assertEqual(visible_devices([self.radio,self.cable],{'show_offline':True}),[self.cable])
- def test_online_receiver_needs_matching_charge_and_battery(self):
+ def test_online_receiver_matches_battery_despite_charge_flag_or_refresh_skew(self):
   active=replace(self.radio,connected=True,percent=57,charging=True)
-  self.assertEqual(visible_devices([active,self.cable],{}),[self.cable])
-  for changed in (replace(active,percent=56),replace(active,charging=False),replace(active,charging=None)):
+  for level in (55,56,57,58,59):
+   for charge in (False,None,True):
+    with self.subTest(level=level,charging=charge):
+     peer=replace(active,percent=level,charging=charge,observed_at=self.cable.observed_at-60)
+     self.assertEqual(visible_devices([peer,self.cable],{}),[self.cable])
+  for changed in (replace(active,percent=52),replace(active,observed_at=self.cable.observed_at-91)):
    self.assertEqual(len(visible_devices([changed,self.cable],{})),2)
+
+ def test_captured_nova_frames_have_different_charge_flags_and_one_card(self):
+  usb=parse_nova5_usb(bytes.fromhex('b0 03 02 2b 01')+bytes(59))
+  radio=parse_nova5(bytes.fromhex('b0 03 02 2b 03')+bytes(59))
+  self.assertEqual(usb[:3],(True,43,True))
+  self.assertEqual(radio[:3],(True,43,False))
+  with tempfile.TemporaryDirectory() as tmp:
+   store=DeviceStore(Path(tmp)/'devices.json')
+   cable=replace(self.cable,identity='usb',percent=None,connected=None,charging=None,observed_at=0)
+   peer=replace(self.radio,identity='radio',connected=None)
+   store.reconcile([cable,peer])
+   with patch('worker.read_local',return_value=radio[:3]+('',)):
+    store.apply_readings('radio',probe({'device':peer.to_dict(),'infos':[],'backend':'nova5'}))
+   self.assertEqual([d.key for d in visible_devices(store.snapshot(),{'show_offline':True})],['radio'])
+   with patch('worker.read_local',return_value=usb):
+    store.apply_readings('usb',probe({'device':cable.to_dict(),'infos':[],'backend':'nova5_usb'}))
+   shown=visible_devices(store.snapshot(),{'show_offline':True})
+   self.assertEqual([(d.key,d.percent,d.status) for d in shown],[('usb',43,'正在充电')])
+   store.reconcile([peer])
+   shown=visible_devices(store.snapshot(),{'show_offline':True})
+   self.assertEqual([d.key for d in shown],['radio'])
+   self.assertEqual(shown[0].last_percent,43)
+
+ def test_known_pairs_use_live_usb_even_after_full_or_stop_charging(self):
+  for vid,usb_pid,radio_pid in ((0x1038,0x2230,0x2232),(0x1532,0x00c0,0x00c1),(0x24ae,0x46a7,0x14a7)):
+   with self.subTest(vid=vid):
+    usb=replace(self.cable,vid=vid,pid=usb_pid,percent=100,charging=False)
+    rx=replace(self.radio,vid=vid,pid=radio_pid,connected=True,percent=99,charging=None)
+    self.assertEqual(visible_devices([rx,usb],{'show_offline':True}),[usb])
+
+ def test_pending_or_failed_usb_falls_back_to_live_receiver(self):
+  rx=replace(self.radio,connected=True,percent=57,charging=False)
+  pending=replace(self.cable,connected=None,percent=None,observed_at=0,charging=None)
+  failed=replace(pending,last_percent=56,last_observed_at=rx.observed_at,query_state='timeout')
+  for cable in (pending,failed):
+   self.assertEqual(visible_devices([cable,rx],{'show_offline':True}),[rx])
+  old=replace(failed,last_observed_at=rx.observed_at-91)
+  self.assertEqual(len(visible_devices([old,rx],{'show_offline':True})),2)
+  different=replace(failed,last_percent=12)
+  self.assertEqual(len(visible_devices([different,rx],{'show_offline':True})),2)
+
+ def test_conflicting_serial_or_explicit_association_prevents_automatic_merge(self):
+  usb=replace(self.cable,serial_hash='one')
+  rx=replace(self.radio,serial_hash='two')
+  self.assertEqual(len(visible_devices([usb,rx],{'show_offline':True})),2)
+  prefs={'show_offline':True,'device_links':{'usb':'linked:one','radio':'linked:two'}}
+  self.assertEqual(len(visible_devices([self.cable,self.radio],prefs)),2)
+  # Explicitly pairing different endpoint serials is an informed user choice.
+  prefs['device_links']['radio']='linked:one'
+  self.assertEqual(visible_devices([usb,rx],prefs),[usb])
+
+ def test_trusted_identity_does_not_require_battery_readings_to_agree(self):
+  usb=replace(self.cable,serial_hash='same')
+  rx=replace(self.radio,serial_hash='same',connected=True,percent=12)
+  self.assertEqual(visible_devices([usb,rx],{}),[usb])
+  bluetooth=replace(usb,transport='Bluetooth')
+  self.assertEqual(len(visible_devices([bluetooth,self.radio],{'show_offline':True})),2)
+
  def test_ambiguous_or_hidden_does_not_merge(self):
   second=replace(self.cable,key='another')
   self.assertEqual(len(visible_devices([self.radio,self.cable,second],{'show_offline':True})),3)
@@ -88,8 +152,8 @@ class ChargingTests(unittest.TestCase):
   collision=replace(other,serial_hash='mouse-a')
   self.assertEqual(set(related_keys(radio,[cable,radio,collision],{})),{'radio'})
 
- def test_unplug_or_noncharging_does_not_merge(self):
-  for usb in (replace(self.cable,present=False),replace(self.cable,charging=False),replace(self.cable,observed_at=0)):
+ def test_unplug_or_stale_usb_does_not_hide_receiver(self):
+  for usb in (replace(self.cable,present=False),replace(self.cable,observed_at=0)):
    self.assertIn(self.radio,visible_devices([self.radio,usb],{'show_offline':True}))
 
 if __name__=='__main__':unittest.main()

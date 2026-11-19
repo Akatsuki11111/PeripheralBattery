@@ -107,7 +107,7 @@ class DeviceCard(QFrame):
     clicked = Signal(str)
     powerModeRequested = Signal(str, str)
 
-    def __init__(self, d, compact=False, show_power_choice=False, *, dark=None):
+    def __init__(self, d, compact=False, show_power_choice=False, *, dark=None, estimate=None):
         super().__init__()
         self.setObjectName('card')
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -125,17 +125,20 @@ class DeviceCard(QFrame):
         self.brand_icon = BrandIcon(d.brand, d.kind)
         header.addWidget(self.brand_icon, 0, Qt.AlignmentFlag.AlignVCenter)
         content = QVBoxLayout()
-        content.setSpacing(7)
+        content.setSpacing(4)
         details = QHBoxLayout()
         details.setSpacing(6)
 
-        text = QVBoxLayout()
-        text.setSpacing(1)
         self.name_label = ElidedLabel()
         self.name_label.setTextFormat(Qt.TextFormat.PlainText)
         self.name_label.setFont(font(14, QFont.Weight.DemiBold))
         self.name_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
-        text.addWidget(self.name_label)
+        details.addWidget(self.name_label, 1)
+        self.value_label = label()
+        self.value_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        self.value_label.setFixedWidth(68)
+        details.addWidget(self.value_label)
+        content.addLayout(details)
 
         status = QHBoxLayout()
         status.setSpacing(5)
@@ -149,14 +152,10 @@ class DeviceCard(QFrame):
         self.status_label.setFont(font(11))
         self.status_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         status.addWidget(self.status_label, 1)
-        text.addLayout(status)
-        details.addLayout(text, 1)
-
-        self.value_label = label()
-        self.value_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-        self.value_label.setFixedWidth(68)
-        details.addWidget(self.value_label, 0, Qt.AlignmentFlag.AlignTop)
-        content.addLayout(details)
+        self.remaining_label = label('', 11, True)
+        self.remaining_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        status.addWidget(self.remaining_label)
+        content.addLayout(status)
 
         self.bar = BatteryBar()
         content.addWidget(self.bar)
@@ -183,9 +182,20 @@ class DeviceCard(QFrame):
             self.power_buttons[mode] = button
         power.addStretch()
         layout.addWidget(self.power_row)
-        self.update_device(d, show_power_choice, dark)
+        self.update_device(d, show_power_choice, dark, estimate)
 
-    def update_device(self, d, show_power_choice=False, dark=None):
+    def update_device(self, d, show_power_choice=False, dark=None, estimate=None):
+        # History may change even when the latest device snapshot is identical.
+        remaining = '暂无估算' if estimate is None or estimate.hours is None else estimate.remaining_text
+        if d.charge_complete and d.usable:
+            remaining = '已充满'
+        elif d.charging is True and d.usable:
+            remaining = '充电中'
+        self.remaining_label.setText('预计剩余 · ' + remaining)
+        self.remaining_label.setToolTip('预计剩余使用时间\n' + (estimate.reason if estimate else '等待有效放电记录'))
+        self.remaining_label.setAccessibleName('预计剩余使用时间，' + remaining)
+        self.remaining_label.setVisible(d.connected is True and d.power_mode != 'wired'
+                                        and d.kind != 'auxiliary' and not d.cached)
         dark = windows.is_dark() if dark is None else dark
         dpr = self.devicePixelRatioF()
         if self.d == d and self.show_power_choice == show_power_choice and self.theme == (dark, dpr):
@@ -540,12 +550,13 @@ class Flyout(QWidget):
         for index,d in enumerate(displayed):
             show_power_choice = needs_power_choice(d) and d.key not in modes
             card=self.cards.get(d.key)
+            estimate=self.history.estimate(d)
             if card is None:
-                card=DeviceCard(d,True,show_power_choice,dark=self.theme);card.clicked.connect(self.show_detail);card.powerModeRequested.connect(lambda key,mode:self.assign_mode(next(d for d in self.devices if d.key==key),mode));self.cards[d.key]=card
+                card=DeviceCard(d,True,show_power_choice,dark=self.theme,estimate=estimate);card.clicked.connect(self.show_detail);card.powerModeRequested.connect(lambda key,mode:self.assign_mode(next(d for d in self.devices if d.key==key),mode));self.cards[d.key]=card
                 self.list_layout.insertWidget(index,card)
                 card.show()
             else:
-                card.update_device(d,show_power_choice,self.theme)
+                card.update_device(d,show_power_choice,self.theme,estimate)
                 if self.list_layout.indexOf(card)!=index:
                     self.list_layout.removeWidget(card);self.list_layout.insertWidget(index,card)
         if not hasattr(self,'empty_label'):
